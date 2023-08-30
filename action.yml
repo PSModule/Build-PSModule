@@ -23,8 +23,8 @@ runs:
         Write-Output '-------------------------------------------'
         Write-Output 'Action inputs:'
         $params = @{
-            Message               = '${{ inputs.message }}'
-            Verbose               = [System.Convert]::ToBoolean('${{ inputs.verbose }}')
+            Message = '${{ inputs.message }}'
+            Verbose = [System.Convert]::ToBoolean('${{ inputs.verbose }}')
         }
         $params.GetEnumerator() | Sort-Object -Property Name
 
