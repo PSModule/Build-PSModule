@@ -1,0 +1,37 @@
+name: 'Build-Module'
+description: 'Build a PowerShell module to the PowerShell Gallery'
+branding:
+  icon: activity
+  color: blue
+
+inputs:
+  message:
+    description: 'A message to Build with.'
+    required: false
+    default: 'Hello World!'
+  verbose:
+    description: 'Enable verbose output.'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run Build-Module
+      shell: pwsh
+      run: |
+        Write-Output '::group::Build-Module'
+
+        Write-Output '-------------------------------------------'
+        Write-Output 'Action inputs:'
+        $params = @{
+            Message               = '${{ inputs.message }}'
+            Verbose               = [System.Convert]::ToBoolean('${{ inputs.verbose }}')
+        }
+        $params.GetEnumerator() | Sort-Object -Property Name
+
+        Write-Output '-------------------------------------------'
+
+        . "$env:GITHUB_ACTION_PATH\scripts\main.ps1" @params
+
+        Write-Output '::endgroup::'
