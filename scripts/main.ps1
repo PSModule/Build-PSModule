@@ -11,6 +11,15 @@ Write-Verbose "$Task`: Message: $Message"
 Write-Verbose "$Task`: Get required modules"
 Write-Verbose "$Task`: Combine files to build module"
 Write-Verbose "$Task`: Generate module manifest"
+$params = @{
+    Path          = '.\output\test.psd1'
+    Guid          = $(New-Guid).Guid
+    Author        = 'Marius Storhaug'
+    ModuleVersion = '0.0.1'
+    Description   = 'Test module'
+}
+
+New-ModuleManifest @params -Verbose
 Write-Verbose "$Task`: Generate module docs"
 
 Write-Verbose "$Task`: Stopping..."
