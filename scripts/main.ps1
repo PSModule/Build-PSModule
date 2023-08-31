@@ -3,32 +3,6 @@ param(
     [Parameter(Mandatory)]
     [string] $Path
 )
-$Task = ($MyInvocation.MyCommand.Name).split('.')[0]
-
-Write-Verbose "$Task`: Starting..."
-Write-Verbose "$Task`: Resolving modules"
-Resolve-Depenencies -Path $Path -Verbose
-
-Write-Verbose "$Task`: Combine files to build module"
-Write-Verbose "$Task`: Generate module manifest"
-$manifestPath = '.\outputs\test.psd1'
-$params = @{
-    Path          = $manifestPath
-    Guid          = $(New-Guid).Guid
-    Author        = 'Marius Storhaug'
-    ModuleVersion = '0.0.1'
-    Description   = 'Test module'
-}
-New-Item -Path $manifestPath -Force -ItemType File
-New-ModuleManifest @params -Verbose
-
-
-Write-Verbose "$Task`: Generate module docs"
-Install-Module -Name PlatyPS -Scope CurrentUser -Force -Verbose
-New-MarkdownHelp -Module test -OutputFolder .\outputs\docs -Force -Verbose
-
-Write-Verbose "$Task`: Stopping..."
-
 
 <#
 .SYNOPSIS
@@ -73,3 +47,34 @@ function Resolve-Depenencies {
         Install-Module @InstallParams
     }
 }
+
+if (!(Test-Path -Path $Path)) {
+    Write-Error "Path: $Path does not exist"
+    return
+}
+
+$Task = ($MyInvocation.MyCommand.Name).split('.')[0]
+
+Write-Verbose "$Task`: Starting..."
+Write-Verbose "$Task`: Resolving modules"
+Resolve-Depenencies -Path $Path -Verbose
+
+Write-Verbose "$Task`: Combine files to build module"
+Write-Verbose "$Task`: Generate module manifest"
+$manifestPath = '.\outputs\test.psd1'
+$params = @{
+    Path          = $manifestPath
+    Guid          = $(New-Guid).Guid
+    Author        = 'Marius Storhaug'
+    ModuleVersion = '0.0.1'
+    Description   = 'Test module'
+}
+New-Item -Path $manifestPath -Force -ItemType File
+New-ModuleManifest @params -Verbose
+
+Write-Verbose "$Task`: Generate module docs"
+Install-Module -Name PlatyPS -Scope CurrentUser -Force -Verbose
+# Import module -> PlatyPS
+#New-MarkdownHelp -Module test -OutputFolder .\outputs\docs -Force -Verbose
+
+Write-Verbose "$Task`: Stopping..."
