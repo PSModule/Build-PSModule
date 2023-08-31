@@ -5,11 +5,10 @@ branding:
   color: blue
 
 inputs:
-  message:
-    description: 'A message to Build with.'
+  Path:
+    description: 'Path to the module to build.'
     required: false
-    default: 'Hello World!'
-  verbose:
+  Verbose:
     description: 'Enable verbose output.'
     required: false
     default: 'false'
@@ -23,7 +22,7 @@ runs:
         Write-Output '-------------------------------------------'
         Write-Output 'Action inputs:'
         $params = @{
-            Message = '${{ inputs.message }}'
+            Path    = '${{ inputs.Path }}'
             Verbose = [System.Convert]::ToBoolean('${{ inputs.verbose }}')
         }
         $params.GetEnumerator() | Sort-Object -Property Name

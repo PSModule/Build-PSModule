@@ -1,15 +1,13 @@
 ﻿[CmdletBinding()]
 param(
     [Parameter(Mandatory)]
-    [string] $Message
+    [string] $Path
 )
 $Task = ($MyInvocation.MyCommand.Name).split('.')[0]
 
 Write-Verbose "$Task`: Starting..."
-
-Write-Verbose "$Task`: Message: $Message"
-Write-Verbose "$Task`: Re modules"
-Resolve-Depenencies -Path "src/$ModuleName/$ModuleName.psd1" -Verbos
+Write-Verbose "$Task`: Resolving modules"
+Resolve-Depenencies -Path $Path -Verbose
 
 Write-Verbose "$Task`: Combine files to build module"
 Write-Verbose "$Task`: Generate module manifest"
@@ -26,6 +24,8 @@ New-ModuleManifest @params -Verbose
 
 
 Write-Verbose "$Task`: Generate module docs"
+Install-Module -Name PlatyPS -Scope CurrentUser -Force -Verbose
+New-MarkdownHelp -Module test -OutputFolder .\outputs\docs -Force -Verbose
 
 Write-Verbose "$Task`: Stopping..."
 
