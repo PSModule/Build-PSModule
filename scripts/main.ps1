@@ -1,6 +1,6 @@
 ﻿[CmdletBinding()]
 param(
-    [Parameter(Mandatory)]
+    [Parameter()]
     [string] $Path = '*'
 )
 $taskName = ($MyInvocation.MyCommand.Name).split('.')[0]
