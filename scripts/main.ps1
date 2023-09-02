@@ -1,8 +1,5 @@
 ﻿[CmdletBinding()]
-param(
-    [Parameter(Mandatory)]
-    [string] $Path
-)
+param()
 
 <#
 .SYNOPSIS

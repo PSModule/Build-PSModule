@@ -5,9 +5,6 @@ branding:
   color: blue
 
 inputs:
-  Path:
-    description: 'Path to the module to build.'
-    required: false
   Verbose:
     description: 'Enable verbose output.'
     required: false
@@ -19,16 +16,15 @@ runs:
     - name: Run Build-Module
       shell: pwsh
       run: |
+        Write-Output '::group::Build-Module'
         Write-Output '-------------------------------------------'
         Write-Output 'Action inputs:'
         $params = @{
-            Path    = '${{ inputs.Path }}'
             Verbose = [System.Convert]::ToBoolean('${{ inputs.verbose }}')
         }
         $params.GetEnumerator() | Sort-Object -Property Name
 
         Write-Output '-------------------------------------------'
-
         . "$env:GITHUB_ACTION_PATH\scripts\main.ps1" @params
-
+        Write-Output '-------------------------------------------'
         Write-Output '::endgroup::'
