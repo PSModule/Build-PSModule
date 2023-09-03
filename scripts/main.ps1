@@ -451,13 +451,17 @@ foreach ($moduleFolder in $moduleFolders) {
     #DECISION: The output folder = .\outputs on the root of the repo.
     #DECISION: The module that is build is stored under the output folder in a folder with the same name as the module.
 
+    $task.Add('Generating outputs')
+    Write-Output "::group::[$($task -join '] - [')] - Generating outputs"
+
     $outputsFolderName = 'outputs'
     $outputsFolderPath = Join-Path -Path '.' $outputsFolderName
-    $outputsFolder = New-Item -Path $outputsFolderPath -ItemType Directory -Force -ErrorAction SilentlyContinue
+    Write-Verbose "[$($task -join '] - [')] - Creating outputs folder [$outputsFolderPath]"
+    $outputsFolder = New-Item -Path $outputsFolderPath -ItemType Directory -Force
 
-    $moduleOutputPath = Join-Path -Path $outputsFolder $moduleName
-    Write-Verbose "[$($task -join '] - [')] - Creating output folder [$moduleOutputPath]"
-    $moduleOutputFolder = New-Item -Path $moduleOutputPath -ItemType Directory -Force -ErrorAction SilentlyContinue
+    $moduleOutputFolderPath = Join-Path -Path $outputsFolder $moduleName
+    Write-Verbose "[$($task -join '] - [')] - Creating module output folder [$moduleOutputFolderPath]"
+    $moduleOutputFolder = New-Item -Path $moduleOutputFolderPath -ItemType Directory -Force
 
     #Copy all the files in the modulefolder except the manifest file
     Write-Verbose "[$($task -join '] - [')] - Copying files from [$moduleFolderPath] to [$moduleOutputFolder]"
@@ -477,26 +481,28 @@ foreach ($moduleFolder in $moduleFolders) {
     Write-Verbose "[$($task -join '] - [')] - Generate module docs"
 
     Write-Output "::group::[$($task -join '] - [')] - Importing module"
-    Import-Module $moduleOutputPath -Verbose
+    Import-Module $moduleOutputFolderPath -Verbose
     Write-Output '::endgroup::'
 
     Write-Output "::group::[$($task -join '] - [')] - Building help"
     New-MarkdownHelp -Module $moduleName -OutputFolder ".\outputs\docs\$moduleName" -Force -Verbose
     Write-Output '::endgroup::'
 
-    Write-Output '::group::[$($task[0])] - Module files'
+    $task.RemoveAt($task.Count - 1)
+
+    Write-Output "::group::[$($task -join '] - [')] - Module files"
     (Get-ChildItem -Path $outputsFolder -Recurse -Force).FullName | Sort-Object
     Write-Output '::endgroup::'
 
-    Write-Output '::group::[$($task[0])] - Manifest'
+    Write-Output "::group::[$($task -join '] - [')] - Manifest"
     Get-Content -Path $outputManifestPath
     Write-Output '::endgroup::'
 
-    Write-Verbose "[$($task -join '] - [')] - Stopping..."
+    Write-Output "::group::[$($task -join '] - [')] - Done"
     $task.RemoveAt($task.Count - 1)
     # Resolve-Depenencies -Path $ManifestFilePath.FullName -Verbose
 }
-
+Write-Output "::group::[$($task -join '] - [')] - Stopping..."
 $task.RemoveAt($task.Count - 1)
 Write-Output '::endgroup::'
 #endregion Process-Module
