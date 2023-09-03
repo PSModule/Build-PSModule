@@ -79,11 +79,11 @@ foreach ($prereqModuleName in $prereqModuleNames) {
     $isLoaded = (Get-Module -Name $prereqModuleName).count -gt 0
     if ($isLoaded) {
         Write-Verbose "[$($task -join '] - [')] - Removing module from session"
-        Remove-Module -Name $prereqModuleName -Force
+        Remove-Module -Name $prereqModuleName -Force -ErrorAction SilentlyContinue
     }
-    
+
     Write-Verbose "[$($task -join '] - [')] - Importing newest version"
-    Import-Module -Name $prereqModuleName -Force
+    Import-Module -Name $prereqModuleName -Force -ErrorAction SilentlyContinue
 
     $task.RemoveAt($task.Count - 1)
     Write-Output '::endgroup::'
