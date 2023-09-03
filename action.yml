@@ -16,7 +16,8 @@ runs:
     - name: Run Build-Module
       shell: pwsh
       run: |
-        Write-Output '::group::Build-Module'
+        # Build-Module
+        Write-Output '::group::[Build-Module] - Initialize'
         Write-Output '-------------------------------------------'
         Write-Output 'Action inputs:'
         $params = @{
