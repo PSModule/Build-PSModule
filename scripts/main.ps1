@@ -24,8 +24,12 @@ function Resolve-ModuleDependencies {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
-        [System.Management.Automation.PSModuleInfo[]] $Manifest
+        [string] $Path
     )
+
+    $Manifest = Import-PowerShellDataFile -Path $Path
+    Write-Verbose "Reading file [$Path]"
+    Write-Verbose "Found [$($Manifest.RequiredModules.Count)] modules to install"
 
     foreach ($Module in $Manifest.RequiredModules) {
         $InstallParams = @{}
@@ -307,7 +311,7 @@ foreach ($moduleFolder in $moduleFolders) {
     Update-ModuleManifest -Path $outputManifestPath -PrivateData $PrivateData -Verbose
 
     Write-Verbose "[$taskName] - [$moduleName] - Resolving modules"
-    Resolve-ModuleDependencies -Manifest $manifest -Verbose
+    Resolve-ModuleDependencies -Path $outputManifestPath -Verbose
 
     Write-Verbose "[$taskName] - [$moduleName] - Generate module docs"
     if (-not (Get-Module -ListAvailable -Name platyPS)) {
