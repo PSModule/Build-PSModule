@@ -122,7 +122,7 @@ foreach ($moduleFolder in $moduleFolders) {
     Write-Output "::group::[$($task -join '] - [')]"
 
     Write-Verbose "[$($task -join '] - [')] - Processing"
-    Write-Verbose "[$($task -join '] - [')] - [$moduleFolderPath]"
+    Write-Verbose "[$($task -join '] - [')] - ModuleFolderPath - [$moduleFolderPath]"
 
     Write-Verbose "[$($task -join '] - [')] - Finding manifest file"
     #DECISION: The manifest file = name of the folder.
@@ -131,14 +131,14 @@ foreach ($moduleFolder in $moduleFolders) {
     $manifestFile = Get-Item -Path $manifestFilePath -ErrorAction SilentlyContinue
     $manifestFileExists = $manifestFile.count -gt 0
     if (-not $manifestFileExists) {
-        Write-Error "[$($task -join '] - [')] - [$manifestFilePath] - 🟥 No manifest file found"
+        Write-Error "[$($task -join '] - [')] - [$manifestFileName] - 🟥 No manifest file found"
         continue
     }
-    Write-Verbose "[$($task -join '] - [')] - [$manifestFilePath] - 🟩 Found manifest file"
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - 🟩 Found manifest file"
     #DECISION: The basis of the module manifest comes from the defined manifest file.
     #DECISION: Values that are not defined in the module manifest file are generated from reading the module files.
 
-    Write-Verbose "[$($task[0])] - [$moduleName] - [Manifest] - Processing"
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - Processing"
     $manifest = Import-PowerShellDataFile $manifestFilePath
 
     #DECISION: If no RootModule is defined in the manifest file, we assume a .psm1 file with the same name as the module is on root.
@@ -150,7 +150,7 @@ foreach ($moduleFolder in $moduleFolders) {
     } else {
         $manifest.RootModule = $null
     }
-    Write-Verbose "[$($task[0])] - [$moduleName] - [Manifest] - [RootModule] - [$($manifest.RootModule)]"
+    Write-Verbose "Write-Verbose '[$($task -join '] - [')] - [$manifestFileName] - [RootModule] - [$($manifest.RootModule)]"
 
     $moduleType = switch -Regex ($manifest.RootModule) {
         '\.(ps1|psm1)$' { 'Script' }
