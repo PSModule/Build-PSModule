@@ -246,6 +246,10 @@ foreach ($moduleFolder in $moduleFolders) {
     }
 
     $manifest.HelpInfoURI = $privateData.Keys -contains 'HelpInfoURI' ? $null -ne $privateData.HelpInfoURI ? $privateData.HelpInfoURI : '' : ''
+    if ([string]::IsNullOrEmpty($manifest.HelpInfoURI)) {
+        $manifest.Remove('HelpInfoURI')
+    }
+
     $manifest.DefaultCommandPrefix = $privateData.Keys -contains 'DefaultCommandPrefix' ? $null -ne $privateData.DefaultCommandPrefix ? $privateData.DefaultCommandPrefix : '' : ''
 
     $PSData = $privateData.Keys -contains 'PSData' ? $null -ne $privateData.PSData ? $privateData.PSData : @{} : @{}
