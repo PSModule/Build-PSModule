@@ -461,7 +461,7 @@ foreach ($moduleFolder in $moduleFolders) {
 
     $task.Add('Generating')
     Write-Output "::group::[$($task -join '] - [')]"
-    
+
     $outputsFolderName = 'outputs'
     $outputsFolderPath = Join-Path -Path '.' $outputsFolderName
     Write-Verbose "[$($task -join '] - [')] - Creating outputs folder [$outputsFolderPath]"
@@ -496,11 +496,11 @@ foreach ($moduleFolder in $moduleFolders) {
 
     $task.RemoveAt($task.Count - 1)
 
-    Write-Output "::group::[$($task -join '] - [')] - [Outputs] - Module files"
+    Write-Output "::group::[$($task -join '] - [')] - Module files"
     (Get-ChildItem -Path $outputsFolder -Recurse -Force).FullName | Sort-Object
     Write-Output '::endgroup::'
 
-    Write-Output "::group::[$($task -join '] - [')] - [Outputs] - Manifest"
+    Write-Output "::group::[$($task -join '] - [')] - Manifest"
     Get-Content -Path $outputManifestPath
     Write-Output '::endgroup::'
 
