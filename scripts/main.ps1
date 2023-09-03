@@ -84,7 +84,7 @@ foreach ($moduleFolder in $moduleFolders) {
 
     #DECISION: If no RootModule is defined in the manifest file, we assume a .psm1 file with the same name as the module is on root.
     $moduleFileName = "$moduleName.psm1"
-    $moduleFilePath = Join-Path -Path $moduleFolderPath $moduleName
+    $moduleFilePath = Join-Path -Path $moduleFolderPath $moduleFileName
     $moduleFile = Get-Item -Path $moduleFilePath -ErrorAction SilentlyContinue
     if ($moduleFile) {
         $manifest.RootModule = [string]::IsNullOrEmpty($manifest.RootModule) ? $moduleFileName : $manifest.RootModule
