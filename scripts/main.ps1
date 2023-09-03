@@ -76,8 +76,14 @@ foreach ($prereqModuleName in $prereqModuleNames) {
         Install-Module -Name $prereqModuleName -Scope CurrentUser -Force
     }
 
-    Write-Verbose "[$($task -join '] - [')] - Importing"
+    Write-Verbose "[$($task -join '] - [')] - Removing module from session"
+    Remove-Module -Name $prereqModuleName -Force
+
+    Write-Verbose "[$($task -join '] - [')] - Importing newest version"
     Import-Module -Name $prereqModuleName -Force
+
+    $task.RemoveAt($task.Count - 1)
+    Write-Output '::endgroup::'
 }
 
 Get-InstalledModule | Select-Object Name, Version, Author | Sort-Object -Property Name | Format-Table -AutoSize
