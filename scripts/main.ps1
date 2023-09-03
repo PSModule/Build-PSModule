@@ -324,6 +324,14 @@ foreach ($moduleFolder in $moduleFolders) {
 
     New-MarkdownHelp -Module $moduleName -OutputFolder ".\outputs\docs\$moduleName" -Force -Verbose
 
+    Write-Output "::group::Module files"
+    (Get-ChildItem -Path $outputsFolder -Recurse -Force).FullName | Sort-Object
+    Write-Output "::endgroup::"
+
+    Write-Output '::group::Manifest'
+    Get-Content -Path $outputManifestPath
+    Write-Output '::endgroup::'
+
     Write-Verbose "[$taskName] - [$moduleName] - Stopping..."
 
     # Resolve-Depenencies -Path $ManifestFilePath.FullName -Verbose
