@@ -86,7 +86,14 @@ foreach ($moduleFolder in $moduleFolders) {
     $manifest = Import-PowerShellDataFile $manifestFilePath
 
     #DECISION: If no RootModule is defined in the manifest file, we assume a .psm1 file with the same name as the module is on root.
-    $manifest.RootModule = [string]::IsNullOrEmpty($manifest.RootModule) ? "$moduleName.psm1" : $manifest.RootModule
+    $moduleFileName = "$moduleName.psm1"
+    $moduleFilePath = Join-Path -Path $moduleFolderPath $moduleName
+    $moduleFile = Get-Item -Path $moduleFilePath -ErrorAction SilentlyContinue
+    if ($moduleFile) {
+        $manifest.RootModule = [string]::IsNullOrEmpty($manifest.RootModule) ? $moduleFileName : $manifest.RootModule
+    } else {
+        $manifest.RootModule = $null
+    }
     Write-Verbose "[$taskName] - [$moduleName] - [Manifest] - [RootModule] - [$($manifest.RootModule)]"
 
     $moduleType = switch -Regex ($manifest.RootModule) {
@@ -115,10 +122,7 @@ foreach ($moduleFolder in $moduleFolders) {
     $manifest.PowerShellHostVersion = $manifest.Keys -contains 'PowerShellHostVersion' ? -not [string]::IsNullOrEmpty($manifest.PowerShellHostVersion) ? $manifest.PowerShellHostVersion : $null : $null
     $manifest.DotNetFrameworkVersion = $manifest.Keys -contains 'DotNetFrameworkVersion' ? -not [string]::IsNullOrEmpty($manifest.DotNetFrameworkVersion) ? $manifest.DotNetFrameworkVersion : $null : $null
     $manifest.ClrVersion = $manifest.Keys -contains 'ClrVersion' ? -not [string]::IsNullOrEmpty($manifest.ClrVersion) ? $manifest.ClrVersion : $null : $null
-    $manifest.ProcessorArchitecture = $manifest.Keys -contains 'ProcessorArchitecture' ? -not [string]::IsNullOrEmpty($manifest.ProcessorArchitecture) ? $manifest.ProcessorArchitecture : '' : ''
-    if ([string]::IsNullOrEmpty($manifest.ProcessorArchitecture)) {
-        $manifest.Remove('ProcessorArchitecture')
-    }
+    $manifest.ProcessorArchitecture = $manifest.Keys -contains 'ProcessorArchitecture' ? -not [string]::IsNullOrEmpty($manifest.ProcessorArchitecture) ? $manifest.ProcessorArchitecture : 'None' : 'None'
 
     $files = $moduleFolder | Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue
 
@@ -198,7 +202,6 @@ foreach ($moduleFolder in $moduleFolders) {
                                 $capturedModules += $modules
                             } else {
                                 $capturedModules += $_
-
                             }
                         }
                     }
@@ -224,7 +227,7 @@ foreach ($moduleFolder in $moduleFolders) {
     $manifest.PowerShellVersion = $capturedVersions[0]
 
     $capturedPSEdition = $capturedPSEdition | Sort-Object -Unique
-    if ($capturedPSEdition.count -eq 0) {
+    if ($capturedPSEdition.count -eq 2) {
         Write-Error "The module is requires both Desktop and Core editions."
         return
     }
@@ -292,6 +295,8 @@ foreach ($moduleFolder in $moduleFolders) {
     Write-Verbose "[$taskName] - [$moduleName] - Copying files from [$moduleFolderPath] to [$moduleOutputFolder]"
     Copy-Item -Path $moduleFolder -Destination $outputsFolder -Recurse -Force -Exclude $manifestFileName
 
+    $env:PSModulePath += ";$moduleOutputFolderPath"
+
     ##DECISION: A new module manifest file is created every time to get a new GUID, so that the specific version of the module can be imported.
     Write-Verbose "[$taskName] - [$moduleName] - [Manifest] - Creating new manifest file in outputs folder"
     $outputManifestPath = (Join-Path -Path $moduleOutputFolder $manifestFileName)
@@ -307,8 +312,7 @@ foreach ($moduleFolder in $moduleFolders) {
     }
     Import-Module -Name PlatyPS -Force -Verbose
 
-    $moduleOutputFolder | Import-Module -Verbose
-    Import-Module $moduleOutputFolder -Verbose
+    Import-Module $moduleName -Verbose
 
     New-MarkdownHelp -Module $moduleName -OutputFolder ".\outputs\docs\$moduleName" -Force -Verbose
 
