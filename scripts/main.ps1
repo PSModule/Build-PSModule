@@ -88,7 +88,9 @@ foreach ($prereqModuleName in $prereqModuleNames) {
     }
 
     $isLoaded = (Get-Module | Where-Object -Property Name -EQ $prereqModuleName).count -gt 0
-    if (-not $isLoaded) {
+    if ($isLoaded) {
+        Write-Output "::group::[$($task -join '] - [')] - Imported"
+    } else {
         Write-Output "::group::[$($task -join '] - [')] - Importing to session"
 
         try {
@@ -351,16 +353,19 @@ foreach ($moduleFolder in $moduleFolders) {
     $manifest.CompatiblePSEditions | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [CompatiblePSEditions] - [$_]" }
 
     $privateData = $manifest.Keys -contains 'PrivateData' ? $null -ne $manifest.PrivateData ? $manifest.PrivateData : @{} : @{}
+    Write-Verbose "[$($task -join '] - [')] - [PrivateData]"
     if ($manifest.Keys -contains 'PrivateData') {
         $manifest.Remove('PrivateData')
     }
 
     $manifest.HelpInfoURI = $privateData.Keys -contains 'HelpInfoURI' ? $null -ne $privateData.HelpInfoURI ? $privateData.HelpInfoURI : '' : ''
+    Write-Verbose "[$($task -join '] - [')] - [HelpInfoURI] - [$($manifest.HelpInfoURI)]"
     if ([string]::IsNullOrEmpty($manifest.HelpInfoURI)) {
         $manifest.Remove('HelpInfoURI')
     }
 
     $manifest.DefaultCommandPrefix = $privateData.Keys -contains 'DefaultCommandPrefix' ? $null -ne $privateData.DefaultCommandPrefix ? $privateData.DefaultCommandPrefix : '' : ''
+    Write-Verbose "[$($task -join '] - [')] - [DefaultCommandPrefix] - [$($manifest.DefaultCommandPrefix)]"
 
     $PSData = $privateData.Keys -contains 'PSData' ? $null -ne $privateData.PSData ? $privateData.PSData : @{} : @{}
 
@@ -376,45 +381,56 @@ foreach ($moduleFolder in $moduleFolders) {
             $manifest.Tags += 'PSEdition_Core'
         }
     }
+    Write-Verbose "[$($task -join '] - [')] - [Tags]"
+    $manifest.Tags | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [Tags] - [$_]" }
 
     if ($PSData.Tags -contains 'PSEdition_Core' -and $manifest.PowerShellVersion -lt '6.0') {
-        Write-Error "[$($task[0])] - [$moduleName] - [Manifest] - [PowerShellVersion] - [$($manifest.PowerShellVersion)] - PowerShell version must be 6.0 or higher when using the PSEdition_Core tag"
+        Write-Error "[$($task -join '] - [')] - [Tags] - Cannot be PSEdition = 'Core' and PowerShellVersion < 6.0"
         return 1
     }
 
     $manifest.LicenseUri = $PSData.Keys -contains 'LicenseUri' ? $null -ne $PSData.LicenseUri ? $PSData.LicenseUri : '' : ''
+    Write-Verbose "[$($task -join '] - [')] - [LicenseUri] - [$($manifest.LicenseUri)]"
     if ([string]::IsNullOrEmpty($manifest.LicenseUri)) {
         $manifest.Remove('LicenseUri')
     }
 
     $manifest.ProjectUri = $PSData.Keys -contains 'ProjectUri' ? $null -ne $PSData.ProjectUri ? $PSData.ProjectUri : '' : ''
+    Write-Verbose "[$($task -join '] - [')] - [ProjectUri] - [$($manifest.ProjectUri)]"
     if ([string]::IsNullOrEmpty($manifest.ProjectUri)) {
         $manifest.Remove('ProjectUri')
     }
 
     $manifest.IconUri = $PSData.Keys -contains 'IconUri' ? $null -ne $PSData.IconUri ? $PSData.IconUri : '' : ''
+    Write-Verbose "[$($task -join '] - [')] - [IconUri] - [$($manifest.IconUri)]"
     if ([string]::IsNullOrEmpty($manifest.IconUri)) {
         $manifest.Remove('IconUri')
     }
 
     $manifest.ReleaseNotes = $PSData.Keys -contains 'ReleaseNotes' ? $null -ne $PSData.ReleaseNotes ? $PSData.ReleaseNotes : '' : ''
+    Write-Verbose "[$($task -join '] - [')] - [ReleaseNotes] - [$($manifest.ReleaseNotes)]"
     if ([string]::IsNullOrEmpty($manifest.ReleaseNotes)) {
         $manifest.Remove('ReleaseNotes')
     }
 
     $manifest.PreRelease = $PSData.Keys -contains 'PreRelease' ? $null -ne $PSData.PreRelease ? $PSData.PreRelease : '' : ''
+    Write-Verbose "[$($task -join '] - [')] - [PreRelease] - [$($manifest.PreRelease)]"
     if ([string]::IsNullOrEmpty($manifest.PreRelease)) {
         $manifest.Remove('PreRelease')
     }
 
     $manifest.RequireLicenseAcceptance = $PSData.Keys -contains 'RequireLicenseAcceptance' ? $null -ne $PSData.RequireLicenseAcceptance ? $PSData.RequireLicenseAcceptance : $false : $false
+    Write-Verbose "[$($task -join '] - [')] - [RequireLicenseAcceptance] - [$($manifest.RequireLicenseAcceptance)]"
     if ($manifest.RequireLicenseAcceptance -eq $false) {
         $manifest.Remove('RequireLicenseAcceptance')
     }
 
     $manifest.ExternalModuleDependencies = $PSData.Keys -contains 'ExternalModuleDependencies' ? $null -ne $PSData.ExternalModuleDependencies ? $PSData.ExternalModuleDependencies : @() : @()
+    Write-Verbose "[$($task -join '] - [')] - [ExternalModuleDependencies]"
     if (($manifest.ExternalModuleDependencies).count -eq 0) {
         $manifest.Remove('ExternalModuleDependencies')
+    } else {
+        $manifest.ExternalModuleDependencies | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [ExternalModuleDependencies] - [$_]" }
     }
 
     <#
@@ -428,36 +444,37 @@ foreach ($moduleFolder in $moduleFolders) {
 
     #DECISION: The output folder = .\outputs on the root of the repo.
     #DECISION: The module that is build is stored under the output folder in a folder with the same name as the module.
+
     $outputsFolderName = 'outputs'
     $outputsFolderPath = Join-Path -Path '.' $outputsFolderName
     $outputsFolder = New-Item -Path $outputsFolderPath -ItemType Directory -Force -ErrorAction SilentlyContinue
 
     $moduleOutputPath = Join-Path -Path $outputsFolder $moduleName
-    Write-Verbose "[$($task[0])] - [$moduleName] - Creating output folder [$moduleOutputPath]"
+    Write-Verbose "[$($task -join '] - [')] - Creating output folder [$moduleOutputPath]"
     $moduleOutputFolder = New-Item -Path $moduleOutputPath -ItemType Directory -Force -ErrorAction SilentlyContinue
 
     #Copy all the files in the modulefolder except the manifest file
-    Write-Verbose "[$($task[0])] - [$moduleName] - Copying files from [$moduleFolderPath] to [$moduleOutputFolder]"
+    Write-Verbose "[$($task -join '] - [')] - Copying files from [$moduleFolderPath] to [$moduleOutputFolder]"
     Copy-Item -Path $moduleFolder -Destination $outputsFolder -Recurse -Force -Exclude $manifestFileName
 
     $env:PSModulePath += ";$moduleOutputFolderPath"
 
     #DECISION: A new module manifest file is created every time to get a new GUID, so that the specific version of the module can be imported.
-    Write-Verbose "[$($task[0])] - [$moduleName] - [Manifest] - Creating new manifest file in outputs folder"
+    Write-Verbose "[$($task -join '] - [')] - [Manifest] - Creating new manifest file in outputs folder"
     $outputManifestPath = (Join-Path -Path $moduleOutputFolder $manifestFileName)
     New-ModuleManifest -Path $outputManifestPath @manifest -Verbose
     # Update-ModuleManifest -Path $outputManifestPath -PrivateData $privateData -Verbose
 
-    Write-Verbose "[$($task[0])] - [$moduleName] - Resolving modules"
+    Write-Verbose "[$($task -join '] - [')] - Resolving modules"
     Resolve-ModuleDependencies -Path $outputManifestPath -Verbose
 
-    Write-Verbose "[$($task[0])] - [$moduleName] - Generate module docs"
+    Write-Verbose "[$($task -join '] - [')] - Generate module docs"
 
-    Write-Output "::group::[$($task[0])] - [$moduleName] - Importing module"
+    Write-Output "::group::[$($task -join '] - [')] - Importing module"
     Import-Module $moduleOutputPath -Verbose
     Write-Output '::endgroup::'
 
-    Write-Output "::group::[$($task[0])] - [$moduleName] - Building help"
+    Write-Output "::group::[$($task -join '] - [')] - Building help"
     New-MarkdownHelp -Module $moduleName -OutputFolder ".\outputs\docs\$moduleName" -Force -Verbose
     Write-Output '::endgroup::'
 
@@ -469,7 +486,7 @@ foreach ($moduleFolder in $moduleFolders) {
     Get-Content -Path $outputManifestPath
     Write-Output '::endgroup::'
 
-    Write-Verbose "[$($task[0])] - [$moduleName] - Stopping..."
+    Write-Verbose "[$($task -join '] - [')] - Stopping..."
     $task.RemoveAt($task.Count - 1)
     # Resolve-Depenencies -Path $ManifestFilePath.FullName -Verbose
 }
