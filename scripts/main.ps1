@@ -249,21 +249,8 @@ foreach ($moduleFolder in $moduleFolders) {
     $manifest.DefaultCommandPrefix = $privateData.Keys -contains 'DefaultCommandPrefix' ? $null -ne $privateData.DefaultCommandPrefix ? $privateData.DefaultCommandPrefix : '' : ''
 
     $PSData = $privateData.Keys -contains 'PSData' ? $null -ne $privateData.PSData ? $privateData.PSData : @{} : @{}
-    $manifest.Tags = $PSData.Keys -contains 'Tags' ? $null -ne $PSData.Tags ? $PSData.Tags : @() : @()
-    $manifest.LicenseUri = $PSData.Keys -contains 'LicenseUri' ? $null -ne $PSData.LicenseUri ? $PSData.LicenseUri : '' : ''
-    $manifest.ProjectUri = $PSData.Keys -contains 'ProjectUri' ? $null -ne $PSData.ProjectUri ? $PSData.ProjectUri : '' : ''
-    $manifest.IconUri = $PSData.Keys -contains 'IconUri' ? $null -ne $PSData.IconUri ? $PSData.IconUri : '' : ''
-    $manifest.ReleaseNotes = $PSData.Keys -contains 'ReleaseNotes' ? $null -ne $PSData.ReleaseNotes ? $PSData.ReleaseNotes : '' : ''
-    $manifest.PreRelease = $PSData.Keys -contains 'PreRelease' ? $null -ne $PSData.PreRelease ? $PSData.PreRelease : '' : ''
-    if ([string]::IsNullOrEmpty($manifest.PreRelease)) {
-        $manifest.Remove('PreRelease')
-    }
-    $manifest.RequireLicenseAcceptance = $PSData.Keys -contains 'RequireLicenseAcceptance' ? $null -ne $PSData.RequireLicenseAcceptance ? $PSData.RequireLicenseAcceptance : $false : $false
-    $manifest.ExternalModuleDependencies = $PSData.Keys -contains 'ExternalModuleDependencies' ? $null -ne $PSData.ExternalModuleDependencies ? $PSData.ExternalModuleDependencies : @() : @()
-    if (($manifest.ExternalModuleDependencies).count -eq 0) {
-        $manifest.Remove('ExternalModuleDependencies')
-    }
 
+    $manifest.Tags = $PSData.Keys -contains 'Tags' ? $null -ne $PSData.Tags ? $PSData.Tags : @() : @()
     # Add tags for compatability mode. https://docs.microsoft.com/en-us/powershell/scripting/developer/module/how-to-write-a-powershell-module-manifest?view=powershell-7.1#compatibility-tags
     if ($manifest.CompatiblePSEditions -contains 'Desktop') {
         if ($manifest.Tags -notcontains 'PSEdition_Desktop') {
@@ -276,10 +263,44 @@ foreach ($moduleFolder in $moduleFolders) {
         }
     }
 
-
     if ($PSData.Tags -contains 'PSEdition_Core' -and $manifest.PowerShellVersion -lt '6.0') {
         Write-Error "[$taskName] - [$moduleName] - [Manifest] - [PowerShellVersion] - [$($manifest.PowerShellVersion)] - PowerShell version must be 6.0 or higher when using the PSEdition_Core tag"
         return 1
+    }
+
+    $manifest.LicenseUri = $PSData.Keys -contains 'LicenseUri' ? $null -ne $PSData.LicenseUri ? $PSData.LicenseUri : '' : ''
+    if ([string]::IsNullOrEmpty($manifest.LicenseUri)) {
+        $manifest.Remove('LicenseUri')
+    }
+
+    $manifest.ProjectUri = $PSData.Keys -contains 'ProjectUri' ? $null -ne $PSData.ProjectUri ? $PSData.ProjectUri : '' : ''
+    if ([string]::IsNullOrEmpty($manifest.ProjectUri)) {
+        $manifest.Remove('ProjectUri')
+    }
+
+    $manifest.IconUri = $PSData.Keys -contains 'IconUri' ? $null -ne $PSData.IconUri ? $PSData.IconUri : '' : ''
+    if ([string]::IsNullOrEmpty($manifest.IconUri)) {
+        $manifest.Remove('IconUri')
+    }
+
+    $manifest.ReleaseNotes = $PSData.Keys -contains 'ReleaseNotes' ? $null -ne $PSData.ReleaseNotes ? $PSData.ReleaseNotes : '' : ''
+    if ([string]::IsNullOrEmpty($manifest.ReleaseNotes)) {
+        $manifest.Remove('ReleaseNotes')
+    }
+
+    $manifest.PreRelease = $PSData.Keys -contains 'PreRelease' ? $null -ne $PSData.PreRelease ? $PSData.PreRelease : '' : ''
+    if ([string]::IsNullOrEmpty($manifest.PreRelease)) {
+        $manifest.Remove('PreRelease')
+    }
+
+    $manifest.RequireLicenseAcceptance = $PSData.Keys -contains 'RequireLicenseAcceptance' ? $null -ne $PSData.RequireLicenseAcceptance ? $PSData.RequireLicenseAcceptance : $false : $false
+    if ($manifest.RequireLicenseAcceptance -eq $false) {
+        $manifest.Remove('RequireLicenseAcceptance')
+    }
+
+    $manifest.ExternalModuleDependencies = $PSData.Keys -contains 'ExternalModuleDependencies' ? $null -ne $PSData.ExternalModuleDependencies ? $PSData.ExternalModuleDependencies : @() : @()
+    if (($manifest.ExternalModuleDependencies).count -eq 0) {
+        $manifest.Remove('ExternalModuleDependencies')
     }
 
     <#
