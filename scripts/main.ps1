@@ -53,6 +53,7 @@ function Resolve-ModuleDependencies {
 }
 #endregion Helpers
 
+#region Install-Prerequisites
 $task.Add('Install-Prerequisites')
 Write-Output "::group::[$($task -join '] - [')]"
 
@@ -82,7 +83,7 @@ foreach ($prereqModuleName in $prereqModuleNames) {
             Install-Module -Name $prereqModuleName -Scope CurrentUser -Force
         }
     } else {
-        Write-Output "::group::[$($task -join '] - [')] - Installing - Version - [$availableModuleVersion9]"
+        Write-Output "::group::[$($task -join '] - [')] - Installing - Version - [$availableModuleVersion]"
         $availableModule | Install-Module -Scope CurrentUser -Force
     }
 
@@ -98,25 +99,21 @@ foreach ($prereqModuleName in $prereqModuleNames) {
     Write-Output '::endgroup::'
 }
 
-Write-Output "::group::[$($task -join '] - [')] - Installed modules"
+Write-Output "::group::[$($task -join '] - [')] - Done"
 Get-InstalledModule | Select-Object Name, Version, Author | Sort-Object -Property Name | Format-Table -AutoSize
+
 $task.RemoveAt($task.Count - 1)
 Write-Output '::endgroup::'
+#endregion Install-Prerequisites
 
-$task.Add('Collect-Modules')
+#region Process-Module
+$task.Add('Process-Module')
 Write-Output "::group::[$($task -join '] - [')]"
 #DECISION: Modules are located under the '.\src' folder which is the root of the repo.
 #DECISION: Module name = the name of the folder under src.
 $moduleFolders = Get-ChildItem -Path 'src' -Directory -ErrorAction SilentlyContinue
-Write-Verbose "[$($task -join '] - [')] - Found $($moduleFolders.Count) modules"
+Write-Verbose "[$($task -join '] - [')] - Found $($moduleFolders.Count) module(s)"
 $moduleFolders | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [$($_.Name)]" }
-<#
-$VerbosePreference = 'Continue'
-$moduleFolder = $moduleFolders[0]
-$VerbosePreference = 'SilentlyContinue'
-#>
-$task.RemoveAt($task.Count - 1)
-Write-Output '::endgroup::'
 
 foreach ($moduleFolder in $moduleFolders) {
     $moduleFolderPath = $moduleFolder.FullName
@@ -418,3 +415,7 @@ foreach ($moduleFolder in $moduleFolders) {
     $task.RemoveAt($task.Count - 1)
     # Resolve-Depenencies -Path $ManifestFilePath.FullName -Verbose
 }
+
+$task.RemoveAt($task.Count - 1)
+Write-Output '::endgroup::'
+#endregion Process-Module
