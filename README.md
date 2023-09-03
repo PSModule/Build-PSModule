@@ -125,6 +125,9 @@ Module manifest:
 - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/new-modulemanifest?view=powershell-7.3
 - https://learn.microsoft.com/en-us/powershell/gallery/concepts/package-manifest-affecting-ui?view=powershellget-2.x#powershell-gallery-feature-elements-controlled-by-the-module-manifest
 
+Requires:
+- https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_requires?view=powershell-7.3
+
 Shields:
 https://shields.io/badges -> https://img.shields.io/powershellgallery/p/:packageName.svg
 

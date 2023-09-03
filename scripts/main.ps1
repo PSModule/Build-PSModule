@@ -50,7 +50,7 @@ function Resolve-ModuleDependencies {
 
 Import-Module PowerShellGet -Verbose
 
-Get-InstalledModule | Select-Object Name, Version, Author
+Get-InstalledModule | Select-Object Name, Version, Author | Format-Table -AutoSize
 
 #endregion Helpers
 
@@ -127,43 +127,46 @@ foreach ($moduleFolder in $moduleFolders) {
 
     $files = $moduleFolder | Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue
 
-    $fileList = $files | Select-Object -ExpandProperty FullName | ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart('\') }
+    #Get the path separator for the current OS
+    $pathSeparator = [System.IO.Path]::DirectorySeparatorChar
+
+    $fileList = $files | Select-Object -ExpandProperty FullName | ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
     $manifest.FileList = $files.count -eq 0 ? @() : @($fileList)
 
     $requiredAssembliesFolderPath = Join-Path $moduleFolder 'assemblies'
     $requiredAssemblies = Get-ChildItem -Path $RequiredAssembliesFolderPath -Recurse -File -ErrorAction SilentlyContinue -Filter '*.dll' |
         Select-Object -ExpandProperty FullName |
-        ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart('\') }
+        ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
     $manifest.RequiredAssemblies = $requiredAssemblies.count -eq 0 ? @() : @($requiredAssemblies)
 
     $nestedModulesFolderPath = Join-Path $moduleFolder 'modules'
     $nestedModules = Get-ChildItem -Path $nestedModulesFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.psm1', '*.ps1' |
         Select-Object -ExpandProperty FullName |
-        ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart('\') }
+        ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
     $manifest.NestedModules = $nestedModules.count -eq 0 ? @() : @($nestedModules)
 
     $scriptsToProcessFolderPath = Join-Path $moduleFolder 'scripts'
     $scriptsToProcess = Get-ChildItem -Path $scriptsToProcessFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1' |
         Select-Object -ExpandProperty FullName |
-        ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart('\') }
+        ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
     $manifest.ScriptsToProcess = $scriptsToProcess.count -eq 0 ? @() : @($scriptsToProcess)
 
     $typesToProcessFolderPath = Join-Path $moduleFolder 'types'
     $typesToProcess = Get-ChildItem -Path $typesToProcessFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1xml' |
         Select-Object -ExpandProperty FullName |
-        ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart('\') }
+        ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
     $manifest.TypesToProcess = $typesToProcess.count -eq 0 ? @() : @($typesToProcess)
 
     $formatsToProcessFolderPath = Join-Path $moduleFolder 'formats'
     $formatsToProcess = Get-ChildItem -Path $formatsToProcessFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1xml' |
         Select-Object -ExpandProperty FullName |
-        ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart('\') }
+        ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
     $manifest.FormatsToProcess = $formatsToProcess.count -eq 0 ? @() : @($formatsToProcess)
 
     $dscResourcesToExportFolderPath = Join-Path $moduleFolder 'dscResources'
     $dscResourcesToExport = Get-ChildItem -Path $dscResourcesToExportFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.psm1' |
         Select-Object -ExpandProperty FullName |
-        ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart('\') }
+        ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
     $manifest.DscResourcesToExport = $dscResourcesToExport.count -eq 0 ? @() : @($dscResourcesToExport)
 
     $publicFolderPath = Join-Path $moduleFolder 'public'
@@ -182,7 +185,7 @@ foreach ($moduleFolder in $moduleFolders) {
     $capturedPSEdition = @()
 
     foreach ($file in $files) {
-        $relativePath = $file.FullName.Replace($moduleFolderPath, '').TrimStart('\')
+        $relativePath = $file.FullName.Replace($moduleFolderPath, '').TrimStart($pathSeparator)
 
         Write-Verbose "[$taskName] - [$moduleName] - [$relativePath] - Processing"
         if ($moduleType -eq 'Script') {
