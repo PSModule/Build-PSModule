@@ -150,7 +150,7 @@ foreach ($moduleFolder in $moduleFolders) {
     } else {
         $manifest.RootModule = $null
     }
-    Write-Verbose "Write-Verbose '[$($task -join '] - [')] - [$manifestFileName] - [RootModule] - [$($manifest.RootModule)]"
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [RootModule] - [$($manifest.RootModule)]"
 
     $moduleType = switch -Regex ($manifest.RootModule) {
         '\.(ps1|psm1)$' { 'Script' }
@@ -159,26 +159,43 @@ foreach ($moduleFolder in $moduleFolders) {
         '\.xaml$' { 'Workflow' }
         default { 'Manifest' }
     }
-    Write-Verbose "[$($task[0])] - [$moduleName] - [Manifest] - [$moduleType] - [$moduleType]"
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [ModuleType] - [$moduleType]"
     #DECISION: Currently only Script and Manifest modules are supported.
-    $unsupportedModuleTypes = @('Binary', 'CIM', 'Workflow')
-    if ($moduleType -in $unsupportedModuleTypes) {
-        Write-Error "[$($task[0])] - [$moduleName] - [Manifest] - [$moduleType] - [$moduleType] - Module type [$moduleType] is not supported"
+    $supportedModuleTypes = @('Script', 'Manifest')
+    if ($moduleType -notin $supportedModuleTypes) {
+        Write-Error "[$($task -join '] - [')] - [$manifestFileName] - [ModuleType] - [$moduleType] - Module type not supported"
         return 1
     }
 
     $manifest.Author = $manifest.Keys -contains 'Author' ? -not [string]::IsNullOrEmpty($manifest.Author) ? $manifest.Author : 'Unknown' : 'Unknown'
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [Author] - [$($manifest.Author)]"
+
+
     $manifest.CompanyName = $manifest.Keys -contains 'CompanyName' ? -not [string]::IsNullOrEmpty($manifest.CompanyName) ? $manifest.CompanyName : 'Unknown' : 'Unknown'
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [CompanyName] - [$($manifest.CompanyName)]"
 
     $year = Get-Date -Format 'yyyy'
     $copyRight = "(c) $year $($manifest.Author) | $($manifest.CompanyName). All rights reserved."
     $manifest.CopyRight = $manifest.Keys -contains 'CopyRight' ? -not [string]::IsNullOrEmpty($manifest.CopyRight) ? $manifest.CopyRight : $copyRight : $copyRight
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [CopyRight] - [$($manifest.CopyRight)]"
+
     $manifest.Description = $manifest.Keys -contains 'Description' ? -not [string]::IsNullOrEmpty($manifest.Description) ? $manifest.Description : 'Unknown' : 'Unknown'
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [Description] - [$($manifest.Description)]"
+
     $manifest.PowerShellHostName = $manifest.Keys -contains 'PowerShellHostName' ? -not [string]::IsNullOrEmpty($manifest.PowerShellHostName) ? $manifest.PowerShellHostName : $null : $null
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [PowerShellHostName] - [$($manifest.PowerShellHostName)]"
+
     $manifest.PowerShellHostVersion = $manifest.Keys -contains 'PowerShellHostVersion' ? -not [string]::IsNullOrEmpty($manifest.PowerShellHostVersion) ? $manifest.PowerShellHostVersion : $null : $null
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [PowerShellHostVersion] - [$($manifest.PowerShellHostVersion)]"
+
     $manifest.DotNetFrameworkVersion = $manifest.Keys -contains 'DotNetFrameworkVersion' ? -not [string]::IsNullOrEmpty($manifest.DotNetFrameworkVersion) ? $manifest.DotNetFrameworkVersion : $null : $null
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [DotNetFrameworkVersion] - [$($manifest.DotNetFrameworkVersion)]"
+
     $manifest.ClrVersion = $manifest.Keys -contains 'ClrVersion' ? -not [string]::IsNullOrEmpty($manifest.ClrVersion) ? $manifest.ClrVersion : $null : $null
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [ClrVersion] - [$($manifest.ClrVersion)]"
+
     $manifest.ProcessorArchitecture = $manifest.Keys -contains 'ProcessorArchitecture' ? -not [string]::IsNullOrEmpty($manifest.ProcessorArchitecture) ? $manifest.ProcessorArchitecture : 'None' : 'None'
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [ProcessorArchitecture] - [$($manifest.ProcessorArchitecture)]"
 
     $files = $moduleFolder | Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue
 
@@ -187,62 +204,92 @@ foreach ($moduleFolder in $moduleFolders) {
 
     $fileList = $files | Select-Object -ExpandProperty FullName | ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
     $manifest.FileList = $files.count -eq 0 ? @() : @($fileList)
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [FileList]"
+    $manifest.FileList | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [FileList] - [$_]" }
+
 
     $requiredAssembliesFolderPath = Join-Path $moduleFolder 'assemblies'
     $requiredAssemblies = Get-ChildItem -Path $RequiredAssembliesFolderPath -Recurse -File -ErrorAction SilentlyContinue -Filter '*.dll' |
         Select-Object -ExpandProperty FullName |
         ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
     $manifest.RequiredAssemblies = $requiredAssemblies.count -eq 0 ? @() : @($requiredAssemblies)
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [RequiredAssemblies]"
+    $manifest.RequiredAssemblies | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [RequiredAssemblies] - [$_]" }
 
     $nestedModulesFolderPath = Join-Path $moduleFolder 'modules'
     $nestedModules = Get-ChildItem -Path $nestedModulesFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.psm1', '*.ps1' |
         Select-Object -ExpandProperty FullName |
         ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
     $manifest.NestedModules = $nestedModules.count -eq 0 ? @() : @($nestedModules)
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [NestedModules]"
+    $manifest.NestedModules | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [NestedModules] - [$_]" }
 
     $scriptsToProcessFolderPath = Join-Path $moduleFolder 'scripts'
     $scriptsToProcess = Get-ChildItem -Path $scriptsToProcessFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1' |
         Select-Object -ExpandProperty FullName |
         ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
     $manifest.ScriptsToProcess = $scriptsToProcess.count -eq 0 ? @() : @($scriptsToProcess)
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [ScriptsToProcess]"
+    $manifest.ScriptsToProcess | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [ScriptsToProcess] - [$_]" }
 
     $typesToProcessFolderPath = Join-Path $moduleFolder 'types'
     $typesToProcess = Get-ChildItem -Path $typesToProcessFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1xml' |
         Select-Object -ExpandProperty FullName |
         ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
     $manifest.TypesToProcess = $typesToProcess.count -eq 0 ? @() : @($typesToProcess)
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [TypesToProcess]"
+    $manifest.TypesToProcess | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [TypesToProcess] - [$_]" }
 
     $formatsToProcessFolderPath = Join-Path $moduleFolder 'formats'
     $formatsToProcess = Get-ChildItem -Path $formatsToProcessFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1xml' |
         Select-Object -ExpandProperty FullName |
         ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
     $manifest.FormatsToProcess = $formatsToProcess.count -eq 0 ? @() : @($formatsToProcess)
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [FormatsToProcess]"
+    $manifest.FormatsToProcess | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [FormatsToProcess] - [$_]" }
 
     $dscResourcesToExportFolderPath = Join-Path $moduleFolder 'dscResources'
     $dscResourcesToExport = Get-ChildItem -Path $dscResourcesToExportFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.psm1' |
         Select-Object -ExpandProperty FullName |
         ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
     $manifest.DscResourcesToExport = $dscResourcesToExport.count -eq 0 ? @() : @($dscResourcesToExport)
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [DscResourcesToExport]"
+    $manifest.DscResourcesToExport | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [DscResourcesToExport] - [$_]" }
 
     $publicFolderPath = Join-Path $moduleFolder 'public'
     $functionsToExport = Get-ChildItem -Path $publicFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1' |
         Select-Object -ExpandProperty BaseName
     $manifest.FunctionsToExport = $functionsToExport.count -eq 0 ? @() : @($functionsToExport)
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [FunctionsToExport]"
+    $manifest.FunctionsToExport | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [FunctionsToExport] - [$_]" }
+
     $manifest.CmdletsToExport = ($manifest.CmdletsToExport).count -eq 0 ? '*' : @($manifest.CmdletsToExport)
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [CmdletsToExport]"
+    $manifest.CmdletsToExport | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [CmdletsToExport] - [$_]" }
+
     $manifest.VariablesToExport = ($manifest.VariablesToExport).count -eq 0 ? '*' : @($manifest.VariablesToExport)
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [VariablesToExport]"
+    $manifest.VariablesToExport | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [VariablesToExport] - [$_]" }
+
     $manifest.AliasesToExport = ($manifest.AliasesToExport).count -eq 0 ? '*' : @($manifest.AliasesToExport)
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [AliasesToExport]"
+    $manifest.AliasesToExport | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [AliasesToExport] - [$_]" }
 
     $moduleList = Get-ChildItem -Path $moduleFolder -Recurse -File -ErrorAction SilentlyContinue -Include '*.psm1' | Select-Object -ExpandProperty FullName
     $manifest.ModuleList = $files.count -eq 0 ? $null : @($moduleList)
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [ModuleList]"
+    $manifest.ModuleList | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [ModuleList] - [$_]" }
 
     $capturedModules = @()
     $capturedVersions = @()
     $capturedPSEdition = @()
 
+
     foreach ($file in $files) {
         $relativePath = $file.FullName.Replace($moduleFolderPath, '').TrimStart($pathSeparator)
+        $task.Add($relativePath)
+        Write-Verbose "[$($task -join '] - [')] - Processing file"
 
-        Write-Verbose "[$($task[0])] - [$moduleName] - [$relativePath] - Processing"
         if ($moduleType -eq 'Script') {
             if ($file.extension -in '.psm1', '.ps1') {
                 $fileContent = Get-Content -Path $file
@@ -250,7 +297,7 @@ foreach ($moduleFolder in $moduleFolders) {
                 $fileContent | ForEach-Object {
                     # RequiredModules -> REQUIRES -Modules <Module-Name> | <Hashtable>, @() if not provided
                     if ($_ -match '^#Requires -Modules (.+)$') {
-                        Write-Verbose "Processing matches: $($matches[1])"
+                        Write-Verbose "[$($task -join '] - [')] - [REQUIRED -Modules] - [$($matches[1])]"
                         # Add captured module name to array
                         $capturedMatches = $matches[1].Split(',').trim()
                         $capturedMatches | ForEach-Object {
@@ -266,11 +313,13 @@ foreach ($moduleFolder in $moduleFolders) {
                     }
                     # PowerShellVersion -> REQUIRES -Version <N>[.<n>], $null if not provided
                     if ($_ -match '^#Requires -Version (.+)$') {
+                        Write-Verbose "[$($task -join '] - [')] - [REQUIRED -Version] - [$($matches[1])]"
                         # Add captured module name to array
                         $capturedVersions += $matches[1]
                     }
                     #CompatiblePSEditions -> REQUIRES -PSEdition <PSEdition-Name>, $null if not provided
                     if ($_ -match '^#Requires -PSEdition (.+)$') {
+                        Write-Verbose "[$($task -join '] - [')] - [REQUIRED -PSEdition] - [$($matches[1])]"
                         # Add captured module name to array
                         $capturedPSEdition += $matches[1]
                     }
