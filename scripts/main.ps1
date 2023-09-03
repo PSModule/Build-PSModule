@@ -473,10 +473,9 @@ foreach ($moduleFolder in $moduleFolders) {
     Write-Verbose "[$($task -join '] - [')] - [Manifest] - Creating new manifest file in outputs folder"
     $outputManifestPath = (Join-Path -Path $moduleOutputFolder $manifestFileName)
     New-ModuleManifest -Path $outputManifestPath @manifest
-    # Update-ModuleManifest -Path $outputManifestPath -PrivateData $privateData -Verbose
 
     Write-Verbose "[$($task -join '] - [')] - Resolving modules"
-    Resolve-ModuleDependencies -Path $outputManifestPath
+    Resolve-ModuleDependencies -Path
 
     Write-Verbose "[$($task -join '] - [')] - Generate module docs"
 
@@ -485,7 +484,7 @@ foreach ($moduleFolder in $moduleFolders) {
     Write-Output '::endgroup::'
 
     Write-Output "::group::[$($task -join '] - [')] - Building help"
-    New-MarkdownHelp -Module $moduleName -OutputFolder ".\outputs\docs\$moduleName" -Force -Verbose
+    New-MarkdownHelp -Module $moduleName -OutputFolder ".\outputs\docs\$moduleName" -Force
     Write-Output '::endgroup::'
 
     $task.RemoveAt($task.Count - 1)
@@ -500,7 +499,6 @@ foreach ($moduleFolder in $moduleFolders) {
 
     Write-Output "::group::[$($task -join '] - [')] - Done"
     $task.RemoveAt($task.Count - 1)
-    # Resolve-Depenencies -Path $ManifestFilePath.FullName -Verbose
 }
 Write-Output "::group::[$($task -join '] - [')] - Stopping..."
 $task.RemoveAt($task.Count - 1)
