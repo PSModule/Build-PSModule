@@ -277,8 +277,10 @@ foreach ($moduleFolder in $moduleFolders) {
     Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [AliasesToExport]"
     $manifest.AliasesToExport | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [AliasesToExport] - [$_]" }
 
-    $moduleList = Get-ChildItem -Path $moduleFolder -Recurse -File -ErrorAction SilentlyContinue -Include '*.psm1' | Select-Object -ExpandProperty FullName
-    $manifest.ModuleList = $files.count -eq 0 ? $null : @($moduleList)
+    $moduleList = Get-ChildItem -Path $moduleFolder -Recurse -File -ErrorAction SilentlyContinue -Include '*.psm1' |
+        Select-Object -ExpandProperty FullName |
+        ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
+    $manifest.ModuleList = $files.count -eq 0 ? $null : @($moduleList)}
     Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [ModuleList]"
     $manifest.ModuleList | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [$manifestFileName] - [ModuleList] - [$_]" }
 
