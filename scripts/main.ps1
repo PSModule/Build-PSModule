@@ -307,11 +307,10 @@ foreach ($moduleFolder in $moduleFolders) {
                 $fileContent | ForEach-Object {
                     # RequiredModules -> REQUIRES -Modules <Module-Name> | <Hashtable>, @() if not provided
                     if ($_ -match '^#Requires -Modules (.+)$') {
-                        Write-Verbose "[$($task -join '] - [')] - [REQUIRED -Modules] - [$($matches[1])]"
                         # Add captured module name to array
                         $capturedMatches = $matches[1].Split(',').trim()
                         $capturedMatches | ForEach-Object {
-                            Write-Verbose "Processing match: $_"
+                            Write-Verbose "[$($task -join '] - [')] - [REQUIRED -Modules] - [$_]"
                             $hashtable = '\@\s*\{[^\}]*\}'
                             if ($_ -match $hashtable) {
                                 $modules = Invoke-Expression $_ -ErrorAction SilentlyContinue
