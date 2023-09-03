@@ -304,7 +304,7 @@ foreach ($moduleFolder in $moduleFolders) {
 
     $env:PSModulePath += ";$moduleOutputFolderPath"
 
-    ##DECISION: A new module manifest file is created every time to get a new GUID, so that the specific version of the module can be imported.
+    #DECISION: A new module manifest file is created every time to get a new GUID, so that the specific version of the module can be imported.
     Write-Verbose "[$taskName] - [$moduleName] - [Manifest] - Creating new manifest file in outputs folder"
     $outputManifestPath = (Join-Path -Path $moduleOutputFolder $manifestFileName)
     New-ModuleManifest -Path $outputManifestPath @manifest
@@ -318,11 +318,14 @@ foreach ($moduleFolder in $moduleFolders) {
         Write-Verbose "[$taskName] - [$moduleName] - Installing platyPS"
         Install-Module -Name PlatyPS -Scope CurrentUser -Force -Verbose:$false
     }
-    Import-Module -Name PlatyPS -Force -Verbose
-
+    Import-Module -Name PlatyPS -Force -Verbose:$false
+    Write-Output "::group::[$moduleName] - Importing module"
     Import-Module $moduleOutputPath -Verbose
+    Write-Output '::endgroup::'
 
+    Write-Output "::group::[$moduleName] - Building help"
     New-MarkdownHelp -Module $moduleName -OutputFolder ".\outputs\docs\$moduleName" -Force -Verbose
+    Write-Output '::endgroup::'
 
     Write-Output "::group::Module files"
     (Get-ChildItem -Path $outputsFolder -Recurse -Force).FullName | Sort-Object
