@@ -48,6 +48,11 @@ function Resolve-ModuleDependencies {
     }
 }
 
+Import-Module PowerShellGet -Verbose
+
+Get-InstalledModule
+
+
 #endregion Helpers
 
 #DECISION: Modules are located under the '.\src' folder which is the root of the repo.
