@@ -50,8 +50,7 @@ function Resolve-ModuleDependencies {
 
 Import-Module PowerShellGet -Verbose
 
-Get-InstalledModule
-
+Get-InstalledModule | Select-Object Name, Version, Author
 
 #endregion Helpers
 
