@@ -479,26 +479,25 @@ foreach ($moduleFolder in $moduleFolders) {
     $outputManifestPath = (Join-Path -Path $moduleOutputFolder $manifestFileName)
     New-ModuleManifest -Path $outputManifestPath @manifest
 
-    Write-Verbose "[$($task -join '] - [')] - Resolving modules"
+    Write-Output "::group::[$($task -join '] - [')] - Resolving modules"
     Resolve-ModuleDependencies -Path $outputManifestPath
-
-    Write-Verbose "[$($task -join '] - [')] - Generate module docs"
-
-    Write-Output "::group::[$($task -join '] - [')] - Importing module"
-    Import-Module $moduleOutputFolderPath
     Write-Output '::endgroup::'
 
-    Write-Output "::group::[$($task -join '] - [')] - Building help"
+    Write-Output "::group::[$($task -join '] - [')] - [Help]"
+    Write-Verbose "[$($task -join '] - [')] - [Help] - Importing module"
+    Import-Module $moduleOutputFolderPath
+
+    Write-Verbose "[$($task -join '] - [')] - [Help] - Building help"
     New-MarkdownHelp -Module $moduleName -OutputFolder ".\outputs\docs\$moduleName" -Force
     Write-Output '::endgroup::'
 
     $task.RemoveAt($task.Count - 1)
 
-    Write-Output "::group::[$($task -join '] - [')] - Module files"
+    Write-Output "::group::[$($task -join '] - [')] - [Outputs] - Module files"
     (Get-ChildItem -Path $outputsFolder -Recurse -Force).FullName | Sort-Object
     Write-Output '::endgroup::'
 
-    Write-Output "::group::[$($task -join '] - [')] - Manifest"
+    Write-Output "::group::[$($task -join '] - [')] - [Outputs] - Manifest"
     Get-Content -Path $outputManifestPath
     Write-Output '::endgroup::'
 
