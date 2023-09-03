@@ -63,28 +63,37 @@ foreach ($prereqModuleName in $prereqModuleNames) {
     $task.Add($prereqModuleName)
     Write-Output "::group::[$($task -join '] - [')]"
 
-    $prereqModule = Get-Module -ListAvailable -Name $prereqModuleName | Sort-Object -Property Version -Descending | Select-Object -First 1
-    if ($prereqModule) {
-        $installedVersion = $prereqModule.Version
-        $latestVersion = (Find-Module -Name $prereqModuleName).Version
-        if ($installedVersion -lt $latestVersion) {
-            Write-Output "::group::[$($task -join '] - [')] - Updating - [$installedVersion] -> [$latestVersion]"
+    $availableModule = Find-Module -Name $prereqModuleName | Sort-Object -Property Version -Descending | Select-Object -First 1
+    $isAvailable = $availableModule.count -gt 0
+    Write-Verbose "[$($task -join '] - [')] - Available - [$isAvailable]"
+    $availableModuleVersion = $availableModule.Version
+    Write-Verbose "[$($task -join '] - [')] - Available - Version - [$availableModuleVersion]"
+
+    $installedPrereqModule = Get-Module -ListAvailable -Name $prereqModuleName | Sort-Object -Property Version -Descending | Select-Object -First 1
+    $isInstalled = $installedPrereqModule.count -gt 0
+    Write-Verbose "[$($task -join '] - [')] - Installed - [$isInstalled]"
+    $installedPrereqModuleVersion = $installedPrereqModule.Version
+
+    if ($isInstalled) {
+        Write-Verbose "[$($task -join '] - [')] - Installed - Version - [$installedPrereqModuleVersion]"
+        if ($installedPrereqModuleVersion -lt $availableModuleVersion) {
+            Write-Output "::group::[$($task -join '] - [')] - Updating - Version - [$installedPrereqModuleVersion] -> [$availableModuleVersion]"
             Install-Module -Name $prereqModuleName -Scope CurrentUser -Force
         }
     } else {
-        Write-Output "::group::[$($task -join '] - [')] - Installing"
-        Install-Module -Name $prereqModuleName -Scope CurrentUser -Force
+        Write-Output "::group::[$($task -join '] - [')] - Installing - Version - [$availableModuleVersion9]"
+        $availableModule | Install-Module -Scope CurrentUser -Force
     }
 
     $isLoaded = (Get-Module -Name $prereqModuleName).count -gt 0
     if ($isLoaded) {
-        Write-Output "::group::[$($task -join '] - [')] - Removing module from session"
+        Write-Output "::group::[$($task -join '] - [')] - Removing from session"
         try {
             Remove-Module -Name $prereqModuleName -Force -ErrorAction SilentlyContinue
         } catch {}
     }
 
-    Write-Output "::group::[$($task -join '] - [')] - Importing newest version"
+    Write-Output "::group::[$($task -join '] - [')] - Importing newest version to session"
     try {
         Import-Module -Name $prereqModuleName -Force -ErrorAction SilentlyContinue
     } catch {}
@@ -93,6 +102,7 @@ foreach ($prereqModuleName in $prereqModuleNames) {
     Write-Output '::endgroup::'
 }
 
+Write-Output "::group::[$($task -join '] - [')] - Installed modules"
 Get-InstalledModule | Select-Object Name, Version, Author | Sort-Object -Property Name | Format-Table -AutoSize
 $task.RemoveAt($task.Count - 1)
 Write-Output '::endgroup::'
@@ -110,7 +120,7 @@ $moduleFolder = $moduleFolders[0]
 $VerbosePreference = 'SilentlyContinue'
 #>
 $task.RemoveAt($task.Count - 1)
-Write-Output "::endgroup::"
+Write-Output '::endgroup::'
 
 foreach ($moduleFolder in $moduleFolders) {
     $moduleFolderPath = $moduleFolder.FullName
