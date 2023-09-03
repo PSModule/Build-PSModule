@@ -442,7 +442,7 @@ foreach ($moduleFolder in $moduleFolders) {
         $manifest.ExternalModuleDependencies | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [ExternalModuleDependencies] - [$_]" }
     }
 
-    $task.Remove($task.Count - 1)
+    $task.RemoveAt($task.Count - 1)
 
     <#
         PSEdition_Desktop: Packages that are compatible with Windows PowerShell
@@ -456,9 +456,12 @@ foreach ($moduleFolder in $moduleFolders) {
     #DECISION: The output folder = .\outputs on the root of the repo.
     #DECISION: The module that is build is stored under the output folder in a folder with the same name as the module.
 
-    $task.Add('Generating outputs')
-    Write-Output "::group::[$($task -join '] - [')] - Generating outputs"
+    $task.Add('Outputs')
+    Write-Output "::group::[$($task -join '] - [')]"
 
+    $task.Add('Generating')
+    Write-Output "::group::[$($task -join '] - [')]"
+    
     $outputsFolderName = 'outputs'
     $outputsFolderPath = Join-Path -Path '.' $outputsFolderName
     Write-Verbose "[$($task -join '] - [')] - Creating outputs folder [$outputsFolderPath]"
@@ -504,7 +507,12 @@ foreach ($moduleFolder in $moduleFolders) {
     Write-Output "::group::[$($task -join '] - [')] - Done"
     $task.RemoveAt($task.Count - 1)
 }
-Write-Output "::group::[$($task -join '] - [')] - Stopping..."
 $task.RemoveAt($task.Count - 1)
+Write-Output "::group::[$($task -join '] - [')] - Done"
+Write-Output '::endgroup::'
+#endregion Process-Module
+
+$task.RemoveAt($task.Count - 1)
+Write-Output "::group::[$($task -join '] - [')] - Stopping..."
 Write-Output '::endgroup::'
 #endregion Process-Module
