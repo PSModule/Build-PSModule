@@ -1,27 +1,28 @@
 ﻿[CmdletBinding()]
 param()
+#region Build-Module
 $task = New-Object System.Collections.Generic.List[string]
 $task.Add('Build-Module')
 Write-Output "::group::[$($task -join '] - [')] - Starting..."
 
 #region Helpers
-<#
-.SYNOPSIS
-Resolve dependencies for a module based on the manifest file.
-
-.DESCRIPTION
-Resolve dependencies for a module based on the manifest file, following PSModuleInfo structure
-
-.PARAMETER Path
-The path to the manifest file.
-
-.EXAMPLE
-Resolve-ModuleDependencies -Path 'C:\MyModule\MyModule.psd1'
-
-Installs all modules defined in the manifest file, following PSModuleInfo structure.
-
-#>
 function Resolve-ModuleDependencies {
+    <#
+    .SYNOPSIS
+    Resolve dependencies for a module based on the manifest file.
+
+    .DESCRIPTION
+    Resolve dependencies for a module based on the manifest file, following PSModuleInfo structure
+
+    .PARAMETER Path
+    The path to the manifest file.
+
+    .EXAMPLE
+    Resolve-ModuleDependencies -Path 'C:\MyModule\MyModule.psd1'
+
+    Installs all modules defined in the manifest file, following PSModuleInfo structure.
+
+    #>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
@@ -519,4 +520,4 @@ Write-Output '::endgroup::'
 $task.RemoveAt($task.Count - 1)
 Write-Output "::group::[$($task -join '] - [')] - Stopping..."
 Write-Output '::endgroup::'
-#endregion Process-Module
+#endregion Build-Module
