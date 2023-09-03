@@ -260,6 +260,9 @@ foreach ($moduleFolder in $moduleFolders) {
     }
     $manifest.RequireLicenseAcceptance = $PSData.Keys -contains 'RequireLicenseAcceptance' ? $null -ne $PSData.RequireLicenseAcceptance ? $PSData.RequireLicenseAcceptance : $false : $false
     $manifest.ExternalModuleDependencies = $PSData.Keys -contains 'ExternalModuleDependencies' ? $null -ne $PSData.ExternalModuleDependencies ? $PSData.ExternalModuleDependencies : @() : @()
+    if (($manifest.ExternalModuleDependencies).count -eq 0) {
+        $manifest.Remove('ExternalModuleDependencies')
+    }
 
     # Add tags for compatability mode. https://docs.microsoft.com/en-us/powershell/scripting/developer/module/how-to-write-a-powershell-module-manifest?view=powershell-7.1#compatibility-tags
     if ($manifest.CompatiblePSEditions -contains 'Desktop') {
