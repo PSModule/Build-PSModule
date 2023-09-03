@@ -30,31 +30,31 @@ function Resolve-ModuleDependencies {
     )
     $action = $MyInvocation.MyCommand.Name
 
-    $Manifest = Import-PowerShellDataFile -Path $Path
+    $manifest = Import-PowerShellDataFile -Path $Path
     Write-Verbose "[$action] - Reading file [$Path]"
-    Write-Verbose "[$action] - Found [$($Manifest.RequiredModules.Count)] modules to install"
+    Write-Verbose "[$action] - Found [$($manifest.RequiredModules.Count)] modules to install"
 
-    foreach ($requiredModule in $Manifest.RequiredModules) {
-        $InstallParams = @{}
+    foreach ($requiredModule in $manifest.RequiredModules) {
+        $installParams = @{}
 
         if ($requiredModule -is [string]) {
-            $InstallParams.Name = $requiredModule
+            $installParams.Name = $requiredModule
         } else {
-            $InstallParams.Name = $requiredModule.ModuleName
-            $InstallParams.MinimumVersion = $requiredModule.ModuleVersion
-            $InstallParams.RequiredVersion = $requiredModule.RequiredVersion
-            $InstallParams.MaximumVersion = $requiredModule.MaximumVersion
+            $installParams.Name = $requiredModule.ModuleName
+            $installParams.MinimumVersion = $requiredModule.ModuleVersion
+            $installParams.RequiredVersion = $requiredModule.RequiredVersion
+            $installParams.MaximumVersion = $requiredModule.MaximumVersion
         }
-        $InstallParams.Verbose = $false
-        $InstallParams.Force = $true
+        $installParams.Verbose = $false
+        $installParams.Force = $true
 
-        Write-Verbose "[$action] - [$($InstallParams.Name)]"
-        Write-Verbose "[$action] - [$($InstallParams.Name)] - Installing module"
-        Write-Verbose "[$action] - [$($InstallParams.Name)] - [$($InstallParams.MinimumVersion)]"
-        Write-Verbose "[$action] - [$($InstallParams.Name)] - [$($InstallParams.RequiredVersion)]]"
+        Write-Verbose "[$action] - [$($installParams.Name)]"
+        Write-Verbose "[$action] - [$($installParams.Name)] - Installing module"
+        Write-Verbose "[$action] - [$($installParams.Name)] - [$($installParams.MinimumVersion)]"
+        Write-Verbose "[$action] - [$($installParams.Name)] - [$($installParams.RequiredVersion)]]"
 
-        Install-Module @InstallParams
-        Write-Verbose "[$action] - [$($InstallParams.Name)] - Done"
+        Install-Module @installParams
+        Write-Verbose "[$action] - [$($installParams.Name)] - Done"
     }
     Write-Verbose "[$action] - Done"
 }
