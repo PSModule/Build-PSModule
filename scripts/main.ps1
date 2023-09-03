@@ -76,9 +76,12 @@ foreach ($prereqModuleName in $prereqModuleNames) {
         Install-Module -Name $prereqModuleName -Scope CurrentUser -Force
     }
 
-    Write-Verbose "[$($task -join '] - [')] - Removing module from session"
-    Remove-Module -Name $prereqModuleName -Force
-
+    $isLoaded = (Get-Module -Name $prereqModuleName).count -gt 0
+    if ($isLoaded) {
+        Write-Verbose "[$($task -join '] - [')] - Removing module from session"
+        Remove-Module -Name $prereqModuleName -Force
+    }
+    
     Write-Verbose "[$($task -join '] - [')] - Importing newest version"
     Import-Module -Name $prereqModuleName -Force
 
