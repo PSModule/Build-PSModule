@@ -56,13 +56,13 @@ Write-Output "::group::Loading prerequisites"
 $prereqModuleNames = 'platyPS', 'PowerShellGet', 'PackageManagement'
 
 foreach ($prereqModuleName in $prereqModuleNames) {
-    $prereqModule = Get-Module -ListAvailable -Name $prereqModuleName
+    $prereqModule = Get-Module -ListAvailable -Name $prereqModuleName | Sort-Object -Property Version -Descending | Select-Object -First 1
     if ($prereqModule) {
         $installedVersion = $prereqModule.Version
         $latestVersion = (Find-Module -Name $prereqModuleName).Version
         if ($installedVersion -lt $latestVersion) {
             Write-Verbose "[$taskName] - [$moduleName] - Updating module [$prereqModuleName] from [$installedVersion] to [$latestVersion]"
-            Update-Module -Name $prereqModuleName -Force -Verbose
+            Install-Module -Name $prereqModuleName -Scope CurrentUser -Force -Verbose
         }
     } else {
         Write-Verbose "[$taskName] - [$moduleName] - Installing module [$prereqModuleName]"
