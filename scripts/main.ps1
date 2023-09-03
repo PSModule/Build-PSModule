@@ -442,8 +442,10 @@ foreach ($moduleFolder in $moduleFolders) {
     } else {
         $manifest.ExternalModuleDependencies | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [ExternalModuleDependencies] - [$_]" }
     }
-
+    Write-Output "::group::[$($task -join '] - [')] - Done"
     $task.RemoveAt($task.Count - 1)
+
+    Write-Output "::group::[$($task -join '] - [')] - Done"
 
     <#
         PSEdition_Desktop: Packages that are compatible with Windows PowerShell
@@ -484,7 +486,7 @@ foreach ($moduleFolder in $moduleFolders) {
     Resolve-ModuleDependencies -Path $outputManifestPath
     Write-Output '::endgroup::'
 
-    Write-Output "::group::[$($task -join '] - [')] - [Help]"
+    Write-Output "::group::[$($task -join '] - [')] - Generate help"
     Write-Verbose "[$($task -join '] - [')] - [Help] - Importing module"
     Import-Module $moduleOutputFolderPath
 
@@ -500,7 +502,9 @@ foreach ($moduleFolder in $moduleFolders) {
     Get-Content -Path $outputManifestPath
     Write-Output '::endgroup::'
 
+    Write-Output "::group::[$($task -join '] - [')] - Done"
     $task.RemoveAt($task.Count - 1)
+
     Write-Output "::group::[$($task -join '] - [')] - Done"
 }
 $task.RemoveAt($task.Count - 1)
