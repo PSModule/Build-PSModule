@@ -235,49 +235,46 @@ foreach ($moduleFolder in $moduleFolders) {
 
     $capturedPSEdition = $capturedPSEdition | Sort-Object -Unique
     if ($capturedPSEdition.count -eq 2) {
-        Write-Error "The module is requires both Desktop and Core editions."
+        Write-Error 'The module is requires both Desktop and Core editions.'
         return
     }
-    $manifest.CompatiblePSEditions = $capturedPSEdition.count -eq 0 ? @('Core','Desktop') : @($capturedPSEdition)
+    $manifest.CompatiblePSEditions = $capturedPSEdition.count -eq 0 ? @('Core', 'Desktop') : @($capturedPSEdition)
 
-    $PrivateData = $manifest.Keys -contains 'PrivateData' ? $null -ne $manifest.PrivateData ? $manifest.PrivateData : @{} : @{}
+    $privateData = $manifest.Keys -contains 'PrivateData' ? $null -ne $manifest.PrivateData ? $manifest.PrivateData : @{} : @{}
     if ($manifest.Keys -contains 'PrivateData') {
         $manifest.Remove('PrivateData')
     }
 
-    $PSData = [hashtable] ($PrivateData.Keys -contains 'PSData' ? $null -ne $PrivateData.PSData ? $PrivateData.PSData : @{} : @{})
+    $manifest.HelpInfoURI = $privateData.Keys -contains 'HelpInfoURI' ? $null -ne $privateData.HelpInfoURI ? $privateData.HelpInfoURI : '' : ''
+    $manifest.DefaultCommandPrefix = $privateData.Keys -contains 'DefaultCommandPrefix' ? $null -ne $privateData.DefaultCommandPrefix ? $privateData.DefaultCommandPrefix : '' : ''
 
-    $PSData = @{
-        Tags                       = $PSData.Keys -contains 'Tags' ? $null -ne $PSData.Tags ? $PSData.Tags : @() : @()
-        LicenseUri                 = $PSData.Keys -contains 'LicenseUri' ? $null -ne $PSData.LicenseUri ? $PSData.LicenseUri : '' : ''
-        ProjectUri                 = $PSData.Keys -contains 'ProjectUri' ? $null -ne $PSData.ProjectUri ? $PSData.ProjectUri : '' : ''
-        IconUri                    = $PSData.Keys -contains 'IconUri' ? $null -ne $PSData.IconUri ? $PSData.IconUri : '' : ''
-        ReleaseNotes               = $PSData.Keys -contains 'ReleaseNotes' ? $null -ne $PSData.ReleaseNotes ? $PSData.ReleaseNotes : '' : ''
-        PreRelease                 = $PSData.Keys -contains 'PreRelease' ? $null -ne $PSData.PreRelease ? $PSData.PreRelease : '' : ''
-        RequireLicenseAcceptance   = $PSData.Keys -contains 'RequireLicenseAcceptance' ? $null -ne $PSData.RequireLicenseAcceptance ? $PSData.RequireLicenseAcceptance : $false : $false
-        ExternalModuleDependencies = $PSData.Keys -contains 'ExternalModuleDependencies' ? $null -ne $PSData.ExternalModuleDependencies ? $PSData.ExternalModuleDependencies : @() : @()
-    }
+    $PSData = $privateData.Keys -contains 'PSData' ? $null -ne $privateData.PSData ? $privateData.PSData : @{} : @{}
+    $manifest.Tags = $PSData.Keys -contains 'Tags' ? $null -ne $PSData.Tags ? $PSData.Tags : @() : @()
+    $manifest.LicenseUri = $PSData.Keys -contains 'LicenseUri' ? $null -ne $PSData.LicenseUri ? $PSData.LicenseUri : '' : ''
+    $manifest.ProjectUri = $PSData.Keys -contains 'ProjectUri' ? $null -ne $PSData.ProjectUri ? $PSData.ProjectUri : '' : ''
+    $manifest.IconUri = $PSData.Keys -contains 'IconUri' ? $null -ne $PSData.IconUri ? $PSData.IconUri : '' : ''
+    $manifest.ReleaseNotes = $PSData.Keys -contains 'ReleaseNotes' ? $null -ne $PSData.ReleaseNotes ? $PSData.ReleaseNotes : '' : ''
+    $manifest.PreRelease = $PSData.Keys -contains 'PreRelease' ? $null -ne $PSData.PreRelease ? $PSData.PreRelease : '' : ''
+    $manifest.RequireLicenseAcceptance = $PSData.Keys -contains 'RequireLicenseAcceptance' ? $null -ne $PSData.RequireLicenseAcceptance ? $PSData.RequireLicenseAcceptance : $false : $false
+    $manifest.ExternalModuleDependencies = $PSData.Keys -contains 'ExternalModuleDependencies' ? $null -ne $PSData.ExternalModuleDependencies ? $PSData.ExternalModuleDependencies : @() : @()
 
     # Add tags for compatability mode. https://docs.microsoft.com/en-us/powershell/scripting/developer/module/how-to-write-a-powershell-module-manifest?view=powershell-7.1#compatibility-tags
     if ($manifest.CompatiblePSEditions -contains 'Desktop') {
-        if ($PSData.Tags -notcontains 'PSEdition_Desktop') {
-            $PSData.Tags += 'PSEdition_Desktop'
+        if ($manifest.Tags -notcontains 'PSEdition_Desktop') {
+            $manifest.Tags += 'PSEdition_Desktop'
         }
     }
     if ($manifest.CompatiblePSEditions -contains 'Core') {
-        if ($PSData.Tags -notcontains 'PSEdition_Core') {
-            $PSData.Tags += 'PSEdition_Core'
+        if ($manifest.Tags -notcontains 'PSEdition_Core') {
+            $manifest.Tags += 'PSEdition_Core'
         }
     }
 
-    $PrivateData.HelpInfoURI = $PrivateData.Keys -contains 'HelpInfoURI' ? $null -ne $PrivateData.HelpInfoURI ? $PrivateData.HelpInfoURI : '' : ''
-    $PrivateData.DefaultCommandPrefix = $PrivateData.Keys -contains 'DefaultCommandPrefix' ? $null -ne $PrivateData.DefaultCommandPrefix ? $PrivateData.DefaultCommandPrefix : '' : ''
 
     if ($PSData.Tags -contains 'PSEdition_Core' -and $manifest.PowerShellVersion -lt '6.0') {
         Write-Error "[$taskName] - [$moduleName] - [Manifest] - [PowerShellVersion] - [$($manifest.PowerShellVersion)] - PowerShell version must be 6.0 or higher when using the PSEdition_Core tag"
         return 1
     }
-    $PrivateData.PSData = $PSData
 
     <#
         PSEdition_Desktop: Packages that are compatible with Windows PowerShell
@@ -307,8 +304,8 @@ foreach ($moduleFolder in $moduleFolders) {
     #DECISION: A new module manifest file is created every time to get a new GUID, so that the specific version of the module can be imported.
     Write-Verbose "[$taskName] - [$moduleName] - [Manifest] - Creating new manifest file in outputs folder"
     $outputManifestPath = (Join-Path -Path $moduleOutputFolder $manifestFileName)
-    New-ModuleManifest -Path $outputManifestPath @manifest
-    Update-ModuleManifest -Path $outputManifestPath -PrivateData $PrivateData -Verbose
+    New-ModuleManifest -Path $outputManifestPath @manifest -Verbose
+    # Update-ModuleManifest -Path $outputManifestPath -PrivateData $privateData -Verbose
 
     Write-Verbose "[$taskName] - [$moduleName] - Resolving modules"
     Resolve-ModuleDependencies -Path $outputManifestPath -Verbose
@@ -327,9 +324,9 @@ foreach ($moduleFolder in $moduleFolders) {
     New-MarkdownHelp -Module $moduleName -OutputFolder ".\outputs\docs\$moduleName" -Force -Verbose
     Write-Output '::endgroup::'
 
-    Write-Output "::group::Module files"
+    Write-Output '::group::Module files'
     (Get-ChildItem -Path $outputsFolder -Recurse -Force).FullName | Sort-Object
-    Write-Output "::endgroup::"
+    Write-Output '::endgroup::'
 
     Write-Output '::group::Manifest'
     Get-Content -Path $outputManifestPath
