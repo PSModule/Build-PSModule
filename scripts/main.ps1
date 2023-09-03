@@ -68,22 +68,26 @@ foreach ($prereqModuleName in $prereqModuleNames) {
         $installedVersion = $prereqModule.Version
         $latestVersion = (Find-Module -Name $prereqModuleName).Version
         if ($installedVersion -lt $latestVersion) {
-            Write-Verbose "[$($task -join '] - [')] - Updating - [$installedVersion] -> [$latestVersion]"
+            Write-Output "::group::[$($task -join '] - [')] - Updating - [$installedVersion] -> [$latestVersion]"
             Install-Module -Name $prereqModuleName -Scope CurrentUser -Force
         }
     } else {
-        Write-Verbose "[$($task -join '] - [')] - Installing"
+        Write-Output "::group::[$($task -join '] - [')] - Installing"
         Install-Module -Name $prereqModuleName -Scope CurrentUser -Force
     }
 
     $isLoaded = (Get-Module -Name $prereqModuleName).count -gt 0
     if ($isLoaded) {
-        Write-Verbose "[$($task -join '] - [')] - Removing module from session"
-        Remove-Module -Name $prereqModuleName -Force -ErrorAction SilentlyContinue
+        Write-Output "::group::[$($task -join '] - [')] - Removing module from session"
+        try {
+            Remove-Module -Name $prereqModuleName -Force -ErrorAction SilentlyContinue
+        } catch {}
     }
 
-    Write-Verbose "[$($task -join '] - [')] - Importing newest version"
-    Import-Module -Name $prereqModuleName -Force -ErrorAction SilentlyContinue
+    Write-Output "::group::[$($task -join '] - [')] - Importing newest version"
+    try {
+        Import-Module -Name $prereqModuleName -Force -ErrorAction SilentlyContinue
+    } catch {}
 
     $task.RemoveAt($task.Count - 1)
     Write-Output '::endgroup::'
