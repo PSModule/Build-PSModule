@@ -86,19 +86,14 @@ foreach ($prereqModuleName in $prereqModuleNames) {
         $availableModule | Install-Module -Scope CurrentUser -Force
     }
 
-    $isLoaded = (Get-Module -Name $prereqModuleName).count -gt 0
-    if ($isLoaded) {
-        Write-Output "::group::[$($task -join '] - [')] - Removing from session"
+    $isLoaded = (Get-Module | Where-Object -Property Name -EQ $prereqModuleName).count -gt 0
+    if (-not $isLoaded) {
+        Write-Output "::group::[$($task -join '] - [')] - Importing to session"
+
         try {
-            Remove-Module -Name $prereqModuleName -Force -ErrorAction SilentlyContinue
+            Import-Module -Name $prereqModuleName -Force -ErrorAction SilentlyContinue
         } catch {}
     }
-
-    Write-Output "::group::[$($task -join '] - [')] - Importing newest version to session"
-    try {
-        Import-Module -Name $prereqModuleName -Force -ErrorAction SilentlyContinue
-    } catch {}
-
     $task.RemoveAt($task.Count - 1)
     Write-Output '::endgroup::'
 }
