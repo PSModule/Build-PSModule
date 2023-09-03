@@ -27,29 +27,35 @@ function Resolve-ModuleDependencies {
         [Parameter(Mandatory)]
         [string] $Path
     )
+    $action = $MyInvocation.MyCommand.Name
 
     $Manifest = Import-PowerShellDataFile -Path $Path
-    Write-Verbose "Reading file [$Path]"
-    Write-Verbose "Found [$($Manifest.RequiredModules.Count)] modules to install"
+    Write-Verbose "[$action] - Reading file [$Path]"
+    Write-Verbose "[$action] - Found [$($Manifest.RequiredModules.Count)] modules to install"
 
-    foreach ($Module in $Manifest.RequiredModules) {
+    foreach ($requiredModule in $Manifest.RequiredModules) {
         $InstallParams = @{}
 
-        if ($Module -is [string]) {
-            $InstallParams.Name = $Module
+        if ($requiredModule -is [string]) {
+            $InstallParams.Name = $requiredModule
         } else {
-            $InstallParams.Name = $Module.ModuleName
-            $InstallParams.MinimumVersion = $Module.ModuleVersion
-            $InstallParams.RequiredVersion = $Module.RequiredVersion
+            $InstallParams.Name = $requiredModule.ModuleName
+            $InstallParams.MinimumVersion = $requiredModule.ModuleVersion
+            $InstallParams.RequiredVersion = $requiredModule.RequiredVersion
+            $InstallParams.MaximumVersion = $requiredModule.MaximumVersion
         }
         $InstallParams.Verbose = $false
         $InstallParams.Force = $true
 
-        Write-Verbose 'Installing module:'
-        $InstallParams
+        Write-Verbose "[$action] - [$($InstallParams.Name)]"
+        Write-Verbose "[$action] - [$($InstallParams.Name)] - Installing module"
+        Write-Verbose "[$action] - [$($InstallParams.Name)] - [$($InstallParams.MinimumVersion)]"
+        Write-Verbose "[$action] - [$($InstallParams.Name)] - [$($InstallParams.RequiredVersion)]]"
 
         Install-Module @InstallParams
+        Write-Verbose "[$action] - [$($InstallParams.Name)] - Done"
     }
+    Write-Verbose "[$action] - Done"
 }
 #endregion Helpers
 
@@ -444,8 +450,6 @@ foreach ($moduleFolder in $moduleFolders) {
     }
     Write-Output "::group::[$($task -join '] - [')] - Done"
     $task.RemoveAt($task.Count - 1)
-
-    Write-Output "::group::[$($task -join '] - [')] - Done"
 
     <#
         PSEdition_Desktop: Packages that are compatible with Windows PowerShell
