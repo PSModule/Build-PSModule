@@ -97,6 +97,7 @@ foreach ($prereqModuleName in $prereqModuleNames) {
             Import-Module -Name $prereqModuleName -Force -ErrorAction SilentlyContinue
         } catch {}
     }
+    Write-Output "::group::[$($task -join '] - [')] - Done"
     $task.RemoveAt($task.Count - 1)
     Write-Output '::endgroup::'
 }
