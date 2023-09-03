@@ -1,6 +1,9 @@
 ﻿[CmdletBinding()]
 param()
-$task[0] = 'Build-Module'
+$task = New-Object System.Collections.ArrayList
+$task = New-Object System.Collections.Generic.List[string]
+$task.Add('Build-Module')
+Write-Output "::group::[$($task -join '] - [')]"
 
 #region Helpers
 <#
@@ -51,66 +54,71 @@ function Resolve-ModuleDependencies {
 }
 #endregion Helpers
 
-$task[1] = 'Install-Prerequisites'
-Write-Output "::group::[$($task[0])] - [$($task[1])]"
+$task.Add('Install-Prerequisites')
+Write-Output "::group::[$($task -join '] - [')]"
 
 $prereqModuleNames = 'platyPS', 'PowerShellGet', 'PackageManagement'
 
 foreach ($prereqModuleName in $prereqModuleNames) {
-    $task[2] = $prereqModuleName
-    Write-Output "::group::[$($task[0])] - [$($task[1])] - [$($task[2])]"
+    $task.Add($prereqModuleName)
+    Write-Output "::group::[$($task -join '] - [')]"
 
     $prereqModule = Get-Module -ListAvailable -Name $prereqModuleName | Sort-Object -Property Version -Descending | Select-Object -First 1
     if ($prereqModule) {
         $installedVersion = $prereqModule.Version
         $latestVersion = (Find-Module -Name $prereqModuleName).Version
         if ($installedVersion -lt $latestVersion) {
-            Write-Verbose "[$($task[0])] - [$($task[1])] - [$($task[2])] - Updating - [$installedVersion] -> [$latestVersion]"
+            Write-Verbose "[$($task -join '] - [')] - Updating - [$installedVersion] -> [$latestVersion]"
             Install-Module -Name $prereqModuleName -Scope CurrentUser -Force
         }
     } else {
-        Write-Verbose "[$($task[0])] - [$($task[1])] - [$($task[2])] - Installing"
+        Write-Verbose "[$($task -join '] - [')] - Installing"
         Install-Module -Name $prereqModuleName -Scope CurrentUser -Force
     }
 
-    Write-Verbose "[$($task[0])] - [$($task[1])] - [$($task[2])] - Importing"
+    Write-Verbose "[$($task -join '] - [')] - Importing"
     Import-Module -Name $prereqModuleName -Force
 }
 
 Get-InstalledModule | Select-Object Name, Version, Author | Sort-Object -Property Name | Format-Table -AutoSize
+$task.RemoveAt($task.Count - 1)
 Write-Output '::endgroup::'
 
-Write-Output "::group::[$($task[0])] - [$($task[0])] - Collecting modules"
-$task[1] = 'Collect-Modules'
+$task.Add('Collect-Modules')
+Write-Output "::group::[$($task -join '] - [')]"
 #DECISION: Modules are located under the '.\src' folder which is the root of the repo.
 #DECISION: Module name = the name of the folder under src.
 $moduleFolders = Get-ChildItem -Path 'src' -Directory -ErrorAction SilentlyContinue
-Write-Verbose "[$($task[0])] - Found $($moduleFolders.Count) manifest files"
-$moduleFolders | ForEach-Object { Write-Verbose "[$($task[0])] - [$($task[1])] - $($_.Name)" }
+Write-Verbose "[$($task -join '] - [')] - Found $($moduleFolders.Count) modules"
+$moduleFolders | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [$($_.Name)]" }
 <#
 $VerbosePreference = 'Continue'
 $moduleFolder = $moduleFolders[0]
 $VerbosePreference = 'SilentlyContinue'
 #>
+$task.RemoveAt($task.Count - 1)
 Write-Output "::endgroup::"
 
 foreach ($moduleFolder in $moduleFolders) {
     $moduleFolderPath = $moduleFolder.FullName
     $moduleName = $moduleFolder.Name
-    Write-Verbose "[$($task[0])] - Processing module: [$moduleName]"
-    Write-Verbose "[$($task[0])] - [$moduleName] - [$moduleFolderPath]"
+    $task.Add($moduleName)
+    Write-Output "::group::[$($task -join '] - [')]"
 
-    Write-Verbose "[$($task[0])] - [$moduleName] - Finding manifest file"
+    Write-Verbose "[$($task -join '] - [')] - Processing"
+    Write-Verbose "[$($task -join '] - [')] - [$moduleFolderPath]"
+
+    Write-Verbose "[$($task -join '] - [')] - Finding manifest file"
     #DECISION: The manifest file = name of the folder.
     $manifestFileName = "$moduleName.psd1"
     $manifestFilePath = Join-Path -Path $moduleFolderPath $manifestFileName
     $manifestFile = Get-Item -Path $manifestFilePath -ErrorAction SilentlyContinue
     $manifestFileExists = $manifestFile.count -gt 0
     if (-not $manifestFileExists) {
-        Write-Error "[$($task[0])] - [$moduleName] - No manifest file found [$manifestFilePath]"
+        Write-Error "[$($task -join '] - [')] - [$manifestFilePath] - 🟥 No manifest file found"
         continue
     }
-    Write-Verbose "[$($task[0])] - [$moduleName] - Found manifest file [$manifestFilePath]"
+    Write-Verbose "[$($task -join '] - [')] - [$manifestFilePath] - 🟩 Found manifest file"
     #DECISION: The basis of the module manifest comes from the defined manifest file.
     #DECISION: Values that are not defined in the module manifest file are generated from reading the module files.
 
@@ -388,6 +396,6 @@ foreach ($moduleFolder in $moduleFolders) {
     Write-Output '::endgroup::'
 
     Write-Verbose "[$($task[0])] - [$moduleName] - Stopping..."
-
+    $task.RemoveAt($task.Count - 1)
     # Resolve-Depenencies -Path $ManifestFilePath.FullName -Verbose
 }
