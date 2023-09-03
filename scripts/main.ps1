@@ -24,10 +24,9 @@ function Resolve-ModuleDependencies {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
-        [string] $Path
+        [System.Management.Automation.PSModuleInfo[]] $Manifest
     )
 
-    $Manifest = Import-PowerShellDataFile -Path $Path
     foreach ($Module in $Manifest.RequiredModules) {
         $InstallParams = @{}
 
@@ -308,15 +307,16 @@ foreach ($moduleFolder in $moduleFolders) {
     Update-ModuleManifest -Path $outputManifestPath -PrivateData $PrivateData -Verbose
 
     Write-Verbose "[$taskName] - [$moduleName] - Resolving modules"
-    Resolve-ModuleDependencies -Path $outputManifestPath -Verbose
+    Resolve-ModuleDependencies -Manifest $manifest -Verbose
 
     Write-Verbose "[$taskName] - [$moduleName] - Generate module docs"
     if (-not (Get-Module -ListAvailable -Name platyPS)) {
-        Install-Module -Name PlatyPS -Scope CurrentUser -Force -Verbose
+        Write-Verbose "[$taskName] - [$moduleName] - Installing platyPS"
+        Install-Module -Name PlatyPS -Scope CurrentUser -Force -Verbose:$false
     }
     Import-Module -Name PlatyPS -Force -Verbose
 
-    Import-Module $moduleName -Verbose
+    Import-Module $moduleOutputPath -Verbose
 
     New-MarkdownHelp -Module $moduleName -OutputFolder ".\outputs\docs\$moduleName" -Force -Verbose
 
