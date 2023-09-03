@@ -72,11 +72,11 @@ foreach ($prereqModuleName in $prereqModuleNames) {
 
     $installedPrereqModule = Get-Module -ListAvailable -Name $prereqModuleName | Sort-Object -Property Version -Descending | Select-Object -First 1
     $isInstalled = $installedPrereqModule.count -gt 0
-    Write-Verbose "[$($task -join '] - [')] - Installed - [$isInstalled]"
+    Write-Output "::group::[$($task -join '] - [')] - Installed - [$isInstalled]"
     $installedPrereqModuleVersion = $installedPrereqModule.Version
+    Write-Output "::group::[$($task -join '] - [')] - Installed - Version - [$installedPrereqModuleVersion]"
 
     if ($isInstalled) {
-        Write-Verbose "[$($task -join '] - [')] - Installed - Version - [$installedPrereqModuleVersion]"
         if ($installedPrereqModuleVersion -lt $availableModuleVersion) {
             Write-Output "::group::[$($task -join '] - [')] - Updating - Version - [$installedPrereqModuleVersion] -> [$availableModuleVersion]"
             Install-Module -Name $prereqModuleName -Scope CurrentUser -Force
