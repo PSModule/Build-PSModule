@@ -330,9 +330,16 @@ foreach ($moduleFolder in $moduleFolders) {
 
     $capturedModules = $capturedModules
     $manifest.RequiredModules = $capturedModules
+    Write-Verbose "[$($task -join '] - [')] - [RequiredModules]"
+    $manifest.RequiredModules | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [RequiredModules] - [$_]" }
+
+    $manifest.RequiredModules = $manifest.RequiredModules | Sort-Object -Unique
+    Write-Verbose "[$($task -join '] - [')] - [RequiredModulesUnique]"
+    $manifest.RequiredModules | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [RequiredModulesUnique] - [$_]" }
 
     $capturedVersions = $capturedVersions | Sort-Object -Unique -Descending
     $manifest.PowerShellVersion = $capturedVersions[0]
+    Write-Verbose "[$($task -join '] - [')] - [PowerShellVersion] - [$($manifest.PowerShellVersion)]"
 
     $capturedPSEdition = $capturedPSEdition | Sort-Object -Unique
     if ($capturedPSEdition.count -eq 2) {
@@ -340,6 +347,8 @@ foreach ($moduleFolder in $moduleFolders) {
         return
     }
     $manifest.CompatiblePSEditions = $capturedPSEdition.count -eq 0 ? @('Core', 'Desktop') : @($capturedPSEdition)
+    Write-Verbose "[$($task -join '] - [')] - [CompatiblePSEditions]"
+    $manifest.CompatiblePSEditions | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [CompatiblePSEditions] - [$_]" }
 
     $privateData = $manifest.Keys -contains 'PrivateData' ? $null -ne $manifest.PrivateData ? $manifest.PrivateData : @{} : @{}
     if ($manifest.Keys -contains 'PrivateData') {
