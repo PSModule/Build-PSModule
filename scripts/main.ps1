@@ -3,7 +3,6 @@ param()
 $taskName = $MyInvocation.MyCommand.Name
 
 #region Helpers
-
 <#
 .SYNOPSIS
 Resolve dependencies for a module based on the manifest file.
@@ -50,13 +49,34 @@ function Resolve-ModuleDependencies {
         Install-Module @InstallParams
     }
 }
-
-Import-Module PowerShellGet -Verbose
-
-Get-InstalledModule | Select-Object Name, Version, Author | Format-Table -AutoSize
-
 #endregion Helpers
 
+Write-Output "::group::Loading prerequisites"
+
+$prereqModuleNames = 'platyPS', 'PowerShellGet', 'PackageManagement'
+
+foreach ($prereqModuleName in $prereqModuleNames) {
+    $prereqModule = Get-Module -ListAvailable -Name $prereqModuleName
+    if ($prereqModule) {
+        $installedVersion = $prereqModule.Version
+        $latestVersion = (Find-Module -Name $prereqModuleName).Version
+        if ($installedVersion -lt $latestVersion) {
+            Write-Verbose "[$taskName] - [$moduleName] - Updating module [$prereqModuleName] from [$installedVersion] to [$latestVersion]"
+            Update-Module -Name $prereqModuleName -Force -Verbose
+        }
+    } else {
+        Write-Verbose "[$taskName] - [$moduleName] - Installing module [$prereqModuleName]"
+        Install-Module -Name $prereqModuleName -Scope CurrentUser -Force -Verbose
+    }
+
+    Write-Verbose "[$taskName] - [$moduleName] - Importing module [$prereqModuleName]"
+    Import-Module -Name $prereqModuleName -Force -Verbose
+}
+
+Get-InstalledModule | Select-Object Name, Version, Author | Sort-Object -Property Name | Format-Table -AutoSize
+Write-Output '::endgroup::'
+
+Write-Output "::group::[$taskName] - Starting..."
 #DECISION: Modules are located under the '.\src' folder which is the root of the repo.
 #DECISION: Module name = the name of the folder under src.
 $moduleFolders = Get-ChildItem -Path 'src' -Directory -ErrorAction SilentlyContinue
@@ -66,6 +86,8 @@ $VerbosePreference = 'Continue'
 $moduleFolder = $moduleFolders[0]
 $VerbosePreference = 'SilentlyContinue'
 #>
+Write-Output "::endgroup::"
+
 foreach ($moduleFolder in $moduleFolders) {
     $moduleFolderPath = $moduleFolder.FullName
     $moduleName = $moduleFolder.Name
@@ -342,11 +364,7 @@ foreach ($moduleFolder in $moduleFolders) {
     Resolve-ModuleDependencies -Path $outputManifestPath -Verbose
 
     Write-Verbose "[$taskName] - [$moduleName] - Generate module docs"
-    if (-not (Get-Module -ListAvailable -Name platyPS)) {
-        Write-Verbose "[$taskName] - [$moduleName] - Installing platyPS"
-        Install-Module -Name PlatyPS -Scope CurrentUser -Force -Verbose:$false
-    }
-    Import-Module -Name PlatyPS -Force -Verbose:$false
+
     Write-Output "::group::[$moduleName] - Importing module"
     Import-Module $moduleOutputPath -Verbose
     Write-Output '::endgroup::'
