@@ -1,9 +1,8 @@
 ﻿[CmdletBinding()]
 param()
-$task = New-Object System.Collections.ArrayList
 $task = New-Object System.Collections.Generic.List[string]
 $task.Add('Build-Module')
-Write-Output "::group::[$($task -join '] - [')]"
+Write-Output "::group::[$($task -join '] - [')] - Starting..."
 
 #region Helpers
 <#
@@ -58,6 +57,8 @@ $task.Add('Install-Prerequisites')
 Write-Output "::group::[$($task -join '] - [')]"
 
 $prereqModuleNames = 'platyPS', 'PowerShellGet', 'PackageManagement'
+Write-Verbose "[$($task -join '] - [')] - Found $($prereqModuleNames.Count) modules"
+$prereqModuleNames | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [$_]" }
 
 foreach ($prereqModuleName in $prereqModuleNames) {
     $task.Add($prereqModuleName)
@@ -65,9 +66,9 @@ foreach ($prereqModuleName in $prereqModuleNames) {
 
     $availableModule = Find-Module -Name $prereqModuleName | Sort-Object -Property Version -Descending | Select-Object -First 1
     $isAvailable = $availableModule.count -gt 0
-    Write-Verbose "[$($task -join '] - [')] - Available - [$isAvailable]"
+    Write-Output "::group::[$($task -join '] - [')] - Available - [$isAvailable]"
     $availableModuleVersion = $availableModule.Version
-    Write-Verbose "[$($task -join '] - [')] - Available - Version - [$availableModuleVersion]"
+    Write-Output "::group::[$($task -join '] - [')] - Available - Version - [$availableModuleVersion]"
 
     $installedPrereqModule = Get-Module -ListAvailable -Name $prereqModuleName | Sort-Object -Property Version -Descending | Select-Object -First 1
     $isInstalled = $installedPrereqModule.count -gt 0
