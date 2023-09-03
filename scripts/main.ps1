@@ -472,16 +472,16 @@ foreach ($moduleFolder in $moduleFolders) {
     #DECISION: A new module manifest file is created every time to get a new GUID, so that the specific version of the module can be imported.
     Write-Verbose "[$($task -join '] - [')] - [Manifest] - Creating new manifest file in outputs folder"
     $outputManifestPath = (Join-Path -Path $moduleOutputFolder $manifestFileName)
-    New-ModuleManifest -Path $outputManifestPath @manifest -Verbose
+    New-ModuleManifest -Path $outputManifestPath @manifest
     # Update-ModuleManifest -Path $outputManifestPath -PrivateData $privateData -Verbose
 
     Write-Verbose "[$($task -join '] - [')] - Resolving modules"
-    Resolve-ModuleDependencies -Path $outputManifestPath -Verbose
+    Resolve-ModuleDependencies -Path $outputManifestPath
 
     Write-Verbose "[$($task -join '] - [')] - Generate module docs"
 
     Write-Output "::group::[$($task -join '] - [')] - Importing module"
-    Import-Module $moduleOutputFolderPath -Verbose
+    Import-Module $moduleOutputFolderPath
     Write-Output '::endgroup::'
 
     Write-Output "::group::[$($task -join '] - [')] - Building help"
