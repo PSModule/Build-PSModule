@@ -1,6 +1,6 @@
 ﻿[CmdletBinding()]
 param()
-$taskName = $MyInvocation.MyCommand.Name
+$task[0] = 'Build-Module'
 
 #region Helpers
 <#
@@ -51,36 +51,42 @@ function Resolve-ModuleDependencies {
 }
 #endregion Helpers
 
-Write-Output "::group::Loading prerequisites"
+$task[1] = 'Install-Prerequisites'
+Write-Output "::group::[$($task[0])] - [$($task[1])]"
 
 $prereqModuleNames = 'platyPS', 'PowerShellGet', 'PackageManagement'
 
 foreach ($prereqModuleName in $prereqModuleNames) {
+    $task[2] = $prereqModuleName
+    Write-Output "::group::[$($task[0])] - [$($task[1])] - [$($task[2])]"
+
     $prereqModule = Get-Module -ListAvailable -Name $prereqModuleName | Sort-Object -Property Version -Descending | Select-Object -First 1
     if ($prereqModule) {
         $installedVersion = $prereqModule.Version
         $latestVersion = (Find-Module -Name $prereqModuleName).Version
         if ($installedVersion -lt $latestVersion) {
-            Write-Verbose "[$taskName] - [$moduleName] - Updating module [$prereqModuleName] from [$installedVersion] to [$latestVersion]"
-            Install-Module -Name $prereqModuleName -Scope CurrentUser -Force -Verbose
+            Write-Verbose "[$($task[0])] - [$($task[1])] - [$($task[2])] - Updating - [$installedVersion] -> [$latestVersion]"
+            Install-Module -Name $prereqModuleName -Scope CurrentUser -Force
         }
     } else {
-        Write-Verbose "[$taskName] - [$moduleName] - Installing module [$prereqModuleName]"
-        Install-Module -Name $prereqModuleName -Scope CurrentUser -Force -Verbose
+        Write-Verbose "[$($task[0])] - [$($task[1])] - [$($task[2])] - Installing"
+        Install-Module -Name $prereqModuleName -Scope CurrentUser -Force
     }
 
-    Write-Verbose "[$taskName] - [$moduleName] - Importing module [$prereqModuleName]"
-    Import-Module -Name $prereqModuleName -Force -Verbose
+    Write-Verbose "[$($task[0])] - [$($task[1])] - [$($task[2])] - Importing"
+    Import-Module -Name $prereqModuleName -Force
 }
 
 Get-InstalledModule | Select-Object Name, Version, Author | Sort-Object -Property Name | Format-Table -AutoSize
 Write-Output '::endgroup::'
 
-Write-Output "::group::[$taskName] - Starting..."
+Write-Output "::group::[$($task[0])] - [$($task[0])] - Collecting modules"
+$task[1] = 'Collect-Modules'
 #DECISION: Modules are located under the '.\src' folder which is the root of the repo.
 #DECISION: Module name = the name of the folder under src.
 $moduleFolders = Get-ChildItem -Path 'src' -Directory -ErrorAction SilentlyContinue
-Write-Verbose "[$taskName] - Found $($moduleFolders.Count) manifest files"
+Write-Verbose "[$($task[0])] - Found $($moduleFolders.Count) manifest files"
+$moduleFolders | ForEach-Object { Write-Verbose "[$($task[0])] - [$($task[1])] - $($_.Name)" }
 <#
 $VerbosePreference = 'Continue'
 $moduleFolder = $moduleFolders[0]
@@ -91,24 +97,24 @@ Write-Output "::endgroup::"
 foreach ($moduleFolder in $moduleFolders) {
     $moduleFolderPath = $moduleFolder.FullName
     $moduleName = $moduleFolder.Name
-    Write-Verbose "[$taskName] - Processing module: [$moduleName]"
-    Write-Verbose "[$taskName] - [$moduleName] - [$moduleFolderPath]"
+    Write-Verbose "[$($task[0])] - Processing module: [$moduleName]"
+    Write-Verbose "[$($task[0])] - [$moduleName] - [$moduleFolderPath]"
 
-    Write-Verbose "[$taskName] - [$moduleName] - Finding manifest file"
+    Write-Verbose "[$($task[0])] - [$moduleName] - Finding manifest file"
     #DECISION: The manifest file = name of the folder.
     $manifestFileName = "$moduleName.psd1"
     $manifestFilePath = Join-Path -Path $moduleFolderPath $manifestFileName
     $manifestFile = Get-Item -Path $manifestFilePath -ErrorAction SilentlyContinue
     $manifestFileExists = $manifestFile.count -gt 0
     if (-not $manifestFileExists) {
-        Write-Error "[$taskName] - [$moduleName] - No manifest file found [$manifestFilePath]"
+        Write-Error "[$($task[0])] - [$moduleName] - No manifest file found [$manifestFilePath]"
         continue
     }
-    Write-Verbose "[$taskName] - [$moduleName] - Found manifest file [$manifestFilePath]"
+    Write-Verbose "[$($task[0])] - [$moduleName] - Found manifest file [$manifestFilePath]"
     #DECISION: The basis of the module manifest comes from the defined manifest file.
     #DECISION: Values that are not defined in the module manifest file are generated from reading the module files.
 
-    Write-Verbose "[$taskName] - [$moduleName] - [Manifest] - Processing"
+    Write-Verbose "[$($task[0])] - [$moduleName] - [Manifest] - Processing"
     $manifest = Import-PowerShellDataFile $manifestFilePath
 
     #DECISION: If no RootModule is defined in the manifest file, we assume a .psm1 file with the same name as the module is on root.
@@ -120,7 +126,7 @@ foreach ($moduleFolder in $moduleFolders) {
     } else {
         $manifest.RootModule = $null
     }
-    Write-Verbose "[$taskName] - [$moduleName] - [Manifest] - [RootModule] - [$($manifest.RootModule)]"
+    Write-Verbose "[$($task[0])] - [$moduleName] - [Manifest] - [RootModule] - [$($manifest.RootModule)]"
 
     $moduleType = switch -Regex ($manifest.RootModule) {
         '\.(ps1|psm1)$' { 'Script' }
@@ -129,11 +135,11 @@ foreach ($moduleFolder in $moduleFolders) {
         '\.xaml$' { 'Workflow' }
         default { 'Manifest' }
     }
-    Write-Verbose "[$taskName] - [$moduleName] - [Manifest] - [$moduleType] - [$moduleType]"
+    Write-Verbose "[$($task[0])] - [$moduleName] - [Manifest] - [$moduleType] - [$moduleType]"
     #DECISION: Currently only Script and Manifest modules are supported.
     $unsupportedModuleTypes = @('Binary', 'CIM', 'Workflow')
     if ($moduleType -in $unsupportedModuleTypes) {
-        Write-Error "[$taskName] - [$moduleName] - [Manifest] - [$moduleType] - [$moduleType] - Module type [$moduleType] is not supported"
+        Write-Error "[$($task[0])] - [$moduleName] - [Manifest] - [$moduleType] - [$moduleType] - Module type [$moduleType] is not supported"
         return 1
     }
 
@@ -212,7 +218,7 @@ foreach ($moduleFolder in $moduleFolders) {
     foreach ($file in $files) {
         $relativePath = $file.FullName.Replace($moduleFolderPath, '').TrimStart($pathSeparator)
 
-        Write-Verbose "[$taskName] - [$moduleName] - [$relativePath] - Processing"
+        Write-Verbose "[$($task[0])] - [$moduleName] - [$relativePath] - Processing"
         if ($moduleType -eq 'Script') {
             if ($file.extension -in '.psm1', '.ps1') {
                 $fileContent = Get-Content -Path $file
@@ -290,7 +296,7 @@ foreach ($moduleFolder in $moduleFolders) {
     }
 
     if ($PSData.Tags -contains 'PSEdition_Core' -and $manifest.PowerShellVersion -lt '6.0') {
-        Write-Error "[$taskName] - [$moduleName] - [Manifest] - [PowerShellVersion] - [$($manifest.PowerShellVersion)] - PowerShell version must be 6.0 or higher when using the PSEdition_Core tag"
+        Write-Error "[$($task[0])] - [$moduleName] - [Manifest] - [PowerShellVersion] - [$($manifest.PowerShellVersion)] - PowerShell version must be 6.0 or higher when using the PSEdition_Core tag"
         return 1
     }
 
@@ -345,43 +351,43 @@ foreach ($moduleFolder in $moduleFolders) {
     $outputsFolder = New-Item -Path $outputsFolderPath -ItemType Directory -Force -ErrorAction SilentlyContinue
 
     $moduleOutputPath = Join-Path -Path $outputsFolder $moduleName
-    Write-Verbose "[$taskName] - [$moduleName] - Creating output folder [$moduleOutputPath]"
+    Write-Verbose "[$($task[0])] - [$moduleName] - Creating output folder [$moduleOutputPath]"
     $moduleOutputFolder = New-Item -Path $moduleOutputPath -ItemType Directory -Force -ErrorAction SilentlyContinue
 
     #Copy all the files in the modulefolder except the manifest file
-    Write-Verbose "[$taskName] - [$moduleName] - Copying files from [$moduleFolderPath] to [$moduleOutputFolder]"
+    Write-Verbose "[$($task[0])] - [$moduleName] - Copying files from [$moduleFolderPath] to [$moduleOutputFolder]"
     Copy-Item -Path $moduleFolder -Destination $outputsFolder -Recurse -Force -Exclude $manifestFileName
 
     $env:PSModulePath += ";$moduleOutputFolderPath"
 
     #DECISION: A new module manifest file is created every time to get a new GUID, so that the specific version of the module can be imported.
-    Write-Verbose "[$taskName] - [$moduleName] - [Manifest] - Creating new manifest file in outputs folder"
+    Write-Verbose "[$($task[0])] - [$moduleName] - [Manifest] - Creating new manifest file in outputs folder"
     $outputManifestPath = (Join-Path -Path $moduleOutputFolder $manifestFileName)
     New-ModuleManifest -Path $outputManifestPath @manifest -Verbose
     # Update-ModuleManifest -Path $outputManifestPath -PrivateData $privateData -Verbose
 
-    Write-Verbose "[$taskName] - [$moduleName] - Resolving modules"
+    Write-Verbose "[$($task[0])] - [$moduleName] - Resolving modules"
     Resolve-ModuleDependencies -Path $outputManifestPath -Verbose
 
-    Write-Verbose "[$taskName] - [$moduleName] - Generate module docs"
+    Write-Verbose "[$($task[0])] - [$moduleName] - Generate module docs"
 
-    Write-Output "::group::[$moduleName] - Importing module"
+    Write-Output "::group::[$($task[0])] - [$moduleName] - Importing module"
     Import-Module $moduleOutputPath -Verbose
     Write-Output '::endgroup::'
 
-    Write-Output "::group::[$moduleName] - Building help"
+    Write-Output "::group::[$($task[0])] - [$moduleName] - Building help"
     New-MarkdownHelp -Module $moduleName -OutputFolder ".\outputs\docs\$moduleName" -Force -Verbose
     Write-Output '::endgroup::'
 
-    Write-Output '::group::Module files'
+    Write-Output '::group::[$($task[0])] - Module files'
     (Get-ChildItem -Path $outputsFolder -Recurse -Force).FullName | Sort-Object
     Write-Output '::endgroup::'
 
-    Write-Output '::group::Manifest'
+    Write-Output '::group::[$($task[0])] - Manifest'
     Get-Content -Path $outputManifestPath
     Write-Output '::endgroup::'
 
-    Write-Verbose "[$taskName] - [$moduleName] - Stopping..."
+    Write-Verbose "[$($task[0])] - [$moduleName] - Stopping..."
 
     # Resolve-Depenencies -Path $ManifestFilePath.FullName -Verbose
 }
