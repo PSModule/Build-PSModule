@@ -145,6 +145,7 @@ foreach ($moduleFolder in $moduleFolders) {
 
     $task.Add('Manifest')
     Write-Output "::group::[$($task -join '] - [')]"
+    Write-Output "::group::[$($task -join '] - [')] - Processing manifest file"
 
     #DECISION: If no RootModule is defined in the manifest file, we assume a .psm1 file with the same name as the module is on root.
     $moduleFileName = "$moduleName.psm1"
@@ -304,9 +305,9 @@ foreach ($moduleFolder in $moduleFolders) {
             if ($file.extension -in '.psm1', '.ps1') {
                 $fileContent = Get-Content -Path $file
 
-                $fileContent | ForEach-Object {
+                switch -Regex ($fileContent) {
                     # RequiredModules -> REQUIRES -Modules <Module-Name> | <Hashtable>, @() if not provided
-                    if ($_ -match '^#Requires -Modules (.+)$') {
+                    '^#Requires -Modules (.+)$' {
                         # Add captured module name to array
                         $capturedMatches = $matches[1].Split(',').trim()
                         $capturedMatches | ForEach-Object {
@@ -321,13 +322,13 @@ foreach ($moduleFolder in $moduleFolders) {
                         }
                     }
                     # PowerShellVersion -> REQUIRES -Version <N>[.<n>], $null if not provided
-                    if ($_ -match '^#Requires -Version (.+)$') {
+                    '^#Requires -Version (.+)$' {
                         Write-Verbose "[$($task -join '] - [')] - [REQUIRED -Version] - [$($matches[1])]"
                         # Add captured module name to array
                         $capturedVersions += $matches[1]
                     }
                     #CompatiblePSEditions -> REQUIRES -PSEdition <PSEdition-Name>, $null if not provided
-                    if ($_ -match '^#Requires -PSEdition (.+)$') {
+                    '^#Requires -PSEdition (.+)$' {
                         Write-Verbose "[$($task -join '] - [')] - [REQUIRED -PSEdition] - [$($matches[1])]"
                         # Add captured module name to array
                         $capturedPSEdition += $matches[1]
@@ -354,7 +355,7 @@ foreach ($moduleFolder in $moduleFolders) {
     $capturedPSEdition = $capturedPSEdition | Sort-Object -Unique
     if ($capturedPSEdition.count -eq 2) {
         Write-Error 'The module is requires both Desktop and Core editions.'
-        return
+        return 1
     }
     $manifest.CompatiblePSEditions = $capturedPSEdition.count -eq 0 ? @('Core', 'Desktop') : @($capturedPSEdition)
     Write-Verbose "[$($task -join '] - [')] - [CompatiblePSEditions]"
@@ -458,9 +459,6 @@ foreach ($moduleFolder in $moduleFolders) {
     $task.Add('Outputs')
     Write-Output "::group::[$($task -join '] - [')]"
 
-    $task.Add('Generating')
-    Write-Output "::group::[$($task -join '] - [')]"
-
     $outputsFolderName = 'outputs'
     $outputsFolderPath = Join-Path -Path '.' $outputsFolderName
     Write-Verbose "[$($task -join '] - [')] - Creating outputs folder [$outputsFolderPath]"
@@ -493,8 +491,6 @@ foreach ($moduleFolder in $moduleFolders) {
     New-MarkdownHelp -Module $moduleName -OutputFolder ".\outputs\docs\$moduleName" -Force
     Write-Output '::endgroup::'
 
-    $task.RemoveAt($task.Count - 1)
-
     Write-Output "::group::[$($task -join '] - [')] - Module files"
     (Get-ChildItem -Path $outputsFolder -Recurse -Force).FullName | Sort-Object
     Write-Output '::endgroup::'
@@ -503,8 +499,8 @@ foreach ($moduleFolder in $moduleFolders) {
     Get-Content -Path $outputManifestPath
     Write-Output '::endgroup::'
 
-    Write-Output "::group::[$($task -join '] - [')] - Done"
     $task.RemoveAt($task.Count - 1)
+    Write-Output "::group::[$($task -join '] - [')] - Done"
 }
 $task.RemoveAt($task.Count - 1)
 Write-Output "::group::[$($task -join '] - [')] - Done"
