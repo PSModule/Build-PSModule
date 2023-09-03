@@ -480,7 +480,7 @@ foreach ($moduleFolder in $moduleFolders) {
     New-ModuleManifest -Path $outputManifestPath @manifest
 
     Write-Verbose "[$($task -join '] - [')] - Resolving modules"
-    Resolve-ModuleDependencies -Path
+    Resolve-ModuleDependencies -Path $outputManifestPath
 
     Write-Verbose "[$($task -join '] - [')] - Generate module docs"
 
