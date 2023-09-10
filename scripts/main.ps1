@@ -1,5 +1,7 @@
 ﻿[CmdletBinding()]
-param()
+param(
+    $Path = 'src'
+)
 #region Build-Module
 $task = New-Object System.Collections.Generic.List[string]
 $task.Add('Build-Module')
@@ -22,6 +24,9 @@ function Resolve-ModuleDependencies {
 
     Installs all modules defined in the manifest file, following PSModuleInfo structure.
 
+    .NOTES
+    Should later be adapted to support both pre-reqs, and dependencies.
+    Should later be adapted to take 4 parameters sets: specific version ("requiredVersion" | "GUID"), latest version ModuleVersion, and latest version within a range MinimumVersion - MaximumVersion.
     #>
     [CmdletBinding()]
     param(
@@ -121,7 +126,7 @@ $task.Add('Process-Module')
 Write-Output "::group::[$($task -join '] - [')]"
 #DECISION: Modules are located under the '.\src' folder which is the root of the repo.
 #DECISION: Module name = the name of the folder under src.
-$moduleFolders = Get-ChildItem -Path 'src' -Directory -ErrorAction SilentlyContinue
+$moduleFolders = Get-ChildItem -Path $Path -Directory -ErrorAction SilentlyContinue
 Write-Verbose "[$($task -join '] - [')] - Found $($moduleFolders.Count) module(s)"
 $moduleFolders | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [$($_.Name)]" }
 
@@ -303,7 +308,6 @@ foreach ($moduleFolder in $moduleFolders) {
     $capturedVersions = @()
     $capturedPSEdition = @()
 
-
     foreach ($file in $files) {
         $relativePath = $file.FullName.Replace($moduleFolderPath, '').TrimStart($pathSeparator)
         $task.Add($relativePath)
@@ -461,12 +465,12 @@ foreach ($moduleFolder in $moduleFolders) {
         https://learn.microsoft.com/en-us/powershell/gallery/concepts/package-manifest-affecting-ui?view=powershellget-2.x#tag-details
     #>
 
-    #DECISION: The output folder = .\outputs on the root of the repo.
-    #DECISION: The module that is build is stored under the output folder in a folder with the same name as the module.
 
     $task.Add('Outputs')
     Write-Output "::group::[$($task -join '] - [')]"
 
+    #DECISION: The output folder = .\outputs on the root of the repo.
+    #DECISION: The module that is build is stored under the output folder in a folder with the same name as the module.
     $outputsFolderName = 'outputs'
     $outputsFolderPath = Join-Path -Path '.' $outputsFolderName
     Write-Verbose "[$($task -join '] - [')] - Creating outputs folder [$outputsFolderPath]"
@@ -517,7 +521,7 @@ Write-Output "::group::[$($task -join '] - [')] - Done"
 Write-Output '::endgroup::'
 #endregion Process-Module
 
-$task.RemoveAt($task.Count - 1)
 Write-Output "::group::[$($task -join '] - [')] - Stopping..."
+$task.RemoveAt($task.Count - 1)
 Write-Output '::endgroup::'
 #endregion Build-Module
