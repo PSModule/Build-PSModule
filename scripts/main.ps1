@@ -513,15 +513,42 @@ foreach ($moduleFolder in $moduleFolders) {
 
     Write-Output "::group::[$($task -join '] - [')] - Done"
     $task.RemoveAt($task.Count - 1)
+    Write-Output '::endgroup::'
+
+    $task.Add('Compress')
+    Write-Output "::group::[$($task -join '] - [')]"
+    Write-Verbose "[$($task -join '] - [')] - Processing"
+
+    # RE-create the moduleName.psm1 file
+    # concat all the files, and add Export-ModuleMembers at the end with modules.
+    $rootModuleFile = New-Item -Path $moduleOutputFolderPath -Name $manifest.RootModule -Force
+
+    $moduleFiles = Get-ChildItem -Path "$moduleOutputFolderPath\classes", "$moduleOutputFolderPath\private", "$moduleOutputFolderPath\public" -Recurse -File -Force
+    foreach ($moduleFile in $moduleFiles) {
+        $relativePath = $moduleFile.FullName.Replace($moduleOutputFolderPath, '').TrimStart($pathSeparator)
+        Add-Content -Path $rootModuleFile -Value "#region - From $relativePath"
+        Get-Content -Path $moduleFile | Add-Content -Path $rootModuleFile
+        Add-Content -Path $rootModuleFile -Value "#endregion - From $relativePath"
+        Add-Content -Path $rootModuleFile -Value ""
+    }
+
+    $moduleFunctions = $($manifest.FunctionsToExport -join "','")
+    $moduleCmdlets = $($manifest.CmdletsToExport -join "','")
+    $moduleVariables = $($manifest.VariablesToExport -join "','")
+    $moduleAlias = $($manifest.AliasesToExport -join "','")
+
+    Add-Content -Path $rootModuleFile -Value "Export-ModuleMember -Function '$moduleFunctions' -Cmdlet '$moduleCmdlets' -Variable '$moduleVariables' -Alias '$moduleAlias'"
 
     Write-Output "::group::[$($task -join '] - [')] - Done"
+    $task.RemoveAt($task.Count - 1)
 }
+
 $task.RemoveAt($task.Count - 1)
 Write-Output "::group::[$($task -join '] - [')] - Done"
 Write-Output '::endgroup::'
 #endregion Process-Module
 
-Write-Output "::group::[$($task -join '] - [')] - Stopping..."
 $task.RemoveAt($task.Count - 1)
+Write-Output "::group::[$($task -join '] - [')] - Stopping..."
 Write-Output '::endgroup::'
 #endregion Build-Module
