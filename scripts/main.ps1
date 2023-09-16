@@ -539,6 +539,10 @@ foreach ($moduleFolder in $moduleFolders) {
 
     Add-Content -Path $rootModuleFile -Value "Export-ModuleMember -Function '$moduleFunctions' -Cmdlet '$moduleCmdlets' -Variable '$moduleVariables' -Alias '$moduleAlias'"
 
+    Write-Output "::group::[$($task -join '] - [')] - Root Module"
+    Get-Content -Path $rootModuleFile
+    Write-Output '::endgroup::'
+
     Write-Output "::group::[$($task -join '] - [')] - Done"
     $task.RemoveAt($task.Count - 1)
 }
