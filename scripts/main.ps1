@@ -216,16 +216,15 @@ foreach ($moduleFolder in $moduleFolders) {
     $manifest.ProcessorArchitecture = $manifest.Keys -contains 'ProcessorArchitecture' ? -not [string]::IsNullOrEmpty($manifest.ProcessorArchitecture) ? $manifest.ProcessorArchitecture : 'None' : 'None'
     Write-Verbose "[$($task -join '] - [')] - [ProcessorArchitecture] - [$($manifest.ProcessorArchitecture)]"
 
-    $files = $moduleFolder | Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue
-
     #Get the path separator for the current OS
     $pathSeparator = [System.IO.Path]::DirectorySeparatorChar
 
-    $fileList = $files | Select-Object -ExpandProperty FullName | ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
-    $manifest.FileList = $files.count -eq 0 ? @() : @($fileList)
+    $files = $moduleFolder | Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue
+    $files = $files | Select-Object -ExpandProperty FullName | ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
+    $fileList = $files | Where-Object { $_ -notLike 'public*' -and $_ -notLike 'private*' -and $_ -notLike 'classes*' }
+    $manifest.FileList = $fileList.count -eq 0 ? @() : @($fileList)
     Write-Verbose "[$($task -join '] - [')] - [FileList]"
     $manifest.FileList | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [FileList] - [$_]" }
-
 
     $requiredAssembliesFolderPath = Join-Path $moduleFolder 'assemblies'
     $requiredAssemblies = Get-ChildItem -Path $RequiredAssembliesFolderPath -Recurse -File -ErrorAction SilentlyContinue -Filter '*.dll' |
@@ -297,10 +296,9 @@ foreach ($moduleFolder in $moduleFolders) {
     $moduleList = Get-ChildItem -Path $moduleFolder -Recurse -File -ErrorAction SilentlyContinue -Include '*.psm1' |
         Select-Object -ExpandProperty FullName |
         ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
-    $manifest.ModuleList = $files.count -eq 0 ? $null : @($moduleList)
+    $manifest.ModuleList = $moduleList.count -eq 0 ? @() : @($moduleList)
     Write-Verbose "[$($task -join '] - [')] - [ModuleList]"
     $manifest.ModuleList | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [ModuleList] - [$_]" }
-
 
     Write-Output "::group::[$($task -join '] - [')] - Gather dependencies from files"
 
@@ -308,6 +306,7 @@ foreach ($moduleFolder in $moduleFolders) {
     $capturedVersions = @()
     $capturedPSEdition = @()
 
+    $files = $moduleFolder | Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue
     foreach ($file in $files) {
         $relativePath = $file.FullName.Replace($moduleFolderPath, '').TrimStart($pathSeparator)
         $task.Add($relativePath)
@@ -529,7 +528,7 @@ foreach ($moduleFolder in $moduleFolders) {
         Add-Content -Path $rootModuleFile -Value "#region - From $relativePath"
         Get-Content -Path $moduleFile | Add-Content -Path $rootModuleFile
         Add-Content -Path $rootModuleFile -Value "#endregion - From $relativePath"
-        Add-Content -Path $rootModuleFile -Value ""
+        Add-Content -Path $rootModuleFile -Value ''
     }
 
     $moduleFunctions = $($manifest.FunctionsToExport -join "','")
@@ -542,6 +541,8 @@ foreach ($moduleFolder in $moduleFolders) {
     Write-Output "::group::[$($task -join '] - [')] - Root Module"
     Get-Content -Path $rootModuleFile
     Write-Output '::endgroup::'
+
+    Remove-Item -Path "$moduleOutputFolderPath\classes", "$moduleOutputFolderPath\private", "$moduleOutputFolderPath\public" -Recurse -Force
 
     Write-Output "::group::[$($task -join '] - [')] - Done"
     $task.RemoveAt($task.Count - 1)
