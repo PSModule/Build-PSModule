@@ -1,4 +1,4 @@
-﻿[CmdletBinding()]
+﻿[CmdletBinding(SupportsShouldProcess)]
 param(
     $Path = 'src'
 )
@@ -543,7 +543,7 @@ foreach ($moduleFolder in $moduleFolders) {
     Write-Output '::endgroup::'
 
     Get-ChildItem -Path $moduleOutputFolderPath -Directory | Where-Object -Property Name -in 'classes','private','public' | Remove-Item -Recurse -Force
-    
+
     Write-Output "::group::[$($task -join '] - [')] - Done"
     $task.RemoveAt($task.Count - 1)
 }
