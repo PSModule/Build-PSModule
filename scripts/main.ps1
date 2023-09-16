@@ -360,7 +360,7 @@ foreach ($moduleFolder in $moduleFolders) {
     $manifest.RequiredModules | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [RequiredModulesUnique] - [$_]" }
 
     $capturedVersions = $capturedVersions | Sort-Object -Unique -Descending
-    $manifest.PowerShellVersion = $capturedVersions[0]
+    $manifest.PowerShellVersion = $capturedVersions.count -eq 0 ? '7.0' : $capturedVersions | Select-Object -First 1
     Write-Verbose "[$($task -join '] - [')] - [PowerShellVersion] - [$($manifest.PowerShellVersion)]"
 
     $capturedPSEdition = $capturedPSEdition | Sort-Object -Unique
