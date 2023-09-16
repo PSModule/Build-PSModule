@@ -542,8 +542,8 @@ foreach ($moduleFolder in $moduleFolders) {
     Get-Content -Path $rootModuleFile
     Write-Output '::endgroup::'
 
-    Remove-Item -Path "$moduleOutputFolderPath\classes", "$moduleOutputFolderPath\private", "$moduleOutputFolderPath\public" -Recurse -Force
-
+    Get-ChildItem -Path $moduleOutputFolderPath -Directory | Where-Object -Property Name -in 'classes','private','public' | Remove-Item -Recurse -Force
+    
     Write-Output "::group::[$($task -join '] - [')] - Done"
     $task.RemoveAt($task.Count - 1)
 }
