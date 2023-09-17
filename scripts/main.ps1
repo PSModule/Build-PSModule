@@ -189,7 +189,7 @@ foreach ($moduleFolder in $moduleFolders) {
         return 1
     }
 
-    $manifest.Author = $manifest.Keys -contains 'Author' ? -not [string]::IsNullOrEmpty($manifest.Author) ? $manifest.Author : 'Unknown' : 'Unknown'
+    $manifest.Author = $manifest.Keys -contains 'Author' ? -not [string]::IsNullOrEmpty($manifest.Author) ? $manifest.Author : $env:GITHUB_REPOSITORY_OWNER : $env:GITHUB_REPOSITORY_OWNER
     Write-Verbose "[$($task -join '] - [')] - [Author] - [$($manifest.Author)]"
 
 
@@ -197,7 +197,8 @@ foreach ($moduleFolder in $moduleFolders) {
     Write-Verbose "[$($task -join '] - [')] - [CompanyName] - [$($manifest.CompanyName)]"
 
     $year = Get-Date -Format 'yyyy'
-    $copyRight = "(c) $year $($manifest.Author) | $($manifest.CompanyName). All rights reserved."
+    $copyRightOwner = $manifest.CompanyName -eq $manifest.Author ? $manifest.Author : "$($manifest.Author) | $($manifest.CompanyName)"
+    $copyRight = "(c) $year $copyRightOwner. All rights reserved."
     $manifest.CopyRight = $manifest.Keys -contains 'CopyRight' ? -not [string]::IsNullOrEmpty($manifest.CopyRight) ? $manifest.CopyRight : $copyRight : $copyRight
     Write-Verbose "[$($task -join '] - [')] - [CopyRight] - [$($manifest.CopyRight)]"
 
