@@ -136,6 +136,9 @@ foreach ($moduleFolder in $moduleFolders) {
     $task.Add($moduleName)
     Write-Output "::group::[$($task -join '] - [')]"
 
+    #Evaluate if the module has changes since last release.
+    #If not, skip the module.
+
     Write-Verbose "[$($task -join '] - [')] - Processing"
     Write-Verbose "[$($task -join '] - [')] - ModuleFolderPath - [$moduleFolderPath]"
 
@@ -360,7 +363,7 @@ foreach ($moduleFolder in $moduleFolders) {
     $manifest.RequiredModules | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [RequiredModulesUnique] - [$_]" }
 
     $capturedVersions = $capturedVersions | Sort-Object -Unique -Descending
-    $manifest.PowerShellVersion = $capturedVersions.count -eq 0 ? '7.0' : $capturedVersions | Select-Object -First 1
+    $manifest.PowerShellVersion = $capturedVersions.count -eq 0 ? [version]'7.0' : [version]($capturedVersions | Select-Object -First 1)
     Write-Verbose "[$($task -join '] - [')] - [PowerShellVersion] - [$($manifest.PowerShellVersion)]"
 
     $capturedPSEdition = $capturedPSEdition | Sort-Object -Unique
