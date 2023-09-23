@@ -279,8 +279,13 @@ foreach ($moduleFolder in $moduleFolders) {
     $manifest.DscResourcesToExport | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [DscResourcesToExport] - [$_]" }
 
     $publicFolderPath = Join-Path $moduleFolder 'public'
-    $functionsToExport = Get-ChildItem -Path $publicFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1' |
-        Select-Object -ExpandProperty BaseName
+    $functionFiles = Get-ChildItem -Path $publicFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1' | ForEach-Object {
+        $fileContent = Get-Content -Path $_.FullName -Raw
+        $containsFunction = $fileContent -match 'function \s*[\w-]+\s*'
+        $containsFunction ? $_ : $null
+    }
+    $functionsToExport = $functionFiles | Select-Object -ExpandProperty BaseName
+    $functionsToExport = $functionsToExport | Where-Object { $fileList -contains "$($_).ps1" }
     $manifest.FunctionsToExport = $functionsToExport.count -eq 0 ? @() : @($functionsToExport)
     Write-Verbose "[$($task -join '] - [')] - [FunctionsToExport]"
     $manifest.FunctionsToExport | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [FunctionsToExport] - [$_]" }
