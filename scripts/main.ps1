@@ -511,7 +511,7 @@ foreach ($moduleFolder in $moduleFolders) {
     Import-Module $moduleOutputFolderPath
 
     Write-Verbose "[$($task -join '] - [')] - [Help] - List loaded modules"
-    $availableModules = Get-Module -ListAvailable -Verbose:$false
+    $availableModules = Get-Module -ListAvailable -Refresh -Verbose:$false
     $availableModules
     Write-Output '::endgroup::'
 
