@@ -556,16 +556,26 @@ foreach ($moduleFolder in $moduleFolders) {
     # 6  *.ps1 on module root
     # 7. Export-ModuleMember
 
-    Add-Content -Path $rootModuleFile.FullPath -Value "#region - Data import"
-    $dataImport = @'
-    Join-Path $PSScriptRoot 'Data' | Get-ChildItem -Recurse -File -Force | ForEach-Object {
-        New-Variable -Name $_.BaseName -Value (Import-PowerShellDataFile -Path $_.FullName) -Force
-    }
-'@
-    $dataImport | Add-Content -Path $rootModuleFile.FullPath
-    Add-Content -Path $rootModuleFile.FullPath -Value "#endregion - Data import"
-    Add-Content -Path $rootModuleFile.FullPath -Value ''
+    Add-Content -Path $rootModuleFile.FullPath -Value @'
+[Cmdletbinding()]
+param()
 
+$scriptName = $MyInvocation.MyCommand.Name
+Write-Verbose "[$scriptName] Importing subcomponents"
+
+#region - Data import
+Write-Verbose "[$scriptName] - [data] - Processing folder"
+
+Get-ChildItem -Path (Join-Path $PSScriptRoot 'data') -Recurse -File -Force | ForEach-Object {
+    Write-Verbose "[$scriptName] - [data] - [$($_.Name)]"
+    New-Variable -Name $_.BaseName -Value (Import-PowerShellDataFile -Path $_.FullName) -Force
+    Write-Verbose "[$scriptName] - [data] - [$($_.Name)] - Done"
+}
+
+Write-Verbose "[$scriptName] - [data] - Done"
+#endregion - Data import
+
+'@
 
     $folderProcessingOrder = @(
         'init',
@@ -582,23 +592,39 @@ foreach ($moduleFolder in $moduleFolders) {
         )
         $relativePath = $Path.FullName.Replace($RootPath, '').TrimStart($pathSeparator)
 
-        Add-Content -Path $RootModuleFilePath -Value "#region - From $relativePath"
+        Add-Content -Path $RootModuleFilePath -Value @"
+#region - From $relativePath
+Write-Verbose "[`$scriptName] - [$relativePath] - Processing folder"
+
+"@
 
         $subFolders = $Path | Get-ChildItem -Directory -Force | Sort-Object -Property Name
         foreach ($subFolder in $subFolders) {
             Add-ContentFromItem -Path $subFolder.FullName -RootModuleFilePath $RootModuleFilePath -RootPath $RootPath
         }
 
-        $files = $Path | Get-ChildItem -File -Force -Filter '*.ps1'
+        $files = $Path | Get-ChildItem -File -Force -Filter '*.ps1' | Sort-Object -Property FullName
         foreach ($file in $files) {
             $relativePath = $file.FullName.Replace($RootPath, '').TrimStart($pathSeparator)
-            Add-Content -Path $RootModuleFilePath -Value "#region - From $relativePath"
+            Add-Content -Path $RootModuleFilePath -Value @"
+#region - From $relativePath
+Write-Verbose "[`$scriptName] - [$relativePath] - Importing"
+
+"@
             Get-Content -Path $file.FullName | Add-Content -Path $RootModuleFilePath
-            Add-Content -Path $RootModuleFilePath -Value "#endregion - From $relativePath"
-            Add-Content -Path $RootModuleFilePath -Value ''
+            Add-Content -Path $RootModuleFilePath -Value @"
+
+Write-Verbose "[`$scriptName] - [$relativePath] - Done"
+#endregion - From $relativePath
+
+"@
         }
-        Add-Content -Path $RootModuleFilePath -Value "#endregion - From $relativePath"
-        Add-Content -Path $RootModuleFilePath -Value ''
+        Add-Content -Path $RootModuleFilePath -Value @"
+
+Write-Verbose "[`$scriptName] - [$relativePath] - Done"
+#endregion - From $relativePath
+
+"@
     }
 
     $subFolders = Get-ChildItem -Path $moduleOutputFolderPath -Directory -Force | Where-Object -Property Name -In $folderProcessingOrder
@@ -609,10 +635,18 @@ foreach ($moduleFolder in $moduleFolders) {
     $files = $Path | Get-ChildItem -File -Force -Filter '*.ps1'
     foreach ($file in $files) {
         $relativePath = $file.FullName.Replace($moduleOutputFolderPath, '').TrimStart($pathSeparator)
-        Add-Content -Path $rootModuleFile.FullPath -Value "#region - From $relativePath"
+        Add-Content -Path $rootModuleFile.FullPath -Value @"
+#region - From $relativePath
+Write-Verbose "[`$scriptName] - [$relativePath] - Importing"
+
+"@
         Get-Content -Path $file.FullName | Add-Content -Path $rootModuleFile.FullPath
-        Add-Content -Path $rootModuleFile.FullPath -Value "#endregion - From $relativePath"
-        Add-Content -Path $rootModuleFile.FullPath -Value ''
+
+        Add-Content -Path $rootModuleFile.FullPath -Value @"
+Write-Verbose "[`$scriptName] - [$relativePath] - Done"
+#endregion - From $relativePath
+
+"@
     }
 
     $moduleFunctions = $($manifest.FunctionsToExport -join "','")
