@@ -508,10 +508,10 @@ foreach ($moduleFolder in $moduleFolders) {
 
     Write-Output "::group::[$($task -join '] - [')] - Generate help"
     Write-Verbose "[$($task -join '] - [')] - [Help] - Importing module"
-    Import-Module $moduleName #$moduleOutputFolderPath
+    Import-Module $moduleOutputFolderPath
 
     Write-Verbose "[$($task -join '] - [')] - [Help] - List loaded modules"
-    $availableModules = Get-Module -ListAvailable -Refresh -Verbose:$false
+    $availableModules = Get-Module -Verbose:$false
     $availableModules
     Write-Output '::endgroup::'
 
