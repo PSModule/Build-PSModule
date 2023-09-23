@@ -618,7 +618,7 @@ Write-Verbose "[`$scriptName] - [$relativeFilePath] - Done"
 "@
         }
         Add-Content -Path $RootModuleFilePath -Value @"
-        
+
 Write-Verbose "[`$scriptName] - [$relativeFolderPath] - Done"
 #endregion - From $relativeFolderPath
 "@
@@ -627,6 +627,7 @@ Write-Verbose "[`$scriptName] - [$relativeFolderPath] - Done"
     $subFolders = Get-ChildItem -Path $moduleOutputFolderPath -Directory -Force | Where-Object -Property Name -In $folderProcessingOrder
     foreach ($subFolder in $subFolders) {
         Add-ContentFromItem -Path $subFolder.FullName -RootModuleFilePath $rootModuleFile.FullName -RootPath $moduleOutputFolderPath
+        $subFolder | Remove-Item -Recurse -Force
     }
 
     $files = $moduleOutputFolderPath | Get-ChildItem -File -Force -Filter '*.ps1'
@@ -644,6 +645,7 @@ Write-Verbose "[`$scriptName] - [$relativePath] - Done"
 #endregion - From $relativePath
 
 "@
+        $file | Remove-Item -Force
     }
 
     $moduleFunctions = $($manifest.FunctionsToExport -join "','")
@@ -656,8 +658,6 @@ Write-Verbose "[`$scriptName] - [$relativePath] - Done"
     Write-Output "::group::[$($task -join '] - [')] - Root Module"
     Get-Content -Path $rootModuleFile
     Write-Output '::endgroup::'
-
-    Get-ChildItem -Path $moduleOutputFolderPath -Directory | Where-Object -Property Name -In 'init', 'classes', 'private', 'public' | Remove-Item -Recurse -Force
 
     Write-Output "::group::[$($task -join '] - [')] - Done"
     $task.RemoveAt($task.Count - 1)
