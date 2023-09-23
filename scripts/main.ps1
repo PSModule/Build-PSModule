@@ -287,7 +287,6 @@ foreach ($moduleFolder in $moduleFolders) {
         $containsFunction ? $_.BaseName : $null
     }
     $manifest.FunctionsToExport = $functionsToExport.count -eq 0 ? @() : @($functionsToExport)
-    $manifest.FunctionsToExport | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [FunctionsToExport] - [$_]" }
 
     Write-Verbose "[$($task -join '] - [')] - [CmdletsToExport]"
     $manifest.CmdletsToExport = ($manifest.CmdletsToExport).count -eq 0 ? @() : @($manifest.CmdletsToExport)
