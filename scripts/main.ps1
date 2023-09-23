@@ -220,7 +220,8 @@ foreach ($moduleFolder in $moduleFolders) {
     $pathSeparator = [System.IO.Path]::DirectorySeparatorChar
 
     Write-Verbose "[$($task -join '] - [')] - [FileList]"
-    $files = $moduleFolder | Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue
+    $files = $moduleFolder | Get-ChildItem -File -ErrorAction SilentlyContinue | Where-Object -Property Name -NotLike '*.ps1'
+    $files += $moduleFolder | Get-ChildItem -Directory | Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue
     $files = $files | Select-Object -ExpandProperty FullName | ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
     $fileList = $files | Where-Object { $_ -notLike 'public*' -and $_ -notLike 'private*' -and $_ -notLike 'classes*' }
     $manifest.FileList = $fileList.count -eq 0 ? @() : @($fileList)
