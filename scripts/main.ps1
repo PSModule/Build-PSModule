@@ -548,13 +548,25 @@ foreach ($moduleFolder in $moduleFolders) {
     $rootModuleFile = New-Item -Path $moduleOutputFolderPath -Name $manifest.RootModule -Force
 
     # Add content to the root module file in the following order:
-    # 0. Init
-    # 1. Classes
-    # 2. Private
-    # 3. Public
-    # 4  *.ps1 on module root
-    # 5. Load data files from Data folder
-    # 5. Export-ModuleMember
+    # 1. Load data files from Data folder
+    # 2. Init
+    # 3. Classes
+    # 4. Private
+    # 5. Public
+    # 6  *.ps1 on module root
+    # 7. Export-ModuleMember
+
+    Add-Content -Path $rootModuleFile.FullPath -Value "#region - Data import"
+    $dataImport = @'
+    Join-Path $PSScriptRoot 'Data' | Get-ChildItem -Recurse -File -Force | ForEach-Object {
+        New-Variable -Name $_.BaseName -Value (Import-PowerShellDataFile -Path $_.FullName) -Force
+    }
+'@
+    $dataImport | Add-Content -Path $rootModuleFile.FullPath
+    Add-Content -Path $rootModuleFile.FullPath -Value "#endregion - Data import"
+    Add-Content -Path $rootModuleFile.FullPath -Value ''
+
+
     $folderProcessingOrder = @(
         'init',
         'classes',
@@ -602,8 +614,6 @@ foreach ($moduleFolder in $moduleFolders) {
         Add-Content -Path $rootModuleFile.FullPath -Value "#endregion - From $relativePath"
         Add-Content -Path $rootModuleFile.FullPath -Value ''
     }
-    Add-Content -Path $rootModuleFile.FullPath -Value "#endregion - From $relativePath"
-    Add-Content -Path $rootModuleFile.FullPath -Value ''
 
     $moduleFunctions = $($manifest.FunctionsToExport -join "','")
     $moduleCmdlets = $($manifest.CmdletsToExport -join "','")
