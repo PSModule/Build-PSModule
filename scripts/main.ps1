@@ -502,6 +502,10 @@ foreach ($moduleFolder in $moduleFolders) {
     Write-Verbose "[$($task -join '] - [')] - [Help] - Importing module"
     Import-Module $moduleOutputFolderPath
 
+    Write-Verbose "[$($task -join '] - [')] - [Help] - List loaded modules"
+    Get-Module -ListAvailable
+    Write-Output '::endgroup::'
+
     Write-Verbose "[$($task -join '] - [')] - [Help] - Building help"
     New-MarkdownHelp -Module $moduleName -OutputFolder ".\outputs\docs\$moduleName" -Force
     Write-Output '::endgroup::'
