@@ -503,11 +503,16 @@ foreach ($moduleFolder in $moduleFolders) {
     Import-Module $moduleOutputFolderPath
 
     Write-Verbose "[$($task -join '] - [')] - [Help] - List loaded modules"
-    Get-Module -ListAvailable
+    $availableModules = Get-Module -ListAvailable -Verbose:$false
+    $availableModules
     Write-Output '::endgroup::'
 
     Write-Verbose "[$($task -join '] - [')] - [Help] - Building help"
-    New-MarkdownHelp -Module $moduleName -OutputFolder ".\outputs\docs\$moduleName" -Force
+    if ($moduleName -in $availableModules) {
+        New-MarkdownHelp -Module $moduleName -OutputFolder ".\outputs\docs\$moduleName" -Force
+    } else {
+        Write-Warning "[$($task -join '] - [')] - [Help] - Module [$moduleName] not found"
+    }
     Write-Output '::endgroup::'
 
     Write-Output "::group::[$($task -join '] - [')] - Module files"
