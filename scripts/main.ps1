@@ -526,7 +526,13 @@ foreach ($moduleFolder in $moduleFolders) {
     # concat all the files, and add Export-ModuleMembers at the end with modules.
     $rootModuleFile = New-Item -Path $moduleOutputFolderPath -Name $manifest.RootModule -Force
 
-    $moduleFiles = Get-ChildItem -Path "$moduleOutputFolderPath\classes", "$moduleOutputFolderPath\private", "$moduleOutputFolderPath\public" -Recurse -File -Force
+    $folderProcessingOrder = @(
+        'classes',
+        'private',
+        'public'
+    )
+    $foldersToProcess = Get-ChildItem -Path $moduleOutputFolderPath -Directory | Where-Object -Property Name -in $folderProcessingOrder
+    $moduleFiles = $foldersToProcess | Get-ChildItem -Recurse -File -Force
     foreach ($moduleFile in $moduleFiles) {
         $relativePath = $moduleFile.FullName.Replace($moduleOutputFolderPath, '').TrimStart($pathSeparator)
         Add-Content -Path $rootModuleFile -Value "#region - From $relativePath"
