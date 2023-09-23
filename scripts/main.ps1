@@ -547,20 +547,63 @@ foreach ($moduleFolder in $moduleFolders) {
     # concat all the files, and add Export-ModuleMembers at the end with modules.
     $rootModuleFile = New-Item -Path $moduleOutputFolderPath -Name $manifest.RootModule -Force
 
+    # Add content to the root module file in the following order:
+    # 0. Init
+    # 1. Classes
+    # 2. Private
+    # 3. Public
+    # 4  *.ps1 on module root
+    # 5. Load data files from Data folder
+    # 5. Export-ModuleMember
     $folderProcessingOrder = @(
+        'init',
         'classes',
         'private',
         'public'
     )
-    $foldersToProcess = Get-ChildItem -Path $moduleOutputFolderPath -Directory | Where-Object -Property Name -In $folderProcessingOrder
-    $moduleFiles = $foldersToProcess | Get-ChildItem -Recurse -File -Force
-    foreach ($moduleFile in $moduleFiles) {
-        $relativePath = $moduleFile.FullName.Replace($moduleOutputFolderPath, '').TrimStart($pathSeparator)
-        Add-Content -Path $rootModuleFile -Value "#region - From $relativePath"
-        Get-Content -Path $moduleFile | Add-Content -Path $rootModuleFile
-        Add-Content -Path $rootModuleFile -Value "#endregion - From $relativePath"
-        Add-Content -Path $rootModuleFile -Value ''
+
+    function Add-ContentFromItem {
+        param(
+            [string] $Path,
+            [string] $RootModuleFilePath,
+            [string] $RootPath
+        )
+        $relativePath = $Path.FullName.Replace($RootPath, '').TrimStart($pathSeparator)
+
+        Add-Content -Path $RootModuleFilePath -Value "#region - From $relativePath"
+
+        $subFolders = $Path | Get-ChildItem -Directory -Force | Sort-Object -Property Name
+        foreach ($subFolder in $subFolders) {
+            Add-ContentFromItem -Path $subFolder.FullName -RootModuleFilePath $RootModuleFilePath -RootPath $RootPath
+        }
+
+        $files = $Path | Get-ChildItem -File -Force -Filter '*.ps1'
+        foreach ($file in $files) {
+            $relativePath = $file.FullName.Replace($RootPath, '').TrimStart($pathSeparator)
+            Add-Content -Path $RootModuleFilePath -Value "#region - From $relativePath"
+            Get-Content -Path $file.FullName | Add-Content -Path $RootModuleFilePath
+            Add-Content -Path $RootModuleFilePath -Value "#endregion - From $relativePath"
+            Add-Content -Path $RootModuleFilePath -Value ''
+        }
+        Add-Content -Path $RootModuleFilePath -Value "#endregion - From $relativePath"
+        Add-Content -Path $RootModuleFilePath -Value ''
     }
+
+    $subFolders = Get-ChildItem -Path $moduleOutputFolderPath -Directory -Force | Where-Object -Property Name -In $folderProcessingOrder
+    foreach ($subFolder in $subFolders) {
+        Add-ContentFromItem -Path $subFolder.FullName -RootModuleFilePath $rootModuleFile.FullPath -RootPath $moduleOutputFolderPath
+    }
+
+    $files = $Path | Get-ChildItem -File -Force -Filter '*.ps1'
+    foreach ($file in $files) {
+        $relativePath = $file.FullName.Replace($moduleOutputFolderPath, '').TrimStart($pathSeparator)
+        Add-Content -Path $rootModuleFile.FullPath -Value "#region - From $relativePath"
+        Get-Content -Path $file.FullName | Add-Content -Path $rootModuleFile.FullPath
+        Add-Content -Path $rootModuleFile.FullPath -Value "#endregion - From $relativePath"
+        Add-Content -Path $rootModuleFile.FullPath -Value ''
+    }
+    Add-Content -Path $rootModuleFile.FullPath -Value "#endregion - From $relativePath"
+    Add-Content -Path $rootModuleFile.FullPath -Value ''
 
     $moduleFunctions = $($manifest.FunctionsToExport -join "','")
     $moduleCmdlets = $($manifest.CmdletsToExport -join "','")
@@ -573,7 +616,7 @@ foreach ($moduleFolder in $moduleFolders) {
     Get-Content -Path $rootModuleFile
     Write-Output '::endgroup::'
 
-    Get-ChildItem -Path $moduleOutputFolderPath -Directory | Where-Object -Property Name -In 'classes', 'private', 'public' | Remove-Item -Recurse -Force
+    Get-ChildItem -Path $moduleOutputFolderPath -Directory | Where-Object -Property Name -In 'init', 'classes', 'private', 'public' | Remove-Item -Recurse -Force
 
     Write-Output "::group::[$($task -join '] - [')] - Done"
     $task.RemoveAt($task.Count - 1)
