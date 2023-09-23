@@ -286,7 +286,6 @@ foreach ($moduleFolder in $moduleFolders) {
         Write-Verbose "[$($task -join '] - [')] - [FunctionsToExport] - [$($_.BaseName)] - [$containsFunction]"
         $containsFunction ? $_.BaseName : $null
     }
-    }
     $manifest.FunctionsToExport = $functionsToExport.count -eq 0 ? @() : @($functionsToExport)
     $manifest.FunctionsToExport | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [FunctionsToExport] - [$_]" }
 
@@ -554,7 +553,7 @@ foreach ($moduleFolder in $moduleFolders) {
         'private',
         'public'
     )
-    $foldersToProcess = Get-ChildItem -Path $moduleOutputFolderPath -Directory | Where-Object -Property Name -in $folderProcessingOrder
+    $foldersToProcess = Get-ChildItem -Path $moduleOutputFolderPath -Directory | Where-Object -Property Name -In $folderProcessingOrder
     $moduleFiles = $foldersToProcess | Get-ChildItem -Recurse -File -Force
     foreach ($moduleFile in $moduleFiles) {
         $relativePath = $moduleFile.FullName.Replace($moduleOutputFolderPath, '').TrimStart($pathSeparator)
@@ -575,7 +574,7 @@ foreach ($moduleFolder in $moduleFolders) {
     Get-Content -Path $rootModuleFile
     Write-Output '::endgroup::'
 
-    Get-ChildItem -Path $moduleOutputFolderPath -Directory | Where-Object -Property Name -in 'classes','private','public' | Remove-Item -Recurse -Force
+    Get-ChildItem -Path $moduleOutputFolderPath -Directory | Where-Object -Property Name -In 'classes', 'private', 'public' | Remove-Item -Recurse -Force
 
     Write-Output "::group::[$($task -join '] - [')] - Done"
     $task.RemoveAt($task.Count - 1)
