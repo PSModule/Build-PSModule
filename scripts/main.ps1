@@ -508,7 +508,7 @@ foreach ($moduleFolder in $moduleFolders) {
 
     Write-Output "::group::[$($task -join '] - [')] - Generate help"
     Write-Verbose "[$($task -join '] - [')] - [Help] - Importing module"
-    Import-Module $moduleOutputFolderPath
+    Import-Module $moduleName #$moduleOutputFolderPath
 
     Write-Verbose "[$($task -join '] - [')] - [Help] - List loaded modules"
     $availableModules = Get-Module -ListAvailable -Refresh -Verbose:$false
@@ -542,11 +542,6 @@ foreach ($moduleFolder in $moduleFolders) {
     # RE-create the moduleName.psm1 file
     # concat all the files, and add Export-ModuleMembers at the end with modules.
     $rootModuleFile = New-Item -Path $moduleOutputFolderPath -Name $manifest.RootModule -Force
-
-    Write-Verbose "$rootModuleFile" -Verbose
-    Write-Verbose "$rootModuleFile" -Verbose
-    Write-Verbose "$rootModuleFile" -Verbose
-    Write-Verbose "$rootModuleFile" -Verbose
 
     # Add content to the root module file in the following order:
     # 1. Load data files from Data folder
