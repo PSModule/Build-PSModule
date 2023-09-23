@@ -53,11 +53,7 @@ function Resolve-ModuleDependencies {
         $installParams.Verbose = $false
         $installParams.Force = $true
 
-        Write-Verbose "[$action] - [$($installParams.Name)]"
         Write-Verbose "[$action] - [$($installParams.Name)] - Installing module"
-        Write-Verbose "[$action] - [$($installParams.Name)] - [$($installParams.MinimumVersion)]"
-        Write-Verbose "[$action] - [$($installParams.Name)] - [$($installParams.RequiredVersion)]]"
-
         Install-Module @installParams
         Write-Verbose "[$action] - [$($installParams.Name)] - Done"
     }
@@ -556,7 +552,8 @@ foreach ($moduleFolder in $moduleFolders) {
     # 6  *.ps1 on module root
     # 7. Export-ModuleMember
 
-    Add-Content -Path $rootModuleFile.FullPath -Value @'
+
+    $test = @'
 [Cmdletbinding()]
 param()
 
@@ -577,6 +574,7 @@ Write-Verbose "[$scriptName] - [data] - Done"
 #endregion - Data import
 
 '@
+    Add-Content -Path $rootModuleFile.FullPath -Value $test
 
     $folderProcessingOrder = @(
         'init',
