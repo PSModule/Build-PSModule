@@ -615,14 +615,12 @@ Write-Verbose "[`$scriptName] - [$relativeFilePath] - Importing"
 
 Write-Verbose "[`$scriptName] - [$relativeFilePath] - Done"
 #endregion - From $relativeFilePath
-
 "@
         }
         Add-Content -Path $RootModuleFilePath -Value @"
-
+        
 Write-Verbose "[`$scriptName] - [$relativeFolderPath] - Done"
 #endregion - From $relativeFolderPath
-
 "@
     }
 
