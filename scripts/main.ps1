@@ -631,7 +631,7 @@ Write-Verbose "[`$scriptName] - [$relativeFolderPath] - Done"
         Add-ContentFromItem -Path $subFolder.FullName -RootModuleFilePath $rootModuleFile.FullName -RootPath $moduleOutputFolderPath
     }
 
-    $files = $Path | Get-ChildItem -File -Force -Filter '*.ps1'
+    $files = $moduleOutputFolderPath | Get-ChildItem -File -Force -Filter '*.ps1'
     foreach ($file in $files) {
         $relativePath = $file.FullName.Replace($moduleOutputFolderPath, '').TrimStart($pathSeparator)
         Add-Content -Path $rootModuleFile.FullName -Value @"
