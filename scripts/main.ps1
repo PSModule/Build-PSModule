@@ -543,6 +543,11 @@ foreach ($moduleFolder in $moduleFolders) {
     # concat all the files, and add Export-ModuleMembers at the end with modules.
     $rootModuleFile = New-Item -Path $moduleOutputFolderPath -Name $manifest.RootModule -Force
 
+    Write-Verbose "$rootModuleFile" -Verbose
+    Write-Verbose "$rootModuleFile" -Verbose
+    Write-Verbose "$rootModuleFile" -Verbose
+    Write-Verbose "$rootModuleFile" -Verbose
+
     # Add content to the root module file in the following order:
     # 1. Load data files from Data folder
     # 2. Init
