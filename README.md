@@ -36,13 +36,14 @@ Not Supported:
 ├─ scripts/
 ├─ src/
 │  ├─ ModuleName/
-│  │  ├─ assembly/                -> loaded during import via RequiredAssemblies
-│  │  │  └─ <dlls>
-│  │  ├─ classes/
-│  │  │  ├─ <ClassName>.ps1       -> loaded during import via ScritsToProcess
-│  │  │  └─ <ClassName>.ps1xml    -> loaded during import via TypesToProcess or FormatsToProcess?
-│  │  ├─ formats/
-│  │  ├─ <lang>/
+│  │  ├─ assembly/                      -> All .dll files are collected to RequiredAssemblies
+│  │  │  └─ <dlls>                      -> loaded during import via RequiredAssemblies
+│  │  ├─ classes/                       -> All .ps1 files are collected to ScriptsToProcess
+│  │  │  ├─ <ClassName>.ps1             -> loaded during import via ScritsToProcess
+│  │  │  ├─ <ClassName>.Format.ps1xml   -> loaded during import via FormatsToProcess (collected based on *.Formats.ps1xml files in the root of the folder)
+│  │  │  └─ <ClassName>.Type.ps1xml     -> loaded during import via TypesToProcess (collected based on *.Types.ps1xml files in the root of the folder)
+│  │  ├─ en/                            
+│  │  |  ├─ en-US/                      -> Search here first for OS = en-US, then parent, en. Get-Help and platyPS reads this.
 │  │  │  └─ about_<ComponentName>.help.txt
 │  │  ├─ private/
 │  │  ├─ public/
