@@ -243,6 +243,7 @@ foreach ($moduleFolder in $moduleFolders) {
     $manifest.NestedModules = $nestedModules.count -eq 0 ? @() : @($nestedModules)
     $manifest.NestedModules | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [NestedModules] - [$_]" }
 
+    Write-Verbose "[$($task -join '] - [')] - [ScriptsToProcess]"
     $allScriptsToProcess = @('scripts', 'classes') | ForEach-Object {
         Write-Verbose "[$($task -join '] - [')] - [Processing $_]"
         $scriptsFolderPath = Join-Path $moduleFolder $_
@@ -255,16 +256,14 @@ foreach ($moduleFolder in $moduleFolders) {
     $manifest.ScriptsToProcess | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [ScriptsToProcess] - [$_]" }
 
     Write-Verbose "[$($task -join '] - [')] - [TypesToProcess]"
-    $typesToProcessFolderPath = Join-Path $moduleFolder 'types'
-    $typesToProcess = Get-ChildItem -Path $typesToProcessFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1xml' |
+    $typesToProcess = Get-ChildItem -Path $moduleFolder -Recurse -File -ErrorAction SilentlyContinue -Include '*.Types.ps1xml' |
         Select-Object -ExpandProperty FullName |
         ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
     $manifest.TypesToProcess = $typesToProcess.count -eq 0 ? @() : @($typesToProcess)
     $manifest.TypesToProcess | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [TypesToProcess] - [$_]" }
 
     Write-Verbose "[$($task -join '] - [')] - [FormatsToProcess]"
-    $formatsToProcessFolderPath = Join-Path $moduleFolder 'formats'
-    $formatsToProcess = Get-ChildItem -Path $formatsToProcessFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1xml' |
+    $formatsToProcess = Get-ChildItem -Path $moduleFolder -Recurse -File -ErrorAction SilentlyContinue -Include '*.Format.ps1xml' |
         Select-Object -ExpandProperty FullName |
         ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
     $manifest.FormatsToProcess = $formatsToProcess.count -eq 0 ? @() : @($formatsToProcess)
