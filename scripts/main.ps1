@@ -243,12 +243,15 @@ foreach ($moduleFolder in $moduleFolders) {
     $manifest.NestedModules = $nestedModules.count -eq 0 ? @() : @($nestedModules)
     $manifest.NestedModules | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [NestedModules] - [$_]" }
 
-    Write-Verbose "[$($task -join '] - [')] - [ScriptsToProcess]"
-    $scriptsToProcessFolderPath = Join-Path $moduleFolder 'scripts'
-    $scriptsToProcess = Get-ChildItem -Path $scriptsToProcessFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1' |
-        Select-Object -ExpandProperty FullName |
-        ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
-    $manifest.ScriptsToProcess = $scriptsToProcess.count -eq 0 ? @() : @($scriptsToProcess)
+    $allScriptsToProcess = @('scripts', 'classes') | ForEach-Object {
+        Write-Verbose "[$($task -join '] - [')] - [Processing $_]"
+        $scriptsFolderPath = Join-Path $moduleFolder $_
+        $scriptsToProcess = Get-ChildItem -Path $scriptsFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1' |
+            Select-Object -ExpandProperty FullName |
+            ForEach-Object { $_.Replace($moduleFolderPath, '').TrimStart($pathSeparator) }
+        $scriptsToProcess
+    }
+    $manifest.ScriptsToProcess = $allScriptsToProcess.count -eq 0 ? @() : @($allScriptsToProcess)
     $manifest.ScriptsToProcess | ForEach-Object { Write-Verbose "[$($task -join '] - [')] - [ScriptsToProcess] - [$_]" }
 
     Write-Verbose "[$($task -join '] - [')] - [TypesToProcess]"
