@@ -30,14 +30,20 @@ Not Supported:
 ├─ docs/
 ├─ icons/
 ├─ images/
+├─ outputs/
+|  ├─ docs/
+|  └─ modules/
 ├─ scripts/
 ├─ src/
 │  ├─ ModuleName/
-│  │  ├─ assembly/
+│  │  ├─ assembly/                -> loaded during import via RequiredAssemblies
 │  │  │  └─ <dlls>
 │  │  ├─ classes/
-│  │  │  └─ <ClassName>.ps1
+│  │  │  ├─ <ClassName>.ps1       -> loaded during import via ScritsToProcess
+│  │  │  └─ <ClassName>.ps1xml    -> loaded during import via TypesToProcess or FormatsToProcess?
 │  │  ├─ formats/
+│  │  ├─ <lang>/
+│  │  │  └─ about_<ComponentName>.help.txt
 │  │  ├─ private/
 │  │  ├─ public/
 │  │  ├─ scripts/
@@ -56,9 +62,40 @@ Not Supported:
 
 ## How the definition file is used:
 
+- The module manifest is regenerated every time the module is built. The generation is based on information from the a powershell data file (with the same properties as the menifest file), and the source files.
+- To test the module manifest, Test-ModuleManifest
+
+
+Could eval to calculate the module like this:
+```powershell
+$content = @'
+@{
+    RootModule    = $(Get-ChildItem -Path $PSScriptRoot1 -File | Where-Object { $_.BaseName -like $_.Directory.BaseName -and ($_.Extension -in '.psm1', '.ps1', '.psd1', '.dll', '.cdxml', '.xaml') } | Select-Object -ExpandProperty Name )
+
+    PrivateData = @{
+
+        PSData = @{
+
+            # Tags applied to this module. These help with module discovery in online galleries.
+            Tags = @( 'AzureAutomation' )
+        }
+    }
+}
+'@
+
+Out-File -FilePath .\test.psd1 -InputObject $content -Encoding utf8 -Force
+
+# - During build:
+$ManifestData = Invoke-Expression -Command (Get-Content -Path .\test.psd1 -Raw)
+$PSData = $ManifestData.PrivateData.PSData
+$ManifestData.Remove('PrivateData')
+New-ModuleManifest @ManifestData @PSData -Path .\test2.psd1
+```
+
+
 ```powershell
 @{
-    RootModule             = 'Module1.psm1' # Get from manifest file, else use module manifest name and the .psm1 extension.
+    RootModule             = 'Module1.psm1' # Get files from root of folder wher name is same as the folder and file extension is .psm1, .ps1, .psd1, .dll, .cdxml, .xaml. Error if there are multiple files that meet the criteria.
     ModuleVersion          = '0.0.1' # Set from during a release, uses GitVersion and Git Releases at the same time.
     CompatiblePSEditions   = @() # Get from source files, REQUIRES -PSEdition <PSEdition-Name>, null if not provided https://learn.microsoft.com/en-us/powershell/module/Microsoft.PowerShell.Core/About/about_PowerShell_Editions
     GUID                   = <GUID> # Updated during build -> always created uniquely using New-ModuleManifest
@@ -72,12 +109,12 @@ Not Supported:
     DotNetFrameworkVersion = '' # Get from manifest file, null if not provided
     ClrVersion             = '' # Get from manifest file, null if not provided
     ProcessorArchitecture  = '' # Get from manifest file, null if not provided
-    RequiredModules        = @() # Get from source files, REQUIRES -Modules <Module-Name> | <Hashtable> -> Need to be installed and loaded on build time.
+    RequiredModules        = @() # Get from source files, REQUIRES -Modules <Module-Name> | <Hashtable> -> Need to be installed and loaded on build time. Will be installed in global session state on installtion.
     #RequiredAssemblies    = @() # Get from manifest file, null if not provided
-    ScriptsToProcess       = @() # Get from moduleRoot\scripts\*.ps1 ordered by name
-    TypesToProcess         = @() # Get from moduleRoot\types\*.ps1xml
-    FormatsToProcess       = @() # Get from moduleRoot\formats\*.ps1xml
-    NestedModules          = @() # Get from moduleRoot\modules\*.psd1 - Could be used to load private modules/files
+    ScriptsToProcess       = @() # Get from moduleRoot\scripts\*.ps1 + moduleRoot\classes*.ps1 ordered by name. These are loaded to the caller session (parent of module session)
+    TypesToProcess         = @() # Get from moduleRoot\**Type.ps1xml
+    FormatsToProcess       = @() # Get from moduleRoot\**.Format.ps1xml
+    NestedModules          = @() # Get from moduleRoot\modules\*.psd1 - Could be used to load modules/files into the module session. Not exported to caller session.
     FunctionsToExport      = @() # Get from moduleRoot\public\*.ps1
     CmdletsToExport        = @() # Get from moduleRoot\public\*.ps1
     VariablesToExport      = '*' # Get from moduleRoot\public\*.ps1
@@ -108,6 +145,10 @@ Not Supported:
 }
 ```
 
+| Name | Type | Mandatory | Default | Accepts * | Description | Source | Notes | Example |
+| ---- | ---- | --------- | ------- | --------- | ----------- | ------ | ----- | ------- |
+| RootModule | String | Yes | '' | X | The name of the module's root or main module. Only exported members are loaded to caller scope, rest is script scope. | Manifest | | 'Module1.psm1' |
+
 
 ## Sources
 PowerShell Gallery:
@@ -129,10 +170,10 @@ Requires:
 - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_requires?view=powershell-7.3
 
 Shields:
-https://shields.io/badges -> https://img.shields.io/powershellgallery/p/:packageName.svg
+- https://shields.io/badges -> https://img.shields.io/powershellgallery/p/:packageName.svg
 
 Define quality:
-https://github.com/PowerShell/DscResources/blob/master/HighQualityModuleGuidelines.md#creating-a-high-quality-dsc-resource-module
+- https://github.com/PowerShell/DscResources/blob/master/HighQualityModuleGuidelines.md#creating-a-high-quality-dsc-resource-module
 
 
 
