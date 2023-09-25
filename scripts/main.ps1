@@ -578,14 +578,12 @@ Write-Verbose "[$scriptName] - [data] - Done"
 
 '@
 
-
     $folderProcessingOrder = @(
         'init',
         'classes',
         'private',
         'public'
     )
-
     function Add-ContentFromItem {
         param(
             [string] $Path,
@@ -624,6 +622,7 @@ Write-Verbose "[`$scriptName] - [$relativeFilePath] - Done"
 
 Write-Verbose "[`$scriptName] - [$relativeFolderPath] - Done"
 #endregion - From $relativeFolderPath
+
 "@
     }
 
