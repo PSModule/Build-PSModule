@@ -281,7 +281,7 @@ foreach ($moduleFolder in $moduleFolders) {
     $publicFolderPath = Join-Path $moduleFolder 'public'
     $functionsToExport = Get-ChildItem -Path $publicFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1' | ForEach-Object {
         $fileContent = Get-Content -Path $_.FullName -Raw
-        $containsFunction = $fileContent -match 'function '
+        $containsFunction = ($fileContent -match 'function ') -or ($fileContent -match 'filter ')
         Write-Verbose "[$($task -join '] - [')] - [FunctionsToExport] - [$($_.BaseName)] - [$containsFunction]"
         $containsFunction ? $_.BaseName : $null
     }
