@@ -21,6 +21,11 @@ runs:
       shell: pwsh
       run: |
         # Build-Module
+
+        Write-Output '::group::[Build-Module] - Initializing...'
+        Install-Module -Name PSModule.FX -Force -Verbose
+        Write-Output '::endgroup::'
+
         Write-Output '::group::[Build-Module] - Initializing...'
         Write-Output '-------------------------------------------'
         Write-Output 'Action inputs:'
@@ -31,6 +36,6 @@ runs:
         $params.GetEnumerator() | Sort-Object -Property Name
 
         Write-Output '-------------------------------------------'
-        . "$env:GITHUB_ACTION_PATH\scripts\main.ps1" @params
+        Build-PSModule @params
         Write-Output '-------------------------------------------'
         Write-Output '::endgroup::'
