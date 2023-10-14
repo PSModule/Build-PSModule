@@ -1,4 +1,4 @@
-name: 'Build-Module'
+name: 'Build-PSModule'
 description: 'Build a PowerShell module to the PowerShell Gallery'
 branding:
   icon: activity
@@ -17,16 +17,12 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Run Build-Module
+    - name: Run Build-PSModule
       shell: pwsh
       run: |
-        # Build-Module
+        # Build-PSModule
 
-        Write-Output '::group::[Build-Module] - Initializing...'
-        Install-Module -Name PSModule.FX -Force -Verbose
-        Write-Output '::endgroup::'
-
-        Write-Output '::group::[Build-Module] - Initializing...'
+        Write-Output '::group::[Build-PSModule] - Initializing...'
         Write-Output '-------------------------------------------'
         Write-Output 'Action inputs:'
         $params = @{
