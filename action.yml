@@ -30,8 +30,6 @@ runs:
             WhatIf  = [System.Convert]::ToBoolean('${{ inputs.WhatIf }}')
         }
         $params.GetEnumerator() | Sort-Object -Property Name
-
-        Write-Output '-------------------------------------------'
-        Build-PSModule @params
-        Write-Output '-------------------------------------------'
         Write-Output '::endgroup::'
+
+        Build-PSModule @params
