@@ -8,7 +8,7 @@ inputs:
   Verbose:
     description: 'Enable verbose output.'
     required: false
-    default: 'false'
+    default: 'true'
   WhatIf:
     description: 'Run in WhatIf mode.'
     required: false
