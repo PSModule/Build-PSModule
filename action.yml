@@ -22,7 +22,7 @@ runs:
       run: |
         # Build-PSModule
 
-        Write-Output '::group::[Build-PSModule] - Initializing...'
+        Write-Output '::group::Initializing...'
         Write-Output '-------------------------------------------'
         Write-Output 'Action inputs:'
         $params = @{
