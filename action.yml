@@ -5,6 +5,10 @@ branding:
   color: blue
 
 inputs:
+  Name:
+    description: 'The name of the module to build.'
+    required: false
+    default: '*'
   Verbose:
     description: 'Enable verbose output.'
     required: false
@@ -26,6 +30,7 @@ runs:
         Write-Output '-------------------------------------------'
         Write-Output 'Action inputs:'
         $params = @{
+            Name    = '${{ inputs.Name }}'
             Verbose = [System.Convert]::ToBoolean('${{ inputs.Verbose }}')
             WhatIf  = [System.Convert]::ToBoolean('${{ inputs.WhatIf }}')
         }
