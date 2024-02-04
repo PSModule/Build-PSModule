@@ -275,7 +275,7 @@ Best practice:
     - Move the loop into the function instead (call it only once).
   - Avoid calling functions that support append, with append.
     - Instead gather all things that must be set, and then call the function once to set them all.
-  - Dont use '*' in *ToExport properties for a module manifest.
+  - Dont use `*` in `...ToExport` properties for a module manifest.
     - Instead use explicit names. Best approach is to use a build step to generate the list of functions, cmdlets, variables and aliases to export.
     - If nothing is defined, then the default should be to export an empty array (`@()`).
   - Avoid CDXML
