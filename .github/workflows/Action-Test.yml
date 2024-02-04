@@ -1,0 +1,20 @@
+name: Verify Action
+
+on:
+  workflow_call:
+  push:
+    paths:
+      - action.yml
+      - .github/workflows/Action-Test.yml
+      - scripts/**
+
+jobs:
+  DefaultTest:
+    name: Test Action - [Default]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Test local action
+        uses: ./
