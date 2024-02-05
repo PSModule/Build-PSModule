@@ -19,7 +19,7 @@ Not Supported:
 - Help in different languages
 - [Updateable help](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_updatable_help?view=powershell-7.3)
 
-## Repo structure
+## Repository structure
 
 ```txt
 . <- repo root
@@ -42,7 +42,7 @@ Not Supported:
 │  │  │  ├─ <ClassName>.ps1             -> loaded during import via ScritsToProcess
 │  │  │  ├─ <ClassName>.Format.ps1xml   -> loaded during import via FormatsToProcess (collected based on *.Formats.ps1xml files in the root of the folder)
 │  │  │  └─ <ClassName>.Type.ps1xml     -> loaded during import via TypesToProcess (collected based on *.Types.ps1xml files in the root of the folder)
-│  │  ├─ en/                            
+│  │  ├─ en/
 │  │  |  ├─ en-US/                      -> Search here first for OS = en-US, then parent, en. Get-Help and platyPS reads this.
 │  │  │  └─ about_<ComponentName>.help.txt
 │  │  ├─ private/
@@ -61,7 +61,7 @@ Not Supported:
 ```
 
 
-## How the definition file is used:
+## How the definition file is used
 
 - The module manifest is regenerated every time the module is built. The generation is based on information from the a powershell data file (with the same properties as the menifest file), and the source files.
 - To test the module manifest, Test-ModuleManifest
@@ -123,11 +123,11 @@ New-ModuleManifest @ManifestData @PSData -Path .\test2.psd1
     DscResourcesToExport   = @() # Get from moduleRoot\dscResources\*.psm1
     ModuleList             = @() # Get from listing all .\*.psm1 files - Informational only
     FileList               = @() # Get from listing all .\* files - Informational only
-    PrivateData            = @{ https://learn.microsoft.com/en-us/powershell/gallery/concepts/package-manifest-affecting-ui?view=powershellget-2.x
+    PrivateData            = @{ <https://learn.microsoft.com/en-us/powershell/gallery/concepts/package-manifest-affecting-ui?view=powershellget-2.x>
         PSData = @{
             Tags                       = @() #Special tag: AzureAutomationNotSupported
             LicenseUri                 = '' # Generate public link to .\LICENSE
-            ProjectUri                 = '' # Generate public link to GitHub Repo
+            ProjectUri                 = '' # Generate public link to GitHub Repository
             IconUri                    = '' # Get from .\icons\*.png
             ReleaseNotes               = '' # Update during release -> PS message to main?
             Prerelease                 = '' # Update during release -> 'prerelease tag' Supports SemVer 1.0.0 https://learn.microsoft.com/en-us/powershell/gallery/concepts/module-prerelease-support?view=powershellget-2.x
@@ -153,28 +153,28 @@ New-ModuleManifest @ManifestData @PSData -Path .\test2.psd1
 
 ## Sources
 PowerShell Gallery:
-- https://learn.microsoft.com/en-us/powershell/gallery/overview?view=powershellget-2.x
-- https://learn.microsoft.com/en-us/powershell/gallery/concepts/publishing-guidelines?view=powershellget-2.x
+- <https://learn.microsoft.com/en-us/powershell/gallery/overview?view=powershellget-2.x>
+- <https://learn.microsoft.com/en-us/powershell/gallery/concepts/publishing-guidelines?view=powershellget-2.x>
 
 Modules:
-- https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_modules?view=powershell-7.3
-- https://learn.microsoft.com/en-us/powershell/scripting/developer/module/understanding-a-windows-powershell-module?view=powershell-7.3
-- https://learn.microsoft.com/en-us/powershell/scripting/developer/module/writing-a-windows-powershell-module?view=powershell-7.3
+- <https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_modules?view=powershell-7.3>
+- <https://learn.microsoft.com/en-us/powershell/scripting/developer/module/understanding-a-windows-powershell-module?view=powershell-7.3>
+- <https://learn.microsoft.com/en-us/powershell/scripting/developer/module/writing-a-windows-powershell-module?view=powershell-7.3>
 
 Module manifest:
-- https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_module_manifests?view=powershell-7.3
-- https://learn.microsoft.com/en-us/powershell/scripting/developer/module/how-to-write-a-powershell-module-manifest?view=powershell-7.3
-- https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/new-modulemanifest?view=powershell-7.3
-- https://learn.microsoft.com/en-us/powershell/gallery/concepts/package-manifest-affecting-ui?view=powershellget-2.x#powershell-gallery-feature-elements-controlled-by-the-module-manifest
+- <https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_module_manifests?view=powershell-7.3>
+- <https://learn.microsoft.com/en-us/powershell/scripting/developer/module/how-to-write-a-powershell-module-manifest?view=powershell-7.3>
+- <https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/new-modulemanifest?view=powershell-7.3>
+- <https://learn.microsoft.com/en-us/powershell/gallery/concepts/package-manifest-affecting-ui?view=powershellget-2.x#powershell-gallery-feature-elements-controlled-by-the-module-manifest>
 
 Requires:
-- https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_requires?view=powershell-7.3
+- <https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_requires?view=powershell-7.3>
 
 Shields:
-- https://shields.io/badges -> https://img.shields.io/powershellgallery/p/:packageName.svg
+- <https://shields.io/badges> -> <https://img.shields.io/powershellgallery/p/:packageName.svg>
 
 Define quality:
-- https://github.com/PowerShell/DscResources/blob/master/HighQualityModuleGuidelines.md#creating-a-high-quality-dsc-resource-module
+- <https://github.com/PowerShell/DscResources/blob/master/HighQualityModuleGuidelines.md#creating-a-high-quality-dsc-resource-module>
 
 
 
@@ -275,7 +275,7 @@ Best practice:
     - Move the loop into the function instead (call it only once).
   - Avoid calling functions that support append, with append.
     - Instead gather all things that must be set, and then call the function once to set them all.
-  - Dont use '*' in *ToExport properties for a module manifest.
+  - Dont use `*` in `...ToExport` properties for a module manifest.
     - Instead use explicit names. Best approach is to use a build step to generate the list of functions, cmdlets, variables and aliases to export.
     - If nothing is defined, then the default should be to export an empty array (`@()`).
   - Avoid CDXML

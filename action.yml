@@ -1,25 +1,25 @@
-name: 'Build-PSModule'
-description: 'Build a PowerShell module to the PowerShell Gallery'
+name: Build-PSModule
+description: Build a PowerShell module to the PowerShell Gallery
 branding:
   icon: activity
   color: blue
 
 inputs:
   Name:
-    description: 'The name of the module to build.'
+    description: The name of the module to build.
     required: false
     default: '*'
   Verbose:
-    description: 'Enable verbose output.'
+    description: Enable verbose output.
     required: false
     default: 'true'
   WhatIf:
-    description: 'Run in WhatIf mode.'
+    description: Run in WhatIf mode.
     required: false
     default: 'false'
 
 runs:
-  using: 'composite'
+  using: composite
   steps:
     - name: Run Build-PSModule
       shell: pwsh
