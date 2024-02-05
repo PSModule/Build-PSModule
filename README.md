@@ -19,7 +19,7 @@ Not Supported:
 - Help in different languages
 - [Updateable help](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_updatable_help?view=powershell-7.3)
 
-## Repo structure
+## Repository structure
 
 ```txt
 . <- repo root
@@ -127,7 +127,7 @@ New-ModuleManifest @ManifestData @PSData -Path .\test2.psd1
         PSData = @{
             Tags                       = @() #Special tag: AzureAutomationNotSupported
             LicenseUri                 = '' # Generate public link to .\LICENSE
-            ProjectUri                 = '' # Generate public link to GitHub Repo
+            ProjectUri                 = '' # Generate public link to GitHub Repository
             IconUri                    = '' # Get from .\icons\*.png
             ReleaseNotes               = '' # Update during release -> PS message to main?
             Prerelease                 = '' # Update during release -> 'prerelease tag' Supports SemVer 1.0.0 https://learn.microsoft.com/en-us/powershell/gallery/concepts/module-prerelease-support?view=powershellget-2.x
