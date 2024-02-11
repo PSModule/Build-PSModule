@@ -1,0 +1,40 @@
+name: Build-PSModule
+description: Build a PowerShell module to the PowerShell Gallery
+branding:
+  icon: activity
+  color: blue
+
+inputs:
+  Name:
+    description: The name of the module to build.
+    required: false
+    default: '*'
+  Verbose:
+    description: Enable verbose output.
+    required: false
+    default: 'true'
+  WhatIf:
+    description: Run in WhatIf mode.
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Run Build-PSModule
+      shell: pwsh
+      run: |
+        # Build-PSModule
+
+        Write-Host '::group::Initializing...'
+        Write-Output '-------------------------------------------'
+        Write-Output 'Action inputs:'
+        $params = @{
+            Name    = '${{ inputs.Name }}'
+            Verbose = [System.Convert]::ToBoolean('${{ inputs.Verbose }}')
+            WhatIf  = [System.Convert]::ToBoolean('${{ inputs.WhatIf }}')
+        }
+        $params.GetEnumerator() | Sort-Object -Property Name
+        Write-Host '::endgroup::'
+
+        Build-PSModule @params
