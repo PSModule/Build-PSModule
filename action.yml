@@ -5,10 +5,6 @@ branding:
   color: blue
 
 inputs:
-  Name:
-    description: The name of the module to build.
-    required: false
-    default: '*'
   Verbose:
     description: Enable verbose output.
     required: false
@@ -24,21 +20,6 @@ runs:
     - name: Run Build-PSModule
       shell: pwsh
       env:
-        Name: ${{ inputs.Name }}
         Verbose: ${{ inputs.Verbose }}
         WhatIf: ${{ inputs.WhatIf }}
-      run: |
-        # Build-PSModule
-
-        Write-Host '::group::Initializing...'
-        Write-Output '-------------------------------------------'
-        Write-Output 'Action inputs:'
-        $params = @{
-            Name    = $env:Name
-            Verbose = $env:Verbose -eq 'true'
-            WhatIf  = $env:WhatIf -eq 'true'
-        }
-        $params.GetEnumerator() | Sort-Object -Property Name
-        Write-Host '::endgroup::'
-
-        Build-PSModule @params
+      run: . "$env:GITHUB_ACTION_PATH\scripts\main.ps1"
