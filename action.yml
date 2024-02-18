@@ -23,6 +23,10 @@ runs:
   steps:
     - name: Run Build-PSModule
       shell: pwsh
+      env:
+        Name: ${{ inputs.Name }}
+        Verbose: ${{ inputs.Verbose }}
+        WhatIf: ${{ inputs.WhatIf }}
       run: |
         # Build-PSModule
 
@@ -30,9 +34,9 @@ runs:
         Write-Output '-------------------------------------------'
         Write-Output 'Action inputs:'
         $params = @{
-            Name    = '${{ inputs.Name }}'
-            Verbose = [System.Convert]::ToBoolean('${{ inputs.Verbose }}')
-            WhatIf  = [System.Convert]::ToBoolean('${{ inputs.WhatIf }}')
+            Name    = $env:Name
+            Verbose = $env:Verbose -eq 'true'
+            WhatIf  = $env:WhatIf -eq 'true'
         }
         $params.GetEnumerator() | Sort-Object -Property Name
         Write-Host '::endgroup::'
