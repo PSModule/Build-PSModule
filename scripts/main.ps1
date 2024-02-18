@@ -1,6 +1,7 @@
 ﻿Write-Output '::group::Initializing...'
 Write-Output '-------------------------------------------'
 Write-Output 'Action inputs:'
+
 $params = @{
     Name       = $env:Name
     Path       = $env:Path
@@ -10,5 +11,8 @@ $params = @{
 }
 $params.GetEnumerator() | Sort-Object -Property Name
 Write-Output '::endgroup::'
+
+$PSDefaultParameterValues.Add('Install-PSResource:TrustRepository', $true)
+$PSDefaultParameterValues.Add('Install-PSResource:Repository', 'PSGallery')
 
 Build-PSModule @params
