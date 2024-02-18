@@ -12,7 +12,7 @@ $params = @{
 $params.GetEnumerator() | Sort-Object -Property Name
 Write-Output '::endgroup::'
 
-$PSDefaultParameterValues.Add('Install-PSResource:TrustRepository', $true)
-$PSDefaultParameterValues.Add('Install-PSResource:Repository', 'PSGallery')
+#HACK
+Install-PSResource -Name Pester, PSScriptAnalyzer, platyPS, PowerShellGet, PackageManagement -Version * -TrustRepository
 
 Build-PSModule @params
