@@ -3,11 +3,13 @@
 Action that is used to build a PowerShell module
 
 ## Supported module types
+
 - Core PS modules
 - Script module type
 - Manifest module type
 
 Not Supported:
+
 - Exclusive Desktop modules
 - Binary modules
 - DSC resources
