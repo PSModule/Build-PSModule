@@ -30,7 +30,7 @@ jobs:
       - name: Action-Test
         uses: ./
         env:
-          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
         with:
           Name: PSModuleTest
           APIKey: ${{ secrets.APIKEY }}
