@@ -5,6 +5,18 @@ branding:
   color: blue
 
 inputs:
+  Name:
+    description: 'Name of the module to process.'
+    required: false
+    default: '*'
+  Path:
+    description: 'Path to the folder where the modules are located.'
+    required: false
+    default: src
+  OutputPath:
+    description: 'Path to the folder where the built modules are outputted.'
+    required: false
+    default: outputs
   Verbose:
     description: Enable verbose output.
     required: false
@@ -20,6 +32,9 @@ runs:
     - name: Run Build-PSModule
       shell: pwsh
       env:
+        Name: ${{ inputs.Name }}
+        Path: ${{ inputs.Path }}
+        OutputPath: ${{ inputs.OutputPath }}
         Verbose: ${{ inputs.Verbose }}
         WhatIf: ${{ inputs.WhatIf }}
       run: . "$env:GITHUB_ACTION_PATH\scripts\main.ps1"
