@@ -123,7 +123,7 @@ Write-Verbose "[`$scriptName] - [$relativePath] - Done"
 
     Start-LogGroup "[$moduleName] - Build root module - Format"
     $AllContent = Get-Content -Path $rootModuleFile.FullName -Raw
-    $settings = (Join-Path -Path $PSScriptRoot -ChildPath 'tests' 'PSScriptAnalyzer' 'PSScriptAnalyzer.Tests.psd1')
+    $settings = (Join-Path -Path $PSScriptRoot 'PSScriptAnalyzer.Tests.psd1')
     Invoke-Formatter -ScriptDefinition $AllContent -Settings $settings |
         Out-File -FilePath $rootModuleFile.FullName -Encoding utf8BOM -Force
     Stop-LogGroup
