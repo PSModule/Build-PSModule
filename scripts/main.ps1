@@ -1,18 +1,20 @@
-﻿Write-Output '::group::Initializing...'
-Write-Output '-------------------------------------------'
-Write-Output 'Action inputs:'
+﻿Write-Output '##[group]Loading helper scripts'
+Get-ChildItem -Path (Join-Path $env:GITHUB_ACTION_PATH 'scripts' 'helpers') -Filter '*.ps1' -Recurse | ForEach-Object {
+    Write-Host "[$($_.FullName)]"
+    . $_.FullName
+}
+Write-Output '##[endgroup]'
+
+$moduleName = [string]::IsNullOrEmpty($env:Name) ? $env:GITHUB_REPOSITORY -replace '.+/', '' : $env:Name
+$codeToBuild = Join-Path $env:GITHUB_WORKSPACE $env:Path
+$outputPath = Join-Path $env:GITHUB_WORKSPACE $env:OutputPath
+if (-not (Test-Path -Path $codeToBuild)) {
+    throw "Module path [$codeToBuild] does not exist."
+}
 
 $params = @{
-    Name       = $env:Name
-    Path       = $env:Path
-    OutputPath = $env:OutputPath
-    Verbose    = $env:Verbose -eq 'true'
-    WhatIf     = $env:WhatIf -eq 'true'
+    Name       = $moduleName
+    Path       = $codeToBuild
+    OutputPath = $outputPath
 }
-$params.GetEnumerator() | Sort-Object -Property Name
-Write-Output '::endgroup::'
-
-#HACK
-Install-PSResource -Name Pester, PSScriptAnalyzer, platyPS, PowerShellGet, PackageManagement -Version * -TrustRepository
-
 Build-PSModule @params

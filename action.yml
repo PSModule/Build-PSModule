@@ -6,25 +6,16 @@ branding:
 
 inputs:
   Name:
-    description: 'Name of the module to process.'
+    description: Name of the module to process.
     required: false
-    default: '*'
   Path:
-    description: 'Path to the folder where the modules are located.'
+    description: Path to the folder where the modules are located.
     required: false
     default: src
   OutputPath:
-    description: 'Path to the folder where the built modules are outputted.'
+    description: Path to the folder where the built modules are outputted.
     required: false
     default: outputs
-  Verbose:
-    description: Enable verbose output.
-    required: false
-    default: 'true'
-  WhatIf:
-    description: Run in WhatIf mode.
-    required: false
-    default: 'false'
 
 runs:
   using: composite
@@ -35,6 +26,4 @@ runs:
         Name: ${{ inputs.Name }}
         Path: ${{ inputs.Path }}
         OutputPath: ${{ inputs.OutputPath }}
-        Verbose: ${{ inputs.Verbose }}
-        WhatIf: ${{ inputs.WhatIf }}
       run: . "$env:GITHUB_ACTION_PATH\scripts\main.ps1"
