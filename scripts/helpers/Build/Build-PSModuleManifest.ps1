@@ -322,7 +322,7 @@
 
     Start-LogGroup "[$moduleName] - Build manifest file - Format"
     $manifestContent = Get-Content -Path $outputManifestPath -Raw
-    $settings = (Join-Path -Path $PSScriptRoot -ChildPath 'tests' 'PSScriptAnalyzer' 'PSScriptAnalyzer.Tests.psd1')
+    $settings = (Join-Path -Path $PSScriptRoot 'PSScriptAnalyzer.Tests.psd1')
     Invoke-Formatter -ScriptDefinition $manifestContent -Settings $settings |
         Out-File -FilePath $outputManifestPath -Encoding utf8BOM -Force
     Stop-LogGroup
