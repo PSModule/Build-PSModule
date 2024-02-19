@@ -18,3 +18,5 @@ jobs:
 
       - name: Action-Test
         uses: ./
+        with:
+          Name: PSModuleTest
