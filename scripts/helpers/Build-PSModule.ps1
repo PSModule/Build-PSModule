@@ -39,6 +39,8 @@
     #DECISION: The module that is build is stored under the output folder in a folder with the same name as the module.
     #DECISION: A new module manifest file is created every time to get a new GUID, so that the specific version of the module can be imported.
 
+    Install-Dependency -Name platyPS
+
     $modulesOutputFolderPath = Join-Path -Path $OutputPath 'modules'
     Write-Verbose "Creating module output folder [$modulesOutputFolderPath]"
     $modulesOutputFolder = New-Item -Path $modulesOutputFolderPath -ItemType Directory -Force
