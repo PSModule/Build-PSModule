@@ -60,7 +60,7 @@
     Build-PSModuleRootModule -SourceFolderPath $moduleSourceFolder -OutputFolderPath $moduleOutputFolder
     Build-PSModuleManifest -SourceFolderPath $moduleSourceFolder -OutputFolderPath $moduleOutputFolder
 
-    Write-Verbose ((Get-ChildItem -Path $moduleSourceFolderPath -Recurse).FullName | Sort-Object) -Verbose
+    Write-Verbose ((Get-ChildItem -Path $moduleSourceFolderPath -Recurse).FullName | Sort-Object | Out-String) -Verbose
 
     Import-PSModule -SourceFolderPath $moduleOutputFolder -ModuleName $Name
     Build-PSModuleDocumentation -SourceFolderPath $moduleOutputFolder -OutputFolderPath $docsOutputFolder
