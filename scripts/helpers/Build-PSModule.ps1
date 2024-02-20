@@ -60,7 +60,7 @@
     Build-PSModuleRootModule -SourceFolderPath $moduleSourceFolder -OutputFolderPath $moduleOutputFolder
     Build-PSModuleManifest -SourceFolderPath $moduleSourceFolder -OutputFolderPath $moduleOutputFolder
 
-    Import-PSModule -SourceFolderPath $moduleOutputFolder -ModuleName $Name
+    Import-PSModule -SourceFolderPath (Join-Path $moduleOutputFolder $Name) -ModuleName $Name
     Build-PSModuleDocumentation -SourceFolderPath $moduleOutputFolder -OutputFolderPath $docsOutputFolder
 
     Write-Verbose "[$Name] - Done"

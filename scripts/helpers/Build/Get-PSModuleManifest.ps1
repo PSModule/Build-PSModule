@@ -30,7 +30,7 @@
     Write-Verbose "[$moduleName] - [$manifestPropertyName] - [$manifestFileName]"
     Write-Verbose "[$moduleName] - [$manifestPropertyName] - Checking path for manifest file [$SourceFolderPath]"
 
-    $manifestFilePath = Join-Path -Path $SourceFolderPath $moduleName $manifestFileName
+    $manifestFilePath = Join-Path -Path $SourceFolderPath $manifestFileName
 
     if (-not (Test-Path -Path $manifestFilePath)) {
         Write-Warning "[$moduleName] - [$manifestPropertyName] - 🟥 No manifest file found"
