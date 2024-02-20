@@ -25,6 +25,9 @@
     Start-LogGroup "[$ModuleName] - Importing module"
 
     $manifestFile = Get-PSModuleManifest -SourceFolderPath $SourceFolderPath -As FileInfo -Verbose:$false
+
+    write-verbose "Manifest file path: [$($manifestFile.FullName)]"
+
     Resolve-PSModuleDependencies -ManifestFilePath $manifestFile
 
     Import-Module $ModuleName
