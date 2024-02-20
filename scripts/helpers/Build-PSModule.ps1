@@ -61,7 +61,7 @@
     Build-PSModuleManifest -SourceFolderPath $moduleSourceFolder -OutputFolderPath $moduleOutputFolder
 
     Import-PSModule -SourceFolderPath (Join-Path $moduleOutputFolder $Name) -ModuleName $Name
-    Build-PSModuleDocumentation -SourceFolderPath $moduleOutputFolder -OutputFolderPath $docsOutputFolder
+    Build-PSModuleDocumentation -SourceFolderPath (Join-Path $moduleOutputFolder $Name) -OutputFolderPath $docsOutputFolder
 
     Write-Verbose "[$Name] - Done"
 }
