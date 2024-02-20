@@ -36,12 +36,12 @@
 
     Install-Dependency -Name platyPS
 
-    $moduleOutputFolderPath = Join-Path -Path $OutputPath 'modules' $Name
+    $moduleOutputFolderPath = Join-Path -Path $OutputPath 'modules'
     Write-Verbose "Creating module output folder [$moduleOutputFolderPath]"
     $moduleOutputFolder = New-Item -Path $moduleOutputFolderPath -ItemType Directory -Force
     Add-PSModulePath -Path $moduleOutputFolder
 
-    $docsOutputFolderPath = Join-Path -Path $OutputPath 'docs' $Name
+    $docsOutputFolderPath = Join-Path -Path $OutputPath 'docs'
     Write-Verbose "Creating docs output folder [$docsOutputFolderPath]"
     $docsOutputFolder = New-Item -Path $docsOutputFolderPath -ItemType Directory -Force
 

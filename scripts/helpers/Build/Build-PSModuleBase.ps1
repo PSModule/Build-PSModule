@@ -32,7 +32,7 @@
         "$moduleName.psm1"
     )
     Write-Verbose "Copying files from [$SourceFolderPath] to [$OutputFolderPath]"
-    Copy-Item -Path "$SourceFolderPath" -Destination $OutputFolderPath -Recurse -Force -Verbose
+    Copy-Item -Path $SourceFolderPath -Destination $OutputFolderPath -Recurse -Force -Verbose
     Write-Verbose "Deleting files from [$OutputFolderPath] that are not needed"
     Get-ChildItem -Path $OutputFolderPath -Recurse -Force | Where-Object { $_.Name -in $deletePaths } | Remove-Item -Force -Recurse -Verbose
     Stop-LogGroup
