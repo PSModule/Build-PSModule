@@ -26,7 +26,7 @@
 
     $manifestFile = Get-PSModuleManifest -SourceFolderPath $SourceFolderPath -As FileInfo -Verbose:$false
 
-    write-verbose "Manifest file path: [$($manifestFile.FullName)]"
+    Write-verbose "Manifest file path: [$($manifestFile.FullName)]" -Verbose
 
     Resolve-PSModuleDependencies -ManifestFilePath $manifestFile
 
