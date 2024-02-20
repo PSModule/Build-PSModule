@@ -28,7 +28,7 @@
     Write-Verbose "[$moduleName] - [$manifestPropertyName]"
     $manifestFileName = "$moduleName.psd1"
     Write-Verbose "[$moduleName] - [$manifestPropertyName] - [$manifestFileName]"
-    Write-Verbose "[$moduleName] - [$manifestPropertyName] - Checking path for manifest file"
+    Write-Verbose "[$moduleName] - [$manifestPropertyName] - Checking path for manifest file [$SourceFolderPath]"
 
     $manifestFilePath = Join-Path -Path $SourceFolderPath $manifestFileName
     if (-not (Test-Path -Path $manifestFilePath)) {
