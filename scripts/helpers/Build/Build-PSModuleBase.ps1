@@ -12,6 +12,10 @@
     #>
     [CmdletBinding()]
     param(
+        # Name of the module to process.
+        [Parameter(Mandatory)]
+        [string] $Name,
+
         # Path to the folder where the module source code is located.
         [Parameter(Mandatory)]
         [string] $SourceFolderPath,
@@ -21,23 +25,23 @@
         [string] $OutputFolderPath
     )
 
-    $moduleName = Split-Path -Path $SourceFolderPath -Leaf
-    Start-LogGroup "[$moduleName] - Build base"
+    Start-LogGroup "[$Name] - Build base"
 
+    Write-Verbose "Copying files from [$SourceFolderPath] to [$OutputFolderPath]"
+    Copy-Item -Path $SourceFolderPath -Destination $OutputFolderPath -Recurse -Force -Verbose
+
+    Write-Verbose "Deleting files from [$OutputFolderPath] that are not needed"
     $deletePaths = @(
         'init',
         'private',
         'public',
-        "$moduleName.psd1",
-        "$moduleName.psm1"
+        "$Name.psd1",
+        "$Name.psm1"
     )
-    Write-Verbose "Copying files from [$SourceFolderPath] to [$OutputFolderPath]"
-    Copy-Item -Path $SourceFolderPath -Destination $OutputFolderPath -Recurse -Force -Verbose
-    Write-Verbose "Deleting files from [$OutputFolderPath] that are not needed"
     Get-ChildItem -Path $OutputFolderPath -Recurse -Force | Where-Object { $_.Name -in $deletePaths } | Remove-Item -Force -Recurse -Verbose
     Stop-LogGroup
 
-    Start-LogGroup "[$moduleName] - Build base - Result"
+    Start-LogGroup "[$Name] - Build base - Result"
     (Get-ChildItem -Path $OutputFolderPath -Recurse -Force).FullName | Sort-Object
     Stop-LogGroup
 }

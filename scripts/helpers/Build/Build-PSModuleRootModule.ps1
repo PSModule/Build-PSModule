@@ -12,6 +12,10 @@
     #>
     [CmdletBinding()]
     param(
+        # Name of the module to process.
+        [Parameter(Mandatory)]
+        [string] $Name,
+
         # Path to the folder where the module source code is located.
         [Parameter(Mandatory)]
         [string] $SourceFolderPath,

@@ -16,6 +16,10 @@
         Justification = 'No real reason. Just to keep the code simple.'
     )]
     param(
+        # Name of the module to process.
+        [Parameter(Mandatory)]
+        [string] $Name,
+
         # Path to the folder where the module source code is located.
         [Parameter(Mandatory)]
         [string] $SourceFolderPath,

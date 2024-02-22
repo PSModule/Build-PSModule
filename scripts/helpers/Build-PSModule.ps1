@@ -19,11 +19,11 @@
 
         # Path to the folder where the modules are located.
         [Parameter()]
-        [string] $Path = 'src',
+        [string] $SourcePath,
 
         # Path to the folder where the built modules are outputted.
         [Parameter()]
-        [string] $OutputPath = 'outputs'
+        [string] $OutputPath
     )
     #DECISION: The manifest file = name of the folder.
     #DECISION: The basis of the module manifest comes from the defined manifest file.
@@ -34,34 +34,27 @@
     #DECISION: The module that is build is stored under the output folder in a folder with the same name as the module.
     #DECISION: A new module manifest file is created every time to get a new GUID, so that the specific version of the module can be imported.
 
-    Install-Dependency -Name platyPS
+    Start-LogGroup "[$Name]"
+    Write-Verbose "Source path - [$SourcePath]"
+    if (-not (Test-Path -Path $SourcePath)) {
+        Write-Error "Source folder not found at [$SourcePath]"
+        return
+    }
+    $sourceFolder = Get-Item -Path $SourcePath
 
-    $moduleOutputFolderPath = Join-Path -Path $OutputPath 'modules'
+    $moduleOutputFolderPath = Join-Path -Path $OutputPath -ChildPath 'modules' $Name
     Write-Verbose "Creating module output folder [$moduleOutputFolderPath]"
     $moduleOutputFolder = New-Item -Path $moduleOutputFolderPath -ItemType Directory -Force
     Add-PSModulePath -Path $moduleOutputFolder
 
-    $docsOutputFolderPath = Join-Path -Path $OutputPath 'docs' $Name
+    $docsOutputFolderPath = Join-Path -Path $OutputPath -ChildPath 'docs' $Name
     Write-Verbose "Creating docs output folder [$docsOutputFolderPath]"
     $docsOutputFolder = New-Item -Path $docsOutputFolderPath -ItemType Directory -Force
 
-    $moduleSourceFolderPath = Join-Path -Path $Path $Name
-    if (-not (Test-Path -Path $moduleSourceFolderPath)) {
-        Write-Error "Module folder not found at [$moduleSourceFolderPath]"
-        return
-    }
-
-    Start-LogGroup "[$Name]"
-    Write-Verbose "ModuleFolderPath - [$moduleSourceFolderPath]"
-
-    $moduleSourceFolder = Get-Item -Path $moduleSourceFolderPath
-
-    Build-PSModuleBase -SourceFolderPath $moduleSourceFolder -OutputFolderPath $moduleOutputFolder
-    Build-PSModuleRootModule -SourceFolderPath $moduleSourceFolder -OutputFolderPath $moduleOutputFolder
-    Build-PSModuleManifest -SourceFolderPath $moduleSourceFolder -OutputFolderPath $moduleOutputFolder
-
-    Import-PSModule -SourceFolderPath (Join-Path $moduleOutputFolder $Name) -ModuleName $Name
-    Build-PSModuleDocumentation -SourceFolderPath (Join-Path $moduleOutputFolder $Name) -OutputFolderPath $docsOutputFolder
+    Build-PSModuleBase -SourceFolderPath $sourceFolder -OutputFolderPath $moduleOutputFolder -Name $Name
+    # Build-PSModuleRootModule -SourceFolderPath $sourceFolder -OutputFolderPath $moduleOutputFolder -Name $Name
+    # Build-PSModuleManifest -SourceFolderPath $sourceFolder -OutputFolderPath $moduleOutputFolder -Name $Name
+    # Build-PSModuleDocumentation -SourceFolderPath $moduleOutputFolder -OutputFolderPath $docsOutputFolder -Name $Name
 
     Write-Verbose "[$Name] - Done"
 }

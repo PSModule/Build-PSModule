@@ -16,6 +16,10 @@
         Justification = 'Write-Host is used to group log messages.'
     )]
     param(
+        # Name of the module to process.
+        [Parameter(Mandatory)]
+        [string] $Name,
+
         # Path to the folder where the module source code is located.
         [Parameter(Mandatory)]
         [string] $SourceFolderPath,
@@ -26,6 +30,9 @@
     )
 
     $moduleName = Split-Path -Path $SourceFolderPath -Leaf
+
+    Install-Dependency -Name platyPS
+    Import-PSModule -SourceFolderPath $moduleOutputFolder -Name $Name
 
     Start-LogGroup "[$moduleName] - Build documentation"
     New-MarkdownHelp -Module $moduleName -OutputFolder $OutputFolderPath -Force -Verbose
