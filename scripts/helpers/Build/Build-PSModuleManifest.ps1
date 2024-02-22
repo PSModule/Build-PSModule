@@ -314,7 +314,7 @@
     #>
 
     Write-Verbose 'Creating new manifest file in outputs folder'
-    $outputManifestPath = (Join-Path -Path $OutputFolderPath $Name $manifestFileName)
+    $outputManifestPath = Join-Path -Path $OutputFolderPath $manifestFileName
     Write-Verbose "OutputManifestPath - [$outputManifestPath]"
     New-ModuleManifest -Path $outputManifestPath @manifest
     Stop-LogGroup
