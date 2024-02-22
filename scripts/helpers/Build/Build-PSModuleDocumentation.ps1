@@ -29,18 +29,16 @@
         [string] $OutputFolderPath
     )
 
-    $moduleName = Split-Path -Path $SourceFolderPath -Leaf
-
     Install-Dependency -Name platyPS
-    Import-PSModule -SourceFolderPath $moduleOutputFolder -Name $Name
+    Import-PSModule -SourceFolderPath $SourceFolderPath -ModuleName $Name
 
-    Start-LogGroup "[$moduleName] - Build documentation"
-    New-MarkdownHelp -Module $moduleName -OutputFolder $OutputFolderPath -Force -Verbose
+    Start-LogGroup "[$Name] - Build documentation"
+    New-MarkdownHelp -Module $Name -OutputFolder $OutputFolderPath -Force -Verbose
     Stop-LogGroup
 
-    Start-LogGroup "[$moduleName] - Build documentation - Result"
+    Start-LogGroup "[$Name] - Build documentation - Result"
     Get-ChildItem -Path $OutputFolderPath -Recurse -Force -Include '*.md' | ForEach-Object {
-        Write-Host "::debug::[$moduleName] - [$_] - [$(Get-FileHash -Path $_.FullName -Algorithm SHA256)]"
+        Write-Host "::debug::[$Name] - [$_] - [$(Get-FileHash -Path $_.FullName -Algorithm SHA256)]"
     }
     Stop-LogGroup
 }

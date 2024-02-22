@@ -325,7 +325,6 @@
 
     Start-LogGroup "[$Name] - Build manifest file - Remove comments"
     $manifestContent = Get-Content -Path $outputManifestPath
-    # $manifestContent = $manifestContent | Where-Object { $_ -notmatch '\s*#' }
     $manifestContent = $manifestContent | ForEach-Object { $_ -replace '#.*' }
     $manifestContent | Out-File -FilePath $outputManifestPath -Encoding utf8BOM -Force
     Show-FileContent -Path $outputManifestPath
