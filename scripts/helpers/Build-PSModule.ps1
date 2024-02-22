@@ -35,7 +35,7 @@
     #DECISION: A new module manifest file is created every time to get a new GUID, so that the specific version of the module can be imported.
 
     Start-LogGroup "[$Name]"
-    Write-Verbose "Source path - [$SourcePath]"
+    Write-Verbose "[$Name] - Source path - [$SourcePath]"
     if (-not (Test-Path -Path $SourcePath)) {
         Write-Error "Source folder not found at [$SourcePath]"
         return
@@ -43,18 +43,19 @@
     $sourceFolder = Get-Item -Path $SourcePath
 
     $moduleOutputFolderPath = Join-Path -Path $OutputPath -ChildPath 'modules' $Name
-    Write-Verbose "Creating module output folder [$moduleOutputFolderPath]"
+    Write-Verbose "[$Name] - Creating module output folder [$moduleOutputFolderPath]"
     $moduleOutputFolder = New-Item -Path $moduleOutputFolderPath -ItemType Directory -Force
     Add-PSModulePath -Path $moduleOutputFolder
 
     $docsOutputFolderPath = Join-Path -Path $OutputPath -ChildPath 'docs' $Name
-    Write-Verbose "Creating docs output folder [$docsOutputFolderPath]"
+    Write-Verbose "[$Name] - Creating docs output folder [$docsOutputFolderPath]"
     $docsOutputFolder = New-Item -Path $docsOutputFolderPath -ItemType Directory -Force
 
     Build-PSModuleBase -SourceFolderPath $sourceFolder -OutputFolderPath $moduleOutputFolder -Name $Name
     Build-PSModuleRootModule -SourceFolderPath $sourceFolder -OutputFolderPath $moduleOutputFolder -Name $Name
-    # Build-PSModuleManifest -SourceFolderPath $sourceFolder -OutputFolderPath $moduleOutputFolder -Name $Name
+    Build-PSModuleManifest -SourceFolderPath $sourceFolder -OutputFolderPath $moduleOutputFolder -Name $Name
     # Build-PSModuleDocumentation -SourceFolderPath $moduleOutputFolder -OutputFolderPath $docsOutputFolder -Name $Name
 
     Write-Verbose "[$Name] - Done"
+    Stop-LogGroup
 }
