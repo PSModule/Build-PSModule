@@ -141,8 +141,8 @@
     $manifest.ModuleList = $moduleList.count -eq 0 ? @() : @($moduleList)
     $manifest.ModuleList | ForEach-Object { Write-Verbose "[$Name] - [ModuleList] - [$_]" }
 
-    Write-Verbose "[$Name] - Gather dependencies from files"
 
+    Write-Verbose "[$Name] - [Gather]"
     $capturedModules = @()
     $capturedVersions = @()
     $capturedPSEdition = @()
