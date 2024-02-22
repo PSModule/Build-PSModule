@@ -15,7 +15,7 @@ if (-not (Test-Path -Path $codeToBuild)) {
 }
 
 $params = @{
-    $Name      = $name
+    Name       = $name
     SourcePath = $codeToBuild
     OutputPath = $outputPath
 }
