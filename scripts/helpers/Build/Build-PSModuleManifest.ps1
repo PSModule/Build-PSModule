@@ -323,11 +323,17 @@
     Show-FileContent -Path $outputManifestPath
     Stop-LogGroup
 
-    Start-LogGroup "[$Name] - Build manifest file - Format"
-    $manifestContent = Get-Content -Path $outputManifestPath -Raw
-    $settings = (Join-Path -Path $PSScriptRoot 'PSScriptAnalyzer.Tests.psd1')
-    Invoke-Formatter -ScriptDefinition $manifestContent -Settings $settings |
-        Out-File -FilePath $outputManifestPath -Encoding utf8BOM -Force
+    Start-LogGroup "[$Name] - Build manifest file - Remove comments"
+    $manifestContent = Get-Content -Path $outputManifestPath
+    $manifestContent = $manifestContent | Where-Object { $_ -notmatch '\s*#' }
+    $manifestContent = $manifestContent | ForEach-Object { $_ -replace '#.*' }
+    $manifestContent | Out-File -FilePath $outputManifestPath -Encoding utf8BOM -Force
+    Stop-LogGroup
+
+    Start-LogGroup "[$Name] - Build manifest file - Removing trailing whitespace"
+    $manifestContent = Get-Content -Path $outputManifestPath
+    $manifestContent = $manifestContent | ForEach-Object { $_.TrimEnd() }
+    $manifestContent | Out-File -FilePath $outputManifestPath -Encoding utf8BOM -Force
     Stop-LogGroup
 
     Start-LogGroup "[$Name] - Build manifest file - Remove blank lines"
@@ -336,16 +342,11 @@
     $manifestContent | Out-File -FilePath $outputManifestPath -Encoding utf8BOM -Force
     Stop-LogGroup
 
-    Start-LogGroup "[$Name] - Build manifest file - Remove comments"
-    $manifestContent = Get-Content -Path $outputManifestPath
-    $manifestContent = $manifestContent | Where-Object { $_ -notmatch '\s*#' }
-    $manifestContent | Out-File -FilePath $outputManifestPath -Encoding utf8BOM -Force
-    Stop-LogGroup
-
-    Start-LogGroup "[$Name] - Build manifest file - Removing trailing whitespace"
-    $manifestContent = Get-Content -Path $outputManifestPath
-    $manifestContent = $manifestContent | ForEach-Object { $_.TrimEnd() }
-    $manifestContent | Out-File -FilePath $outputManifestPath -Encoding utf8BOM -Force
+    Start-LogGroup "[$Name] - Build manifest file - Format"
+    $manifestContent = Get-Content -Path $outputManifestPath -Raw
+    $settings = (Join-Path -Path $PSScriptRoot 'PSScriptAnalyzer.Tests.psd1')
+    Invoke-Formatter -ScriptDefinition $manifestContent -Settings $settings |
+        Out-File -FilePath $outputManifestPath -Encoding utf8BOM -Force
     Stop-LogGroup
 
     #TODO: Add way to normalize string arrays
