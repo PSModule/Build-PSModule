@@ -8,12 +8,14 @@ Get-ChildItem -Path (Join-Path -Path $env:GITHUB_ACTION_PATH -ChildPath 'scripts
 Write-Output '##[endgroup]'
 
 $name = [string]::IsNullOrEmpty($env:Name) ? $env:GITHUB_REPOSITORY -replace '.+/', '' : $env:Name
+
 $sourceModulePath = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath $env:Path $name
+if (-not (Test-Path -Path $sourceModulePath)) {
+    throw "Module path [$sourceModulePath] does not exist."
+}
+
 $modulesOutputPath = Join-Path $env:GITHUB_WORKSPACE $env:ModulesOutputPath
 $docsOutputPath = Join-Path $env:GITHUB_WORKSPACE $env:DocsOutputPath
-if (-not (Test-Path -Path $codeToBuild)) {
-    throw "Module path [$codeToBuild] does not exist."
-}
 
 $params = @{
     Name              = $name
