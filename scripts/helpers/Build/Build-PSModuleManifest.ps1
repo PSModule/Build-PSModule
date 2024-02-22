@@ -330,12 +330,6 @@
         Out-File -FilePath $outputManifestPath -Encoding utf8BOM -Force
     Stop-LogGroup
 
-    Start-LogGroup "[$Name] - Build manifest file - Removing trailing whitespace"
-    $manifestContent = Get-Content -Path $outputManifestPath
-    $manifestContent = $manifestContent | ForEach-Object { $_.TrimEnd() }
-    $manifestContent | Out-File -FilePath $outputManifestPath -Encoding utf8BOM -Force
-    Stop-LogGroup
-
     Start-LogGroup "[$Name] - Build manifest file - Remove blank lines"
     $manifestContent = Get-Content -Path $outputManifestPath
     $manifestContent = $manifestContent | Where-Object { -not [string]::IsNullOrEmpty($_) }
@@ -344,7 +338,13 @@
 
     Start-LogGroup "[$Name] - Build manifest file - Remove comments"
     $manifestContent = Get-Content -Path $outputManifestPath
-    $manifestContent = $manifestContent | Where-Object { $_ -notmatch '^\s*#' }
+    $manifestContent = $manifestContent | Where-Object { $_ -notmatch '\s*#' }
+    $manifestContent | Out-File -FilePath $outputManifestPath -Encoding utf8BOM -Force
+    Stop-LogGroup
+
+    Start-LogGroup "[$Name] - Build manifest file - Removing trailing whitespace"
+    $manifestContent = Get-Content -Path $outputManifestPath
+    $manifestContent = $manifestContent | ForEach-Object { $_.TrimEnd() }
     $manifestContent | Out-File -FilePath $outputManifestPath -Encoding utf8BOM -Force
     Stop-LogGroup
 
