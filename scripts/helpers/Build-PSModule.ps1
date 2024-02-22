@@ -39,7 +39,7 @@
     #DECISION: A new module manifest file is created every time to get a new GUID, so that the specific version of the module can be imported.
 
     Start-LogGroup "[$Name]"
-    Write-Verbose "[$Name] - Source path - [$SourcePath]"
+    Write-Verbose "[$Name] - Source path:          [$SourcePath]"
     if (-not (Test-Path -Path $SourcePath)) {
         Write-Error "Source folder not found at [$SourcePath]"
         return
@@ -47,10 +47,10 @@
     $sourceFolder = Get-Item -Path $SourcePath
 
     $moduleOutputFolder = New-Item -Path $ModulesOutputPath -Name $Name -ItemType Directory -Force
-    Write-Verbose "[$Name] - Module output folder [$($moduleOutputFolder.FullName)]"
+    Write-Verbose "[$Name] - Module output folder: [$($moduleOutputFolder.FullName)]"
 
     $docsOutputFolder = New-Item -Path $DocsOutputPath -Name $Name -ItemType Directory -Force
-    Write-Verbose "[$Name] - Docs output folder [$($docsOutputFolder.FullName)]"
+    Write-Verbose "[$Name] - Docs output folder:  [$($docsOutputFolder.FullName)]"
 
     Build-PSModuleBase -SourceFolderPath $sourceFolder -OutputFolderPath $moduleOutputFolder -Name $Name
     Build-PSModuleRootModule -SourceFolderPath $sourceFolder -OutputFolderPath $moduleOutputFolder -Name $Name
