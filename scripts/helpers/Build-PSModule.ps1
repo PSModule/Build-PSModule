@@ -48,11 +48,10 @@
 
     $moduleOutputFolder = New-Item -Path $ModulesOutputPath -Name $Name -ItemType Directory -Force
     Write-Verbose "[$Name] - Module output folder [$($moduleOutputFolder.FullName)]"
-    # Add-PSModulePath -Path $moduleOutputFolder
 
-    Write-Verbose "[$Name] - Docs output folder [$($DocsOutputPath.FullName)]"
     $docsOutputFolder = New-Item -Path $DocsOutputPath -Name $Name -ItemType Directory -Force
-
+    Write-Verbose "[$Name] - Docs output folder [$($docsOutputFolder.FullName)]"
+    
     Build-PSModuleBase -SourceFolderPath $sourceFolder -OutputFolderPath $moduleOutputFolder -Name $Name
     Build-PSModuleRootModule -SourceFolderPath $sourceFolder -OutputFolderPath $moduleOutputFolder -Name $Name
     Build-PSModuleManifest -SourceFolderPath $sourceFolder -OutputFolderPath $moduleOutputFolder -Name $Name

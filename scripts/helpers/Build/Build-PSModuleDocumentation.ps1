@@ -20,7 +20,7 @@
         [Parameter(Mandatory)]
         [string] $Name,
 
-        # Path to the folder where the module source code is located.
+        # Path to the folder where the module is located.
         [Parameter(Mandatory)]
         [string] $SourceFolderPath,
 
@@ -29,7 +29,10 @@
         [string] $OutputFolderPath
     )
 
+    Start-LogGroup "[$Name] - Docs - Dependencies"
+
     Install-Dependency -Name platyPS
+    Add-PSModulePath -Path $SourceFolderPath
     Import-PSModule -SourceFolderPath $SourceFolderPath -ModuleName $Name
 
     Start-LogGroup "[$Name] - Build documentation"

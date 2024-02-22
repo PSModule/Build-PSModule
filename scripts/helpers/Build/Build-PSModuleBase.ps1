@@ -25,13 +25,13 @@
         [string] $OutputFolderPath
     )
 
-    Start-LogGroup "Build base"
+    Start-LogGroup "[$Name] - Build base"
 
     Write-Verbose "Copying files from [$SourceFolderPath] to [$OutputFolderPath]"
     Copy-Item -Path "$SourceFolderPath\*" -Destination $OutputFolderPath -Recurse -Force -Verbose
     Stop-LogGroup
 
-    Start-LogGroup "Build base - Deleting unecessary files"
+    Start-LogGroup "[$Name] - Build base - Deleting unecessary files"
     Write-Verbose "Deleting files from [$OutputFolderPath] that are not needed"
     $deletePaths = @(
         'init',
@@ -43,7 +43,7 @@
     Get-ChildItem -Path $OutputFolderPath -Recurse -Force | Where-Object { $_.Name -in $deletePaths } | Remove-Item -Force -Recurse -Verbose
     Stop-LogGroup
 
-    Start-LogGroup "Build base - Result"
+    Start-LogGroup "[$Name] - Build base - Result"
     (Get-ChildItem -Path $OutputFolderPath -Recurse -Force).FullName | Sort-Object
     Stop-LogGroup
 }
