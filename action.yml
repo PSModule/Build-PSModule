@@ -12,10 +12,14 @@ inputs:
     description: Path to the folder where the modules are located.
     required: false
     default: src
-  OutputPath:
+  ModulesOutputPath:
     description: Path to the folder where the built modules are outputted.
     required: false
-    default: outputs
+    default: outputs/modules
+  DocsOutputPath:
+    description: Path to the folder where the built modules are outputted.
+    required: false
+    default: outputs/docs
 
 runs:
   using: composite
@@ -25,5 +29,6 @@ runs:
       env:
         Name: ${{ inputs.Name }}
         Path: ${{ inputs.Path }}
-        OutputPath: ${{ inputs.OutputPath }}
+        ModulesOutputPath: ${{ inputs.ModulesOutputPath }}
+        DocsOutputPath: ${{ inputs.DocsOutputPath }}
       run: . "$env:GITHUB_ACTION_PATH\scripts\main.ps1"

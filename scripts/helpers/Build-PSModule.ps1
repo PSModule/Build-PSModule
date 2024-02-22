@@ -18,12 +18,16 @@
         [string] $Name,
 
         # Path to the folder where the modules are located.
-        [Parameter()]
+        [Parameter(Mandatory)]
         [string] $SourcePath,
 
         # Path to the folder where the built modules are outputted.
-        [Parameter()]
-        [string] $OutputPath
+        [Parameter(Mandatory)]
+        [string] $ModulesOutputPath,
+
+        # Path to the folder where the documentation is outputted.
+        [Parameter(Mandatory)]
+        [string] $DocsOutputPath
     )
     #DECISION: The manifest file = name of the folder.
     #DECISION: The basis of the module manifest comes from the defined manifest file.
@@ -42,14 +46,12 @@
     }
     $sourceFolder = Get-Item -Path $SourcePath
 
-    $moduleOutputFolderPath = Join-Path -Path $OutputPath -ChildPath 'modules' $Name
-    Write-Verbose "[$Name] - Creating module output folder [$moduleOutputFolderPath]"
-    $moduleOutputFolder = New-Item -Path $moduleOutputFolderPath -ItemType Directory -Force
-    Add-PSModulePath -Path $moduleOutputFolder
+    $moduleOutputFolder = New-Item -Path $ModulesOutputPath -Name $Name -ItemType Directory -Force
+    Write-Verbose "[$Name] - Module output folder [$($moduleOutputFolder.FullName)]"
+    # Add-PSModulePath -Path $moduleOutputFolder
 
-    $docsOutputFolderPath = Join-Path -Path $OutputPath -ChildPath 'docs' $Name
-    Write-Verbose "[$Name] - Creating docs output folder [$docsOutputFolderPath]"
-    $docsOutputFolder = New-Item -Path $docsOutputFolderPath -ItemType Directory -Force
+    Write-Verbose "[$Name] - Docs output folder [$($DocsOutputPath.FullName)]"
+    $docsOutputFolder = New-Item -Path $DocsOutputPath -Name $Name -ItemType Directory -Force
 
     Build-PSModuleBase -SourceFolderPath $sourceFolder -OutputFolderPath $moduleOutputFolder -Name $Name
     Build-PSModuleRootModule -SourceFolderPath $sourceFolder -OutputFolderPath $moduleOutputFolder -Name $Name
