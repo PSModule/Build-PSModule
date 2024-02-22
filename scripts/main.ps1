@@ -7,7 +7,7 @@ Get-ChildItem -Path (Join-Path -Path $env:GITHUB_ACTION_PATH -ChildPath 'scripts
 }
 Write-Output '##[endgroup]'
 
-$name = [string]::IsNullOrEmpty($env:Name) ? $env:GITHUB_REPOSITORY -replace '.+/', '' : $env:Name
+$name = [string]::IsNullOrEmpty($env:Name) ? $env:GITHUB_REPOSITORY -replace '.+/' : $env:Name
 
 $sourceModulePath = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath $env:Path $name
 if (-not (Test-Path -Path $sourceModulePath)) {
