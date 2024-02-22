@@ -32,7 +32,7 @@
     Start-LogGroup "[$Name] - Docs - Dependencies"
 
     Install-Dependency -Name platyPS
-    Add-PSModulePath -Path $SourceFolderPath
+    Add-PSModulePath -Path (Split-Path -Path $SourceFolderPath -Perent)
     Import-PSModule -SourceFolderPath $SourceFolderPath -ModuleName $Name
 
     Start-LogGroup "[$Name] - Build documentation"
