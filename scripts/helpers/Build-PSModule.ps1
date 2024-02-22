@@ -52,7 +52,7 @@
     $docsOutputFolder = New-Item -Path $docsOutputFolderPath -ItemType Directory -Force
 
     Build-PSModuleBase -SourceFolderPath $sourceFolder -OutputFolderPath $moduleOutputFolder -Name $Name
-    # Build-PSModuleRootModule -SourceFolderPath $sourceFolder -OutputFolderPath $moduleOutputFolder -Name $Name
+    Build-PSModuleRootModule -SourceFolderPath $sourceFolder -OutputFolderPath $moduleOutputFolder -Name $Name
     # Build-PSModuleManifest -SourceFolderPath $sourceFolder -OutputFolderPath $moduleOutputFolder -Name $Name
     # Build-PSModuleDocumentation -SourceFolderPath $moduleOutputFolder -OutputFolderPath $docsOutputFolder -Name $Name
 

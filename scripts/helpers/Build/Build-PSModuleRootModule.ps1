@@ -25,13 +25,11 @@
         [string] $OutputFolderPath
     )
 
-    $moduleName = Split-Path -Path $SourceFolderPath -Leaf
-    Start-LogGroup "[$moduleName] - Build root module"
+    Start-LogGroup "Build root module"
 
     # RE-create the moduleName.psm1 file
     # concat all the files, and add Export-ModuleMembers at the end with modules.
-    $moduleOutputfolder = Join-Path -Path $OutputFolderPath -ChildPath $moduleName
-    $rootModuleFile = New-Item -Path $moduleOutputfolder -Name "$moduleName.psm1" -Force
+    $rootModuleFile = New-Item -Path $OutputFolderPath -Name "$Name.psm1" -Force
 
     # Add content to the root module file in the following order:
     # 0. Module attributes
@@ -44,7 +42,7 @@
 
     $moduleAttributes = Join-Path -Path $SourceFolderPath -ChildPath 'attributes.txt'
     if (Test-Path -Path $moduleAttributes) {
-        Start-LogGroup "[$moduleName] - Build root module - Module attributes"
+        Start-LogGroup "Build root module - Module attributes"
         $moduleAttributesContent = Get-Content -Path $moduleAttributes -Raw
         Add-Content -Path $rootModuleFile.FullName -Force -Value $moduleAttributesContent
     }
@@ -121,18 +119,18 @@ Write-Verbose "[`$scriptName] - [$relativePath] - Done"
     Add-Content @params
     Stop-LogGroup
 
-    Start-LogGroup "[$moduleName] - Build root module - Before format"
+    Start-LogGroup "Build root module - Before format"
     Show-FileContent -Path $rootModuleFile
     Stop-LogGroup
 
-    Start-LogGroup "[$moduleName] - Build root module - Format"
+    Start-LogGroup "Build root module - Format"
     $AllContent = Get-Content -Path $rootModuleFile.FullName -Raw
     $settings = (Join-Path -Path $PSScriptRoot 'PSScriptAnalyzer.Tests.psd1')
     Invoke-Formatter -ScriptDefinition $AllContent -Settings $settings |
         Out-File -FilePath $rootModuleFile.FullName -Encoding utf8BOM -Force
     Stop-LogGroup
 
-    Start-LogGroup "[$moduleName] - Build root module - Result"
+    Start-LogGroup "Build root module - Result"
     Show-FileContent -Path $rootModuleFile
     Stop-LogGroup
 }
