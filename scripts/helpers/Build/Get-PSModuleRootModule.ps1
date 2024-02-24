@@ -16,10 +16,9 @@
         [string] $SourceFolderPath
     )
 
-    $moduleName = Split-Path -Path $SourceFolderPath -Leaf
     $manifestPropertyName = 'RootModule'
 
-    Write-Verbose "[$moduleName] - [$manifestPropertyName] - Find root module"
+    Write-Verbose "[$manifestPropertyName] - Find root module"
     $manifest = Get-PSModuleManifest -SourceFolderPath $SourceFolderPath -Verbose:$false
 
     $rootModule = $(Get-ChildItem -Path $SourceFolderPath -File |
@@ -27,10 +26,10 @@
             Select-Object -First 1 -ExpandProperty Name
     )
     if (-not $rootModule) {
-        Write-Verbose "[$moduleName] - [$manifestPropertyName] - No RootModule found"
+        Write-Verbose "[$manifestPropertyName] - No RootModule found"
     }
 
-    Write-Verbose "[$moduleName] - [$manifestPropertyName] - [$RootModule]"
+    Write-Verbose "[$manifestPropertyName] - [$RootModule]"
 
     $moduleType = switch -Regex ($RootModule) {
         '\.(ps1|psm1)$' { 'Script' }
@@ -39,11 +38,11 @@
         '\.xaml$' { 'Workflow' }
         default { 'Manifest' }
     }
-    Write-Verbose "[$moduleName] - [$manifestPropertyName] - [$moduleType]"
+    Write-Verbose "[$manifestPropertyName] - [$moduleType]"
 
     $supportedModuleTypes = @('Script', 'Manifest')
     if ($moduleType -notin $supportedModuleTypes) {
-        Write-Warning "[$moduleName] - [$manifestPropertyName] - [$moduleType] - Module type not supported"
+        Write-Warning "[$manifestPropertyName] - [$moduleType] - Module type not supported"
     }
 
     $rootModule = [string]::IsNullOrEmpty($manifest.RootModule) ? $rootModule : @($manifest.RootModule)

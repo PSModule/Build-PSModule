@@ -16,18 +16,17 @@
         [string] $SourceFolderPath
     )
 
-    $moduleName = Split-Path -Path $SourceFolderPath -Leaf
     $manifestPropertyName = 'FunctionsToExport'
 
-    Write-Verbose "[$moduleName] - [$manifestPropertyName]"
-    Write-Verbose "[$moduleName] - [$manifestPropertyName] - Checking path for functions and filters"
+    Write-Verbose "[$manifestPropertyName]"
+    Write-Verbose "[$manifestPropertyName] - Checking path for functions and filters"
 
     $publicFolderPath = Join-Path $SourceFolderPath 'public'
-    Write-Verbose "[$moduleName] - [$manifestPropertyName] - [$publicFolderPath]"
+    Write-Verbose "[$manifestPropertyName] - [$publicFolderPath]"
     $functionsToExport = Get-ChildItem -Path $publicFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1' | ForEach-Object {
         $fileContent = Get-Content -Path $_.FullName -Raw
         $containsFunction = ($fileContent -match 'function ') -or ($fileContent -match 'filter ')
-        Write-Verbose "[$moduleName] - [$manifestPropertyName] - [$($_.BaseName)] - [$containsFunction]"
+        Write-Verbose "[$manifestPropertyName] - [$($_.BaseName)] - [$containsFunction]"
         $containsFunction ? $_.BaseName : $null
     }
     $functionsToExport = $functionsToExport.count -eq 0 ? @() : @($functionsToExport)

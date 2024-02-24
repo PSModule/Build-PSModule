@@ -1,4 +1,6 @@
-﻿function Build-PSModuleRootModule {
+﻿#Requires -Modules PSScriptAnalyzer, Utilities
+
+function Build-PSModuleRootModule {
     <#
         .SYNOPSIS
         Compiles the module root module files.
@@ -25,7 +27,8 @@
         [string] $OutputFolderPath
     )
 
-    Start-LogGroup "[$Name] - Build root module"
+    #region Build root module
+    Start-LogGroup 'Build root module'
 
     # RE-create the moduleName.psm1 file
     # concat all the files, and add Export-ModuleMembers at the end with modules.
@@ -42,7 +45,7 @@
 
     $moduleAttributes = Join-Path -Path $SourceFolderPath -ChildPath 'attributes.txt'
     if (Test-Path -Path $moduleAttributes) {
-        Start-LogGroup "[$Name] - Build root module - Module attributes"
+        Start-LogGroup 'Build root module - Module attributes'
         $moduleAttributesContent = Get-Content -Path $moduleAttributes -Raw
         Add-Content -Path $rootModuleFile.FullName -Force -Value $moduleAttributesContent
     }
@@ -118,19 +121,22 @@ Write-Verbose "[`$scriptName] - [$relativePath] - Done"
     }
     Add-Content @params
     Stop-LogGroup
+    #endregion Build root module
 
-    Start-LogGroup "[$Name] - Build root module - Before format"
+    #region Format root module
+    Start-LogGroup 'Format root module - Before format'
     Show-FileContent -Path $rootModuleFile
     Stop-LogGroup
 
-    Start-LogGroup "[$Name] - Build root module - Format"
+    Start-LogGroup 'Format root module - Format'
     $AllContent = Get-Content -Path $rootModuleFile.FullName -Raw
     $settings = (Join-Path -Path $PSScriptRoot 'PSScriptAnalyzer.Tests.psd1')
     Invoke-Formatter -ScriptDefinition $AllContent -Settings $settings |
         Out-File -FilePath $rootModuleFile.FullName -Encoding utf8BOM -Force
     Stop-LogGroup
 
-    Start-LogGroup "[$Name] - Build root module - Result"
+    Start-LogGroup 'Format root module - Result'
     Show-FileContent -Path $rootModuleFile
     Stop-LogGroup
+    #endregion Format root module
 }

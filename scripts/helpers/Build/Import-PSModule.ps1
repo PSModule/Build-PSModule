@@ -22,7 +22,7 @@
         [string] $ModuleName
     )
 
-    Start-LogGroup "[$ModuleName] - Importing module"
+    Start-LogGroup "Importing module [$ModuleName]"
 
     $manifestFile = Get-PSModuleManifest -SourceFolderPath $SourceFolderPath -As FileInfo -Verbose
 
@@ -32,12 +32,12 @@
 
     Import-Module $ModuleName
 
-    Write-Verbose "[$ModuleName] - List loaded modules"
+    Write-Verbose "List loaded modules"
     $availableModules = Get-Module -ListAvailable -Refresh -Verbose:$false
     $availableModules | Select-Object Name, Version, Path | Sort-Object Name | Format-Table -AutoSize
 
     if ($ModuleName -notin $availableModules.Name) {
-        throw "[$ModuleName] - Module not found"
+        throw "Module not found"
     }
     Stop-LogGroup
 }

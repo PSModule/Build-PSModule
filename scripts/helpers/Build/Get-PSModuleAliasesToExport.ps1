@@ -16,13 +16,14 @@
         [string] $SourceFolderPath
     )
 
-    $moduleName = Split-Path -Path $SourceFolderPath -Leaf
     $manifestPropertyName = 'AliasesToExport'
 
     $manifest = Get-PSModuleManifest -SourceFolderPath $SourceFolderPath -Verbose:$false
 
-    Write-Verbose "[$moduleName] - [$manifestPropertyName]"
+    Write-Verbose "[$manifestPropertyName]"
     $aliasesToExport = ($manifest.AliasesToExport).count -eq 0 ? '*' : @($manifest.AliasesToExport)
-    $aliasesToExport | ForEach-Object { Write-Verbose "[$moduleName] - [$manifestPropertyName] - [$_]" }
+    $aliasesToExport | ForEach-Object {
+        Write-Verbose "[$manifestPropertyName] - [$_]"
+    }
     $aliasesToExport
 }

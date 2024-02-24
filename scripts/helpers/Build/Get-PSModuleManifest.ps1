@@ -25,18 +25,18 @@
     $moduleName = Split-Path -Path $SourceFolderPath -Leaf
     $manifestPropertyName = 'ManifestFile'
 
-    Write-Verbose "[$moduleName] - [$manifestPropertyName]"
+    Write-Verbose "[$manifestPropertyName]"
     $manifestFileName = "$moduleName.psd1"
-    Write-Verbose "[$moduleName] - [$manifestPropertyName] - [$manifestFileName]"
-    Write-Verbose "[$moduleName] - [$manifestPropertyName] - Checking path for manifest file [$SourceFolderPath]"
+    Write-Verbose "[$manifestPropertyName] - [$manifestFileName]"
+    Write-Verbose "[$manifestPropertyName] - Checking path for manifest file [$SourceFolderPath]"
 
     $manifestFilePath = Join-Path -Path $SourceFolderPath $manifestFileName
 
     if (-not (Test-Path -Path $manifestFilePath)) {
-        Write-Warning "[$moduleName] - [$manifestPropertyName] - 🟥 No manifest file found"
+        Write-Warning "[$manifestPropertyName] - 🟥 No manifest file found"
         return $null
     }
-    Write-Verbose "[$moduleName] - [$manifestPropertyName] - 🟩 Found manifest file"
+    Write-Verbose "[$manifestPropertyName] - 🟩 Found manifest file"
 
     switch ($As) {
         'FileName' {

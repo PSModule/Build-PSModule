@@ -1,4 +1,6 @@
-﻿function Build-PSModuleDocumentation {
+﻿#Requires -Modules platyPS, Utilities
+
+function Build-PSModuleDocumentation {
     <#
         .SYNOPSIS
         Compiles the module documentation.
@@ -11,10 +13,6 @@
         Build-PSModuleDocumentation -SourceFolderPath 'C:\MyModule\src\MyModule' -OutputFolderPath 'C:\MyModule\build\MyModule'
     #>
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
-        'PSAvoidUsingWriteHost', '',
-        Justification = 'Write-Host is used to group log messages.'
-    )]
     param(
         # Name of the module to process.
         [Parameter(Mandatory)]
@@ -29,19 +27,18 @@
         [string] $OutputFolderPath
     )
 
-    Start-LogGroup "[$Name] - Docs - Dependencies"
+    Start-LogGroup "Docs - Dependencies"
 
-    Install-Dependency -Name platyPS
     Add-PSModulePath -Path (Split-Path -Path $SourceFolderPath -Parent)
     Import-PSModule -SourceFolderPath $SourceFolderPath -ModuleName $Name
 
-    Start-LogGroup "[$Name] - Build documentation"
+    Start-LogGroup "Build documentation"
     New-MarkdownHelp -Module $Name -OutputFolder $OutputFolderPath -Force -Verbose
     Stop-LogGroup
 
-    Start-LogGroup "[$Name] - Build documentation - Result"
+    Start-LogGroup "Build documentation - Result"
     Get-ChildItem -Path $OutputFolderPath -Recurse -Force -Include '*.md' | ForEach-Object {
-        Write-Host "::debug::[$Name] - [$_] - [$(Get-FileHash -Path $_.FullName -Algorithm SHA256)]"
+        Write-Verbose "[$_] - [$(Get-FileHash -Path $_.FullName -Algorithm SHA256)]"
     }
     Stop-LogGroup
 }

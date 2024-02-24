@@ -16,13 +16,14 @@
         [string] $SourceFolderPath
     )
 
-    $moduleName = Split-Path -Path $SourceFolderPath -Leaf
     $manifestPropertyName = 'VariablesToExport'
 
     $manifest = Get-PSModuleManifest -SourceFolderPath $SourceFolderPath -Verbose:$false
 
-    Write-Verbose "[$moduleName] - [$manifestPropertyName]"
+    Write-Verbose "[$manifestPropertyName]"
     $variablesToExport = ($manifest.VariablesToExport).count -eq 0 ? @() : @($manifest.VariablesToExport)
-    $variablesToExport | ForEach-Object { Write-Verbose "[$moduleName] - [$manifestPropertyName] - [$_]" }
+    $variablesToExport | ForEach-Object {
+        Write-Verbose "[$manifestPropertyName] - [$_]"
+    }
     $variablesToExport
 }

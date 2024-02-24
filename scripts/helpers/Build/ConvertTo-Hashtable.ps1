@@ -16,26 +16,17 @@
 
         Converts the string to a hashtable.
     #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSAvoidUsingInvokeExpression', '', Scope = 'Function',
+        Justification = 'Converting a string based hashtable to a hashtable.'
+    )]
+    [CmdletBinding()]
     param (
         # The string to convert to a hashtable.
         [Parameter(Mandatory = $true)]
         [string]$InputString
     )
 
-    $outputHashtable = @{}
+    Invoke-Expression $InputString
 
-    # Match pairs of key = value
-    $regexPattern = "\s*(\w+)\s*=\s*\'([^\']+)\'"
-    $regMatches = [regex]::Matches($InputString, $regexPattern)
-    foreach ($match in $regMatches) {
-        $key = $match.Groups[1].value
-        $value = $match.Groups[2].value
-
-        $outputHashtable[$key] = $value
-    }
-
-    return $outputHashtable
 }
-
-
-$InputString = "@{ ModuleName = 'AzureRM.Netcore'; MaximumVersion = '0.12.0' }"

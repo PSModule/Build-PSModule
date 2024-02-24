@@ -1,4 +1,6 @@
-﻿function Build-PSModuleBase {
+﻿#Requires -Modules Utilities
+
+function Build-PSModuleBase {
     <#
         .SYNOPSIS
         Compiles the base module files.
@@ -25,13 +27,13 @@
         [string] $OutputFolderPath
     )
 
-    Start-LogGroup "[$Name] - Build base"
+    Start-LogGroup "Build base"
 
     Write-Verbose "Copying files from [$SourceFolderPath] to [$OutputFolderPath]"
     Copy-Item -Path "$SourceFolderPath\*" -Destination $OutputFolderPath -Recurse -Force -Verbose
     Stop-LogGroup
 
-    Start-LogGroup "[$Name] - Build base - Deleting unecessary files"
+    Start-LogGroup "Build base - Deleting unecessary files"
     Write-Verbose "Deleting files from [$OutputFolderPath] that are not needed"
     $deletePaths = @(
         'init',
@@ -43,7 +45,7 @@
     Get-ChildItem -Path $OutputFolderPath -Recurse -Force | Where-Object { $_.Name -in $deletePaths } | Remove-Item -Force -Recurse -Verbose
     Stop-LogGroup
 
-    Start-LogGroup "[$Name] - Build base - Result"
+    Start-LogGroup "Build base - Result"
     (Get-ChildItem -Path $OutputFolderPath -Recurse -Force).FullName | Sort-Object
     Stop-LogGroup
 }
