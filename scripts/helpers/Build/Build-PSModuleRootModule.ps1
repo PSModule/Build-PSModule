@@ -74,6 +74,7 @@ Write-Verbose "[$scriptName] - [data] - Done"
 
     $folderProcessingOrder = @(
         'init',
+        'classes',
         'private',
         'public'
     )
