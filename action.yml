@@ -27,8 +27,14 @@ runs:
     - name: Run Build-PSModule
       shell: pwsh
       env:
-        Name: ${{ inputs.Name }}
-        Path: ${{ inputs.Path }}
-        ModulesOutputPath: ${{ inputs.ModulesOutputPath }}
-        DocsOutputPath: ${{ inputs.DocsOutputPath }}
-      run: . "$env:GITHUB_ACTION_PATH\scripts\main.ps1"
+        GITHUB_ACTION_INPUT_Name: ${{ inputs.Name }}
+        GITHUB_ACTION_INPUT_Path: ${{ inputs.Path }}
+        GITHUB_ACTION_INPUT_ModulesOutputPath: ${{ inputs.ModulesOutputPath }}
+        GITHUB_ACTION_INPUT_DocsOutputPath: ${{ inputs.DocsOutputPath }}
+      run: |
+        # Build-PSModule
+        Write-Host '::group::Loading libraries'
+        Install-PSResource -Name 'Utilities', 'platyPS' -TrustRepository -Verbose
+        Write-Host '::endgroup::'
+
+        . "$env:GITHUB_ACTION_PATH\scripts\main.ps1" -Verbose
