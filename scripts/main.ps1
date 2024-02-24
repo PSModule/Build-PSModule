@@ -9,9 +9,7 @@ Get-ChildItem -Path (Join-Path -Path $env:GITHUB_ACTION_PATH -ChildPath 'scripts
 Stop-LogGroup
 
 Start-LogGroup 'Loading inputs'
-$env:GITHUB_REPOSITORY_NAME = $env:GITHUB_REPOSITORY -replace '.+/'
-Set-GitHubEnv -Name 'GITHUB_REPOSITORY_NAME' -Value $env:GITHUB_REPOSITORY_NAME
-$moduleName = ($env:GITHUB_ACTION_INPUT_Name | IsNullOrEmpty) ?$env:GITHUB_REPOSITORY_NAME : $env:GITHUB_ACTION_INPUT_Name
+$moduleName = ($env:GITHUB_ACTION_INPUT_Name | IsNullOrEmpty) ? $env:GITHUB_REPOSITORY_NAME : $env:GITHUB_ACTION_INPUT_Name
 $sourceModulePath = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath $env:GITHUB_ACTION_INPUT_Path $moduleName
 Write-Verbose "Module name:         [$moduleName]"
 Write-Verbose "Source module path:  [$sourceModulePath]"
