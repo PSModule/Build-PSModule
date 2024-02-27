@@ -344,7 +344,7 @@ function Build-PSModuleManifest {
 
     Start-LogGroup "Format manifest file - Remove blank lines"
     $manifestContent = Get-Content -Path $outputManifestPath
-    $manifestContent = $manifestContent | Where-Object { -not [string]::IsNullOrEmpty($_) }
+    $manifestContent = $manifestContent | Where-Object { $_ | IsNotNullOrEmpty }
     $manifestContent | Out-File -FilePath $outputManifestPath -Encoding utf8BOM -Force
     Show-FileContent -Path $outputManifestPath
     Stop-LogGroup
