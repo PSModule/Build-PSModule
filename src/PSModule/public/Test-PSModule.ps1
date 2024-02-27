@@ -1,10 +1,10 @@
-﻿Function Test-PSModuleTest {
+﻿Function Test-PSModule {
     <#
         .SYNOPSIS
         Performs tests on a module.
 
         .EXAMPLE
-        Test-PSModuleTest -Name 'World'
+        Test-PSModule -Name 'World'
 
         "Hello, World!"
     #>

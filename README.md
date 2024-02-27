@@ -95,7 +95,6 @@ $ManifestData.Remove('PrivateData')
 New-ModuleManifest @ManifestData @PSData -Path .\test2.psd1
 ```
 
-
 ```powershell
 @{
     RootModule             = 'Module1.psm1' # Get files from root of folder wher name is same as the folder and file extension is .psm1, .ps1, .psd1, .dll, .cdxml, .xaml. Error if there are multiple files that meet the criteria.
