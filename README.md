@@ -110,6 +110,9 @@ $ManifestData.Remove('PrivateData')
 New-ModuleManifest @ManifestData @PSData -Path .\test2.psd1
 ```
 
+Most data should be able to be overridable from a manifest file.
+
+
 ```powershell
 @{
     RootModule             = 'Module1.psm1' # Get files from root of folder wher name is same as the folder and file extension is .psm1, .ps1, .psd1, .dll, .cdxml, .xaml. Error if there are multiple files that meet the criteria.
@@ -119,7 +122,7 @@ New-ModuleManifest @ManifestData @PSData -Path .\test2.psd1
     Author                 = 'marst' # Get from manifest file
     CompanyName            = 'Unknown' # Get from manifest file
     Copyright              = '(c) YYYY $Author|$Company. All rights reserved.' # Generated from Author and Company and adds the current year.
-    Description            = '' # Get from the manifest file, required.
+    Description            = '' # Get from the repo description.
     PowerShellVersion      = '' # Get from source files, REQUIRES -Version <N>[.<n>], null if not provided
     PowerShellHostName     = '' # Get from manifest file, null if not provided
     PowerShellHostVersion  = '' # Get from manifest file, null if not provided
@@ -127,7 +130,7 @@ New-ModuleManifest @ManifestData @PSData -Path .\test2.psd1
     ClrVersion             = '' # Get from manifest file, null if not provided
     ProcessorArchitecture  = '' # Get from manifest file, null if not provided
     RequiredModules        = @() # Get from source files, REQUIRES -Modules <Module-Name> | <Hashtable> -> Need to be installed and loaded on build time. Will be installed in global session state on installtion.
-    #RequiredAssemblies    = @() # Get from manifest file, null if not provided
+    RequiredAssemblies     = @() # Get from manifest file, null if not provided
     ScriptsToProcess       = @() # Get from moduleRoot\scripts\*.ps1 + moduleRoot\classes*.ps1 ordered by name. These are loaded to the caller session (parent of module session)
     TypesToProcess         = @() # Get from moduleRoot\**Type.ps1xml
     FormatsToProcess       = @() # Get from moduleRoot\**.Format.ps1xml
