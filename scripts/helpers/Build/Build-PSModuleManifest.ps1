@@ -331,11 +331,9 @@ function Build-PSModuleManifest {
     Stop-LogGroup
 
     Start-LogGroup "Format manifest file - After"
-    Format-ModuleManifest -Path $outputManifestPath
+    Set-ModuleManifest -Path $outputManifestPath
     Show-FileContent -Path $outputManifestPath
     Stop-LogGroup
-
-    #TODO: Add way to normalize string arrays like filelist and command lists
 
     Start-LogGroup "Format manifest file - Result"
     Show-FileContent -Path $outputManifestPath
