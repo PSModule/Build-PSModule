@@ -300,7 +300,7 @@ function Build-PSModuleManifest {
     }
 
     Write-Verbose "[PreRelease]"
-    $manifest.PreRelease = ""
+    # $manifest.PreRelease = ""
     # Is managed by the publish action
 
     Write-Verbose "[RequireLicenseAcceptance]"
