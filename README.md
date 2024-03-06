@@ -86,10 +86,10 @@ It is built from the source code files in the module folder in the following ord
 1. Adds module headers from `header.ps1`.
 1. Adds data loader automation that loads files from the `data` folder as variables in the module scope. The variables are available using the ´$script:<filename>´ syntax.
 1. Adds content from subfolders, in the order:
-   1. Init
-   1. Private
-   1. Public
-   1. *.ps1 on module root
+  - Init
+  - Private
+  - Public
+  - *.ps1 on module root
 1. Adds the Export-ModuleMember function to the end of the file, to make sure that only the functions, cmdlets, variables and aliases that are defined in the module are exported.
 
 ### The root module in the src folder
