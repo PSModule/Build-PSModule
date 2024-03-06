@@ -16,7 +16,7 @@ This action "compiles" the module source code into a efficient PowerShell module
 During the build process the following steps are performed:
 
 1. Copies the source code of the module to an output folder.
-1. Builds the module manifest file based of info on the GitHub repo and source code. For more info see the [Module Manifest](#module-manifest) section for more information.
+1. Builds the module manifest file based of info on the GitHub repository and source code. For more info see the [Module Manifest](#module-manifest) section for more information.
 1. Builds the root module (.psm1) file by combining source code and adding automation into the root module file. For more info see the [Root module](#root-module) section for more information.
 1. Builds the module documentation using platyPS and comment based help in the source code. For more info see the [Module documentation](#module-documentation) section for more information.
 
@@ -86,10 +86,10 @@ It is built from the source code files in the module folder in the following ord
 1. Adds module headers from `header.ps1`.
 1. Adds data loader automation that loads files from the `data` folder as variables in the module scope. The variables are available using the ´$script:<filename>´ syntax.
 1. Adds content from subfolders, in the order:
-  1. Init
-  1. Private
-  1. Public
-  1. *.ps1 on module root
+   1. Init
+   1. Private
+   1. Public
+   1. *.ps1 on module root
 1. Adds the Export-ModuleMember function to the end of the file, to make sure that only the functions, cmdlets, variables and aliases that are defined in the module are exported.
 
 ### The root module in the src folder
@@ -105,11 +105,11 @@ The file also contains important metadata that is used by the PowerShell Gallery
 During the module manifest build process the following steps are performed:
 
 1. Get the manifest file from the source code. Content from this file overrides any value that would be calculated based on the source code.
-1. Find and set the `RootModule` based on file name and extension.
+1. Find and set the `RootModule` based on filename and extension.
 1. Set a temporary `ModuleVersion`, as this is set during the release process by [Publish-PSModule](https://github.com/PSModule/Publish-PSModule).
 1. Set the `Author` and `CompanyName` based on GitHub Owner.
 1. Set the `Copyright` information based on a default text (`(c) 2024 >>OwnerName<<. All rights reserved.`) and adds either the `Author`, `CompanyName` or both (`Author | CompanyName`) when these are different.
-1. Set the `Description` based on the GitHub repo description.
+1. Set the `Description` based on the GitHub repository description.
 1. Set various properties in the manifest such as `PowerShellHostName`, `PowerShellHostVersion`, `DotNetFrameworkVersion`, `ClrVersion`, and `ProcessorArchitecture`. There is currently no automation for these properties.
 1. Get the list of files in the module source folder and set the `FileList` property in the manifest.
 1. Get the list of required assemblies (`*.dll` files) from the `assemblies` folder and set the `RequiredAssemblies` property in the manifest.
@@ -121,10 +121,10 @@ During the module manifest build process the following steps are performed:
 1. Get the list of functions, cmdlets, aliases, and variables to export and set the respective properties in the manifest.
 1. Get the list of modules by searching for all `*.psm1` files in the entire module source folder, excluding the root module and set the `ModuleList` property in the manifest.
 1. Gather information about required modules, PowerShell version, and compatible PS editions from the module source files and set the respective properties in the manifest.
-1. The following values are gathered from the GitHub repo:
+1. The following values are gathered from the GitHub repository:
   - `Tags` are generated from Repository topics in addition to compatability tags gathered from the source code.
   - `LicenseUri` is generated assuming there is a `LICENSE` file on the root of the repository.
-  - `ProjectUri` is the url to the GitHub repository
+  - `ProjectUri` is the URL to the GitHub repository
   - `IconUri` is generated assuming there is a `icon.png` file in the `icon` folder on the repository root.
 1. `ReleaseNotes` currently not automated, but could be the PR description or release description.
 1. `PreRelease` is not managed here, but is managed from [Publish-PSModule](https://github.com/PSModule/Publish-PSModule)
