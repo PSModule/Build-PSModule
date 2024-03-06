@@ -1,11 +1,8 @@
 @{
-    ModuleVersion = '0.0.1'
-    RootModule    = 'PSModule.psm1'
-    Author        = 'PSModule'
-    Description   = 'PSModule Framework Test Module'
+    ModuleVersion = '0.0.0'
     PrivateData   = @{
         PSData = @{
-            Tags = @('PSModule', 'Test')
+            Tags = @()
         }
     }
 }

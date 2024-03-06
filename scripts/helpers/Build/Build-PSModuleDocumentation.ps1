@@ -14,30 +14,27 @@ function Build-PSModuleDocumentation {
     #>
     [CmdletBinding()]
     param(
-        # Name of the module to process.
+        # Folder where the module source code is located. 'src/MyModule'
         [Parameter(Mandatory)]
-        [string] $Name,
+        [System.IO.DirectoryInfo] $ModuleSourceFolder,
 
-        # Path to the folder where the module is located.
+        # Folder where the built modules are outputted. 'outputs/modules/MyModule'
         [Parameter(Mandatory)]
-        [string] $SourceFolderPath,
-
-        # Path to the folder where the built modules are outputted.
-        [Parameter(Mandatory)]
-        [string] $OutputFolderPath
+        [System.IO.DirectoryInfo] $ModuleOutputFolder
     )
 
     Start-LogGroup "Docs - Dependencies"
+    $moduleName = Split-Path -Path $ModuleSourceFolder -Leaf
 
-    Add-PSModulePath -Path (Split-Path -Path $SourceFolderPath -Parent)
-    Import-PSModule -SourceFolderPath $SourceFolderPath -ModuleName $Name
+    Add-PSModulePath -Path (Split-Path -Path $ModuleSourceFolder -Parent)
+    Import-PSModule -SourceFolderPath $ModuleSourceFolder -ModuleName $moduleName
 
     Start-LogGroup "Build documentation"
-    New-MarkdownHelp -Module $Name -OutputFolder $OutputFolderPath -Force -Verbose
+    New-MarkdownHelp -Module $moduleName -OutputFolder $ModuleOutputFolder -Force -Verbose
     Stop-LogGroup
 
     Start-LogGroup "Build documentation - Result"
-    Get-ChildItem -Path $OutputFolderPath -Recurse -Force -Include '*.md' | ForEach-Object {
+    Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         Write-Verbose "[$_] - [$(Get-FileHash -Path $_.FullName -Algorithm SHA256)]"
     }
     Stop-LogGroup

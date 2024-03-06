@@ -31,22 +31,22 @@ function Build-PSModuleRootModule {
     #>
     [CmdletBinding()]
     param(
-        # Path to the folder where the module source code is located.
+        # Folder where the module source code is located. 'src/MyModule'
         [Parameter(Mandatory)]
-        [string] $SourceFolderPath,
+        [System.IO.DirectoryInfo] $ModuleSourceFolder,
 
-        # Path to the folder where the built modules are outputted.
+        # Folder where the built modules are outputted. 'outputs/modules/MyModule'
         [Parameter(Mandatory)]
-        [string] $OutputFolderPath
+        [System.IO.DirectoryInfo] $ModuleOutputFolder
     )
 
     #region Build root module
     Start-LogGroup 'Build root module'
-    $moduleName = Split-Path -Path $SourceFolderPath -Leaf
-    $rootModuleFile = New-Item -Path $OutputFolderPath -Name "$moduleName.psm1" -Force
+    $moduleName = Split-Path -Path $ModuleSourceFolder -Leaf
+    $rootModuleFile = New-Item -Path $ModuleOutputFolder -Name "$moduleName.psm1" -Force
 
     #region - Module header
-    $headerFilePath = Join-Path -Path $OutputFolderPath -ChildPath 'header.ps1'
+    $headerFilePath = Join-Path -Path $ModuleOutputFolder -ChildPath 'header.ps1'
     if (Test-Path -Path $headerFilePath) {
         Get-Content -Path $headerFilePath -Raw | Add-Content -Path $rootModuleFile -Force
         $headerFilePath | Remove-Item -Force
@@ -91,19 +91,19 @@ Write-Verbose "[$scriptName] - [data] - Done"
     )
 
     foreach ($scriptFolder in $scriptFoldersToProcess) {
-        $scriptFolder = Join-Path -Path $OutputFolderPath -ChildPath $scriptFolder
+        $scriptFolder = Join-Path -Path $ModuleOutputFolder -ChildPath $scriptFolder
         if (-not (Test-Path -Path $scriptFolder)) {
             continue
         }
-        Add-ContentFromItem -Path $scriptFolder -RootModuleFilePath $rootModuleFile -RootPath $OutputFolderPath
+        Add-ContentFromItem -Path $scriptFolder -RootModuleFilePath $rootModuleFile -RootPath $ModuleOutputFolder
         Remove-Item -Path $scriptFolder -Force -Recurse
     }
     #endregion - Add content from subfolders
 
     #region - Add content from *.ps1 files on module root
-    $files = $OutputFolderPath | Get-ChildItem -File -Force -Filter '*.ps1'
+    $files = $ModuleOutputFolder | Get-ChildItem -File -Force -Filter '*.ps1'
     foreach ($file in $files) {
-        $relativePath = $file.FullName.Replace($OutputFolderPath, '').TrimStart($pathSeparator)
+        $relativePath = $file.FullName.Replace($ModuleOutputFolder, '').TrimStart($pathSeparator)
         Add-Content -Path $rootModuleFile -Force -Value @"
 #region - From $relativePath
 Write-Verbose "[`$scriptName] - [$relativePath] - Importing"
@@ -121,16 +121,16 @@ Write-Verbose "[`$scriptName] - [$relativePath] - Done"
     #endregion - Add content from *.ps1 files on module root
 
     #region - Export-ModuleMember
-    $functionsToExport = Get-PSModuleFunctionsToExport -SourceFolderPath $OutputFolderPath
+    $functionsToExport = Get-PSModuleFunctionsToExport -SourceFolderPath $ModuleOutputFolder
     $functionsToExport = $($functionsToExport -join "','")
 
-    $cmdletsToExport = Get-PSModuleCmdletsToExport -SourceFolderPath $OutputFolderPath
+    $cmdletsToExport = Get-PSModuleCmdletsToExport -SourceFolderPath $ModuleOutputFolder
     $cmdletsToExport = $($cmdletsToExport -join "','")
 
-    $variablesToExport = Get-PSModuleVariablesToExport -SourceFolderPath $OutputFolderPath
+    $variablesToExport = Get-PSModuleVariablesToExport -SourceFolderPath $ModuleOutputFolder
     $variablesToExport = $($variablesToExport -join "','")
 
-    $aliasesToExport = Get-PSModuleAliasesToExport -SourceFolderPath $OutputFolderPath
+    $aliasesToExport = Get-PSModuleAliasesToExport -SourceFolderPath $ModuleOutputFolder
     $aliasesToExport = $($aliasesToExport -join "','")
 
     $params = @{
