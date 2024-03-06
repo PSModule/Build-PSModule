@@ -6,18 +6,31 @@ function Build-PSModuleRootModule {
         Compiles the module root module files.
 
         .DESCRIPTION
-        This function will compile the module root module files.
-        It will copy the source files to the output folder and remove the files that are not needed.
+        This function will compile the modules root module from source files.
+        It will copy the source files to the output folder and start compiling the module.
+        During compilation, the source files are added to the root module file in the following order:
+
+        1. Module header from header.ps1 file. Usually to suppress code analysis warnings/errors and to add [CmdletBinding()] to the module.
+        2. Data files are added from source files. These are also tracked based on visibility/exportability based on folder location:
+          1. private
+          2. public
+        3. Combines *.ps1 files from the following folders in alphabetical order from each folder:
+          1. init
+          2. classes
+          3. private
+          4. public
+          5. Any remaining *.ps1 on module root.
+        3. Export-ModuleMember by using the functions, cmdlets, variables and aliases found in the source files.
+          - `Functions` will only contain functions that are from the `public` folder.
+          - `Cmdlets` will only contain cmdlets that are from the `public` folder.
+          - `Variables` will only contain variables that are from the `public` folder.
+          - `Aliases` will only contain aliases that are from the functions from the `public` folder.
 
         .EXAMPLE
         Build-PSModuleRootModule -SourceFolderPath 'C:\MyModule\src\MyModule' -OutputFolderPath 'C:\MyModule\build\MyModule'
     #>
     [CmdletBinding()]
     param(
-        # Name of the module to process.
-        [Parameter(Mandatory)]
-        [string] $Name,
-
         # Path to the folder where the module source code is located.
         [Parameter(Mandatory)]
         [string] $SourceFolderPath,
@@ -29,34 +42,32 @@ function Build-PSModuleRootModule {
 
     #region Build root module
     Start-LogGroup 'Build root module'
+    $moduleName = Split-Path -Path $SourceFolderPath -Leaf
+    $rootModuleFile = New-Item -Path $OutputFolderPath -Name "$moduleName.psm1" -Force
 
-    # RE-create the moduleName.psm1 file
-    # concat all the files, and add Export-ModuleMembers at the end with modules.
-    $rootModuleFile = New-Item -Path $OutputFolderPath -Name "$Name.psm1" -Force
-
-    # Add content to the root module file in the following order:
-    # 0. Module attributes
-    # 1. Load data files from Data folder
-    # 2. Init
-    # 3. Private
-    # 4. Public
-    # 5  *.ps1 on module root
-    # 6. Export-ModuleMember
-
-    $moduleAttributes = Join-Path -Path $SourceFolderPath -ChildPath 'attributes.txt'
-    if (Test-Path -Path $moduleAttributes) {
-        Start-LogGroup 'Build root module - Module attributes'
-        $moduleAttributesContent = Get-Content -Path $moduleAttributes -Raw
-        Add-Content -Path $rootModuleFile.FullName -Force -Value $moduleAttributesContent
-    }
-
-    Add-Content -Path $rootModuleFile.FullName -Force -Value @'
-[Cmdletbinding()]
+    #region - Module header
+    $headerFilePath = Join-Path -Path $OutputFolderPath -ChildPath 'header.ps1'
+    if (Test-Path -Path $headerFilePath) {
+        Get-Content -Path $headerFilePath -Raw | Add-Content -Path $rootModuleFile -Force
+        $headerFilePath | Remove-Item -Force
+    } else {
+        Add-Content -Path $rootModuleFile -Force -Value @'
+[CmdletBinding()]
 param()
+'@
+    }
+    #endregion - Module header
 
+    #region - Module post-header
+    Add-Content -Path $rootModuleFile -Force -Value @'
 $scriptName = $MyInvocation.MyCommand.Name
-Write-Verbose "[$scriptName] Importing subcomponents"
+Write-Verbose "[$scriptName] Importing module"
 
+'@
+    #endregion - Module post-header
+
+    #region - Data and variables
+    Add-Content -Path $rootModuleFile.FullName -Force -Value @'
 #region - Data import
 Write-Verbose "[$scriptName] - [data] - Processing folder"
 $dataFolder = (Join-Path $PSScriptRoot 'data')
@@ -71,56 +82,66 @@ Write-Verbose "[$scriptName] - [data] - Done"
 #endregion - Data import
 
 '@
+    #endregion - Data and variables
 
-    $folderProcessingOrder = @(
-        'init',
-        'classes',
+    #region - Add content from subfolders
+    $scriptFoldersToProcess = @(
         'private',
         'public'
     )
 
-    $subFolders = Get-ChildItem -Path $SourceFolderPath -Directory -Force | Where-Object -Property Name -In $folderProcessingOrder
-    foreach ($subFolder in $subFolders) {
-        Add-ContentFromItem -Path $subFolder.FullName -RootModuleFilePath $rootModuleFile.FullName -RootPath $SourceFolderPath
+    foreach ($scriptFolder in $scriptFoldersToProcess) {
+        $scriptFolder = Join-Path -Path $OutputFolderPath -ChildPath $scriptFolder
+        if (-not (Test-Path -Path $scriptFolder)) {
+            continue
+        }
+        Add-ContentFromItem -Path $scriptFolder -RootModuleFilePath $rootModuleFile -RootPath $OutputFolderPath
+        Remove-Item -Path $scriptFolder -Force -Recurse
     }
+    #endregion - Add content from subfolders
 
-    $files = $SourceFolderPath | Get-ChildItem -File -Force -Filter '*.ps1'
+    #region - Add content from *.ps1 files on module root
+    $files = $OutputFolderPath | Get-ChildItem -File -Force -Filter '*.ps1'
     foreach ($file in $files) {
-        $relativePath = $file.FullName.Replace($SourceFolderPath, '').TrimStart($pathSeparator)
-        Add-Content -Path $rootModuleFile.FullName -Force -Value @"
+        $relativePath = $file.FullName.Replace($OutputFolderPath, '').TrimStart($pathSeparator)
+        Add-Content -Path $rootModuleFile -Force -Value @"
 #region - From $relativePath
 Write-Verbose "[`$scriptName] - [$relativePath] - Importing"
 
 "@
-        Get-Content -Path $file.FullName | Add-Content -Path $rootModuleFile.FullName -Force
+        Get-Content -Path $file.FullName | Add-Content -Path $rootModuleFile -Force
 
-        Add-Content -Path $rootModuleFile.FullName -Force -Value @"
+        Add-Content -Path $rootModuleFile -Force -Value @"
 Write-Verbose "[`$scriptName] - [$relativePath] - Done"
 #endregion - From $relativePath
 
 "@
         $file | Remove-Item -Force
     }
+    #endregion - Add content from *.ps1 files on module root
 
-    $functionsToExport = Get-PSModuleFunctionsToExport -SourceFolderPath $SourceFolderPath
+    #region - Export-ModuleMember
+    $functionsToExport = Get-PSModuleFunctionsToExport -SourceFolderPath $OutputFolderPath
     $functionsToExport = $($functionsToExport -join "','")
 
-    $cmdletsToExport = Get-PSModuleCmdletsToExport -SourceFolderPath $SourceFolderPath
+    $cmdletsToExport = Get-PSModuleCmdletsToExport -SourceFolderPath $OutputFolderPath
     $cmdletsToExport = $($cmdletsToExport -join "','")
 
-    $variablesToExport = Get-PSModuleVariablesToExport -SourceFolderPath $SourceFolderPath
+    $variablesToExport = Get-PSModuleVariablesToExport -SourceFolderPath $OutputFolderPath
     $variablesToExport = $($variablesToExport -join "','")
 
-    $aliasesToExport = Get-PSModuleAliasesToExport -SourceFolderPath $SourceFolderPath
+    $aliasesToExport = Get-PSModuleAliasesToExport -SourceFolderPath $OutputFolderPath
     $aliasesToExport = $($aliasesToExport -join "','")
 
     $params = @{
-        Path  = $rootModuleFile.FullName
+        Path  = $rootModuleFile
         Force = $true
         Value = "Export-ModuleMember -Function '$functionsToExport' " +
         "-Cmdlet '$cmdletsToExport' -Variable '$variablesToExport' -Alias '$aliasesToExport'"
     }
     Add-Content @params
+    #endregion - Export-ModuleMember
+
     Stop-LogGroup
     #endregion Build root module
 
@@ -130,10 +151,10 @@ Write-Verbose "[`$scriptName] - [$relativePath] - Done"
     Stop-LogGroup
 
     Start-LogGroup 'Format root module - Format'
-    $AllContent = Get-Content -Path $rootModuleFile.FullName -Raw
+    $AllContent = Get-Content -Path $rootModuleFile -Raw
     $settings = (Join-Path -Path $PSScriptRoot 'PSScriptAnalyzer.Tests.psd1')
     Invoke-Formatter -ScriptDefinition $AllContent -Settings $settings |
-        Out-File -FilePath $rootModuleFile.FullName -Encoding utf8BOM -Force
+        Out-File -FilePath $rootModuleFile -Encoding utf8BOM -Force
     Stop-LogGroup
 
     Start-LogGroup 'Format root module - Result'

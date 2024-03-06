@@ -10,21 +10,21 @@ Stop-LogGroup
 
 Start-LogGroup 'Loading inputs'
 $moduleName = ($env:GITHUB_ACTION_INPUT_Name | IsNullOrEmpty) ? $env:GITHUB_REPOSITORY_NAME : $env:GITHUB_ACTION_INPUT_Name
-$sourceModulePath = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath $env:GITHUB_ACTION_INPUT_Path $moduleName
+$moduleSourceFolderPath = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath $env:GITHUB_ACTION_INPUT_Path $moduleName
 Write-Verbose "Module name:         [$moduleName]"
-Write-Verbose "Source module path:  [$sourceModulePath]"
-if (-not (Test-Path -Path $sourceModulePath)) {
-    throw "Module path [$sourceModulePath] does not exist."
+Write-Verbose "Source module path:  [$moduleSourceFolderPath]"
+if (-not (Test-Path -Path $moduleSourceFolderPath)) {
+    throw "Module path [$moduleSourceFolderPath] does not exist."
 }
 
-$modulesOutputPath = Join-Path $env:GITHUB_WORKSPACE $env:GITHUB_ACTION_INPUT_ModulesOutputPath
-Write-Verbose "Modules output path: [$modulesOutputPath]"
-$docsOutputPath = Join-Path $env:GITHUB_WORKSPACE $env:GITHUB_ACTION_INPUT_DocsOutputPath
-Write-Verbose "Docs output path:    [$docsOutputPath]"
+$modulesOutputFolderPath = Join-Path $env:GITHUB_WORKSPACE $env:GITHUB_ACTION_INPUT_ModulesOutputPath
+Write-Verbose "Modules output path: [$modulesOutputFolderPath]"
+$docsOutputFolderPath = Join-Path $env:GITHUB_WORKSPACE $env:GITHUB_ACTION_INPUT_DocsOutputPath
+Write-Verbose "Docs output path:    [$docsOutputFolderPath]"
 Stop-LogGroup
 $params = @{
-    SourcePath        = $sourceModulePath
-    ModulesOutputPath = $modulesOutputPath
-    DocsOutputPath    = $docsOutputPath
+    ModuleSourceFolderPath  = $moduleSourceFolderPath
+    ModulesOutputFolderPath = $modulesOutputFolderPath
+    DocsOutputFolderPath    = $docsOutputFolderPath
 }
 Build-PSModule @params

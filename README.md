@@ -1,321 +1,224 @@
 # Build-Module
 
-Action that is used to build a PowerShell module
+This action "compiles" the module source code into a efficient PowerShell module that is ready to be published to the PowerShell Gallery.
 
 ## Supported module types
 
-- Core PS modules
 - Script module type
 - Manifest module type
 
-Not Supported:
+## Supported practices and principles
 
-- Exclusive Desktop modules
-- Binary modules
-- DSC resources
-- Workflows
-- CIM commands
-- ExperimentalFeatures
-- Crescendo modules
-- Role capabilities
-- Help in different languages
-- [Updateable help](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_updatable_help?view=powershell-7.3)
+- [PowerShellGallery Publishing Guidelines and Best Practices](https://learn.microsoft.com/powershell/gallery/concepts/publishing-guidelines) are followed as much as possible.
 
-## DECISIONS
+## How it works
 
-- The ModuleVersion is generated from the Publish-PSModule function, based on available version and lables on PRs, not from the module manifest.
-- Modules are default located under the '.\src' folder which is the root of the repo.
-- Module name = the name of the folder under src. Inherited decision from PowerShell team.
-- The module manifest file = name of the folder.
-- The manifest file = name of the folder.
-- The basis of the module manifest comes from the defined manifest file.
-- Values that are not defined in the module manifest file are generated from reading the module files.
-- If no RootModule is defined in the manifest file, we assume a .psm1 file with the same name as the module is on root.
-- Currently only Script and Manifest modules are supported.
-- The output folder = .\outputs on the root of the repo.
-- The module that is build is stored under the output folder in a folder with the same name as the module.
-- A new module manifest file is created every time to get a new GUID, so that the specific version of the module can be imported.
+During the build process the following steps are performed:
+
+1. Copies the source code of the module to an output folder.
+1. Builds the module manifest file based of info on the GitHub repo and source code. For more info see the [Module Manifest](#module-manifest) section for more information.
+1. Builds the root module (.psm1) file by combining source code and adding automation into the root module file. For more info see the [Root module](#root-module) section for more information.
+1. Builds the module documentation using platyPS and comment based help in the source code. For more info see the [Module documentation](#module-documentation) section for more information.
+
+## Usage
+
+| Name | Description | Required | Default |
+| --- | --- | --- | --- |
+| Name | Name of the module to process. | false |  |
+| Path | Path to the folder where the modules are located. | false | src |
+| ModulesOutputPath | Path to the folder where the built modules are outputted. | false | outputs/modules |
+| DocsOutputPath | Path to the folder where the built docs are outputted. | false | outputs/docs |
 
 ## Repository structure
 
+The test and build process is based on the following repository structure. The PSModule framework is expecting the modules to follow this structure as some of the
+paths and calculations are based on this structure. Not following this might result in the build process not working as expected.
+
 ```txt
-. <- repo root
+.
 ├─ .github/
 │  └- workflows/
-│     └- ModuleName.yml
-├─ .vscode/
-├─ docs/
-├─ icons/
-├─ images/
-├─ outputs/
-|  ├─ docs/
-|  └─ modules/
-├─ scripts/
-├─ src/
-│  ├─ ModuleName/
+│     └- Process-PSModule.yml           -> The workflow file based on [Process-PSModule](https://github.com/PSModule/Process-PSModule) template.
+├─ .vscode/                             -> The settings for the Visual Studio Code aligned with the PSModule framework formatting and linting practices.
+├─ icon/
+|  └- <icon>.png                        -> Icon file automatically used in the module manifest file if nothing else is specified.
+├─ outputs/                             -> The output folder created during build. This is a temporary folder that should not be committed to the repository.
+|  ├─ docs/                             -> The output folder for the documentation.
+|  |  └─ ModuleName/                    -> The output folder for the module.
+|  └─ modules/                          -> The output folder for the module.
+|     └─ ModuleName/                    -> The output folder for the module.
+├─ src/                                 -> The source code for the module.
+│  ├─ ModuleName/                       -> The source code folder for the module. Kept like this for ease of testing. This folder can be loaded as a module.
 │  │  ├─ assembly/                      -> All .dll files are collected to RequiredAssemblies
 │  │  │  └─ <dlls>                      -> loaded during import via RequiredAssemblies
-│  │  ├─ classes/                       -> All .ps1 files are collected to ScriptsToProcess
+│  │  ├─ classes/                       -> All .ps1 files are collected to ScriptsToProcess and loaded to the caller session (parent of module session)
 │  │  │  ├─ <ClassName>.ps1             -> loaded during import via ScritsToProcess
 │  │  │  ├─ <ClassName>.Format.ps1xml   -> loaded during import via FormatsToProcess (collected based on *.Formats.ps1xml files in the root of the folder)
 │  │  │  └─ <ClassName>.Type.ps1xml     -> loaded during import via TypesToProcess (collected based on *.Types.ps1xml files in the root of the folder)
+│  │  ├─ data/                          -> Loads .psd1 files into the module session.
 │  │  ├─ en/
 │  │  |  ├─ en-US/                      -> Search here first for OS = en-US, then parent, en. Get-Help and platyPS reads this.
 │  │  │  └─ about_<ComponentName>.help.txt
-│  │  ├─ private/
-│  │  ├─ public/
-│  │  ├─ scripts/
-│  │  ├─ types/
-│  │  ├─ ModuleName.psd1
-│  │  └- ModuleName.psm1
+│  │  ├─ init/                          -> All .ps1 files are added to the root module and can contain scripts that run during import before functions are loaded.
+│  │  ├─ modules/                       -> All .dll, psm1 and ps1 files are collected to NestedModules and loaded to the module session.
+│  │  ├─ private/                       -> All .ps1 files are added to the root module, but not exported to the caller session.
+│  │  ├─ public/                        -> All .ps1 files are added to the root module, and exported to the caller session.
+|  |  ├─ resources/                     -> All .psm1 files are collected to DscResourcesToExport and loaded to the module session.
+│  │  ├─ scripts/                       -> All .ps1 files are collected to ScriptsToProcess and loaded to the caller session (parent of module session)
+|  |  ├─ <ScriptName>.ps1               -> All *.ps1 files are added to the root module last and can contain scripts that run during import after functions are loaded.
+|  |  ├─ header.ps1                     -> Added to the root module first. Typically for Pester supressions and [CmdletBinding()].
+│  │  ├─ ModuleName.psd1                -> The module manifest file, if not present, it is generated.
+│  │  └- ModuleName.psm1                -> The root module file, if not present, it is generated from the source files.
 ├─ tests/
 │  └- ModuleName/
 │     └- ModuleName.Tests.ps1
 ├─ .gitattributes
 ├─ .gitignore
-├─ LICENSE
+├─ LICENSE                              -> The license file for the module. Used in the module manifest file.
 └─ README.md
 ```
 
+## Root module
 
-## How the definition file is used
+The root module file is the main file that is loaded when the module is imported.
+It is built from the source code files in the module folder in the following order:
 
-- The module manifest is regenerated every time the module is built. The generation is based on information from the a powershell data file (with the same properties as the menifest file), and the source files.
-- To test the module manifest, Test-ModuleManifest
+1. Adds module headers from `header.ps1`.
+1. Adds data loader automation that loads files from the `data` folder as variables in the module scope. The variables are available using the ´$script:<filename>´ syntax.
+1. Adds content from subfolders, in the order:
+  1. Init
+  1. Private
+  1. Public
+  1. *.ps1 on module root
+1. Adds the Export-ModuleMember function to the end of the file, to make sure that only the functions, cmdlets, variables and aliases that are defined in the module are exported.
 
+### The root module in the src folder
 
-Could eval to calculate the module like this:
+The root module file that is included in the source files contains the same functionality but is not optimized for performance.
+The goal with this is to have a quick way to import and test the module without having to build it.
+
+## Module manifest
+
+The module manifest file is the file that describes the module and its content. It is used by PowerShell to load the module and its prerequisites.
+The file also contains important metadata that is used by the PowerShell Gallery.
+
+During the module manifest build process the following steps are performed:
+
+1. Get the manifest file from the source code. Content from this file overrides any value that would be calculated based on the source code.
+1. Find and set the `RootModule` based on file name and extension.
+1. Set a temporary `ModuleVersion`, as this is set during the release process by [Publish-PSModule](https://github.com/PSModule/Publish-PSModule).
+1. Set the `Author` and `CompanyName` based on GitHub Owner.
+1. Set the `Copyright` information based on a default text (`(c) 2024 >>OwnerName<<. All rights reserved.`) and adds either the `Author`, `CompanyName` or both (`Author | CompanyName`) when these are different.
+1. Set the `Description` based on the GitHub repo description.
+1. Set various properties in the manifest such as `PowerShellHostName`, `PowerShellHostVersion`, `DotNetFrameworkVersion`, `ClrVersion`, and `ProcessorArchitecture`. There is currently no automation for these properties.
+1. Get the list of files in the module source folder and set the `FileList` property in the manifest.
+1. Get the list of required assemblies (`*.dll` files) from the `assemblies` folder and set the `RequiredAssemblies` property in the manifest.
+1. Get the list of nested modules (`*.psm1` files) from the `modules` folder and set the `NestedModules` property in the manifest.
+1. Get the list of scripts to process (`*.ps1` files) from the `classes` and `scripts` folders and set the `ScriptsToProcess` property in the manifest. This ensures that the scripts are loaded to the caller session (parent of module session).
+1. Get the list of types to process by searching for `*.Types.ps1xml` files in the entire module source folder and set the `TypesToProcess` property in the manifest.
+1. Get the list of formats to process by searching for `*.Format.ps1xml` files in the entire module source folder and set the `FormatsToProcess` property in the manifest.
+1. Get the list of DSC resources to export by searching for `*.psm1` files in the `resources` folder and set the `DscResourcesToExport` property in the manifest.
+1. Get the list of functions, cmdlets, aliases, and variables to export and set the respective properties in the manifest.
+1. Get the list of modules by searching for all `*.psm1` files in the entire module source folder, excluding the root module and set the `ModuleList` property in the manifest.
+1. Gather information about required modules, PowerShell version, and compatible PS editions from the module source files and set the respective properties in the manifest.
+1. The following values are gathered from the GitHub repo:
+  - `Tags` are generated from Repository topics in addition to compatability tags gathered from the source code.
+  - `LicenseUri` is generated assuming there is a `LICENSE` file on the root of the repository.
+  - `ProjectUri` is the url to the GitHub repository
+  - `IconUri` is generated assuming there is a `icon.png` file in the `icon` folder on the repository root.
+1. `ReleaseNotes` currently not automated, but could be the PR description or release description.
+1. `PreRelease` is not managed here, but is managed from [Publish-PSModule](https://github.com/PSModule/Publish-PSModule)
+1. `RequireLicenseAcceptance` is not automated and defaults to `false`, and
+1. `ExternalModuleDependencies` is currenlty not automated.
+1. `HelpInfoURI` is not automated.
+1. Create a new manifest file in the output folder with the gathered info above. This also generates a new `GUID` for the module.
+1. Format the manifest file using the `Set-ModuleManifest` function from the [Utilities](https://github.com/PSModule/Utilities) module.
+
+Linking the description to the module manifest file might show more how this works:
+
 ```powershell
-$content = @'
 @{
-    RootModule    = $(Get-ChildItem -Path $PSScriptRoot1 -File | Where-Object { $_.BaseName -like $_.Directory.BaseName -and ($_.Extension -in '.psm1', '.ps1', '.psd1', '.dll', '.cdxml', '.xaml') } | Select-Object -ExpandProperty Name )
-
-    PrivateData = @{
-
+    RootModule             = 'Utilities.psm1' # Get files from root of folder wher name is same as the folder and file extension is .psm1, .ps1, .psd1, .dll, .cdxml, .xaml. Error if there are multiple files that meet the criteria.
+    ModuleVersion          = '0.0.1' # Set during release using Publish-PSModule.
+    CompatiblePSEditions   = @() # Get from source files, REQUIRES -PSEdition <PSEdition-Name>, null if not provided.
+    GUID                   = '<GUID>' # Generated when finally saving the manifest using New-ModuleManifest.
+    Author                 = 'PSModule' # Get from GitHub Owner, else use info from source manifest file.
+    CompanyName            = 'PSModule' # Get from GitHub Owner, else use info from source manifest file.
+    Copyright              = '(c) 2024 PSModule. All rights reserved.' # Generated from the current year and Author and Company values.
+    Description            = 'This is a module.' # Get from the repository description, else use info from source manifest file.
+    PowerShellVersion      = '' # Get from source files, REQUIRES -Version <N>[.<n>], null if not provided.
+    PowerShellHostName     = '' # Get from manifest file, null if not provided.
+    PowerShellHostVersion  = '' # Get from manifest file, null if not provided.
+    DotNetFrameworkVersion = '' # Get from manifest file, null if not provided.
+    ClrVersion             = '' # Get from manifest file, null if not provided.
+    ProcessorArchitecture  = '' # Get from manifest file, null if not provided.
+    RequiredModules        = @() # Get from source files, REQUIRES -Modules <Module-Name> | <Hashtable> -> Need to be installed and loaded on build time. Will be installed in global session state during installtion.
+    RequiredAssemblies     = @() # Get from assemblies\*.dll.
+    ScriptsToProcess       = @() # Get from scripts\*.ps1 and classes\*.ps1 ordered by name. These are loaded to the caller session (parent of module session).
+    TypesToProcess         = @() # Get from *.Types.ps1xml anywhere in the source module folder.
+    FormatsToProcess       = @() # Get from *.Format.ps1xml anywhere in the source module folder.
+    NestedModules          = @() # Get from modules\*.psm1.
+    FunctionsToExport      = @() # Get from public\*.ps1.
+    CmdletsToExport        = @() # Get from manifest file.
+    VariablesToExport      = @() # To be automated, currently adds '@()' to the manifest file.
+    AliasesToExport        = '*' # To be automated, currently adds '*' to the manifest file.
+    DscResourcesToExport   = @() # Get from resources\*.psm1.
+    ModuleList             = @() # Get from listing all .\*.psm1 files - Informational only.
+    FileList               = @() # Get from listing all .\* files - Informational only.
+    PrivateData            = @{  # <https://learn.microsoft.com/en-us/powershell/gallery/concepts/package-manifest-affecting-ui?view=powershellget-2.x>
         PSData = @{
-
-            # Tags applied to this module. These help with module discovery in online galleries.
-            Tags = @( 'AzureAutomation' )
-        }
-    }
-}
-'@
-
-Out-File -FilePath .\test.psd1 -InputObject $content -Encoding utf8 -Force
-
-# - During build:
-$ManifestData = Invoke-Expression -Command (Get-Content -Path .\test.psd1 -Raw)
-$PSData = $ManifestData.PrivateData.PSData
-$ManifestData.Remove('PrivateData')
-New-ModuleManifest @ManifestData @PSData -Path .\test2.psd1
-```
-
-Most data should be able to be overridable from a manifest file.
-
-
-```powershell
-@{
-    RootModule             = 'Module1.psm1' # Get files from root of folder wher name is same as the folder and file extension is .psm1, .ps1, .psd1, .dll, .cdxml, .xaml. Error if there are multiple files that meet the criteria.
-    ModuleVersion          = '0.0.1' # Set from during a release, uses GitVersion and Git Releases at the same time.
-    CompatiblePSEditions   = @() # Get from source files, REQUIRES -PSEdition <PSEdition-Name>, null if not provided https://learn.microsoft.com/en-us/powershell/module/Microsoft.PowerShell.Core/About/about_PowerShell_Editions
-    GUID                   = <GUID> # Updated during build -> always created uniquely using New-ModuleManifest
-    Author                 = 'marst' # Get from manifest file
-    CompanyName            = 'Unknown' # Get from manifest file
-    Copyright              = '(c) YYYY $Author|$Company. All rights reserved.' # Generated from Author and Company and adds the current year.
-    Description            = '' # Get from the repo description.
-    PowerShellVersion      = '' # Get from source files, REQUIRES -Version <N>[.<n>], null if not provided
-    PowerShellHostName     = '' # Get from manifest file, null if not provided
-    PowerShellHostVersion  = '' # Get from manifest file, null if not provided
-    DotNetFrameworkVersion = '' # Get from manifest file, null if not provided
-    ClrVersion             = '' # Get from manifest file, null if not provided
-    ProcessorArchitecture  = '' # Get from manifest file, null if not provided
-    RequiredModules        = @() # Get from source files, REQUIRES -Modules <Module-Name> | <Hashtable> -> Need to be installed and loaded on build time. Will be installed in global session state on installtion.
-    RequiredAssemblies     = @() # Get from manifest file, null if not provided
-    ScriptsToProcess       = @() # Get from moduleRoot\scripts\*.ps1 + moduleRoot\classes*.ps1 ordered by name. These are loaded to the caller session (parent of module session)
-    TypesToProcess         = @() # Get from moduleRoot\**Type.ps1xml
-    FormatsToProcess       = @() # Get from moduleRoot\**.Format.ps1xml
-    NestedModules          = @() # Get from moduleRoot\modules\*.psd1 - Could be used to load modules/files into the module session. Not exported to caller session.
-    FunctionsToExport      = @() # Get from moduleRoot\public\*.ps1
-    CmdletsToExport        = @() # Get from moduleRoot\public\*.ps1
-    VariablesToExport      = '*' # Get from moduleRoot\public\*.ps1
-    AliasesToExport        = @() # Get from moduleRoot\public\*.ps1
-    DscResourcesToExport   = @() # Get from moduleRoot\dscResources\*.psm1
-    ModuleList             = @() # Get from listing all .\*.psm1 files - Informational only
-    FileList               = @() # Get from listing all .\* files - Informational only
-    PrivateData            = @{ <https://learn.microsoft.com/en-us/powershell/gallery/concepts/package-manifest-affecting-ui?view=powershellget-2.x>
-        PSData = @{
-            Tags                       = @() #Special tag: AzureAutomationNotSupported
-            LicenseUri                 = '' # Generate public link to .\LICENSE
-            ProjectUri                 = '' # Generate public link to GitHub Repository
-            IconUri                    = '' # Get from .\icons\*.png
-            ReleaseNotes               = '' # Update during release -> PS message to main?
-            Prerelease                 = '' # Update during release -> 'prerelease tag' Supports SemVer 1.0.0 https://learn.microsoft.com/en-us/powershell/gallery/concepts/module-prerelease-support?view=powershellget-2.x
-            RequireLicenseAcceptance   = $false ## Get from manifest file, if empty default is $false
-            ExternalModuleDependencies = @()
-            ExperimentalFeatures       = @( # Get from script files
+            Tags                       = @() # Get from repository topics + compatability tags collected from source files.
+            LicenseUri                 = '' # Generate public link to .\LICENSE.
+            ProjectUri                 = '' # Generate public link to GitHub Repository.
+            IconUri                    = '' # Get from .\icon\icon.png.
+            ReleaseNotes               = '' # Update during release -> PR description or release description.
+            Prerelease                 = '' # Update during release -> uses a normalized version of the branch name.
+            RequireLicenseAcceptance   = $false ## Get from manifest file, default is $false.
+            ExternalModuleDependencies = @() # Get from source manifest file
+            ExperimentalFeatures       = @( # Get from source manifest file
                 @{
-                    Name = "PSWebCmdletV2"
-                    Description = "Rewrite the web cmdlets for better performance"
-                },
-            ),
+                    Name = "SomeExperimentalFeature"
+                    Description = "This is an experimental feature."
+                }
+            )
+        }
         OtherKeys = @{} # Get from manifest file
     }
-    HelpInfoURI            = '' # Update during release -> Generate public link to GitHub release
-    DefaultCommandPrefix   = '' # Get from manifest file, null if not provided
+    HelpInfoURI            = '' # Get from source manifest file
+    DefaultCommandPrefix   = '' # Get from source manifest file
 }
 ```
 
-| Name | Type | Mandatory | Default | Accepts * | Description | Source | Notes | Example |
-| ---- | ---- | --------- | ------- | --------- | ----------- | ------ | ----- | ------- |
-| RootModule | String | Yes | '' | X | The name of the module's root or main module. Only exported members are loaded to caller scope, rest is script scope. | Manifest | | 'Module1.psm1' |
+### The module manifest in the src folder
 
+The module manifest file that is included in the source files contains the same functionality but is not optimized for performance and does not automatically gather all the information that is gathered during the build process.
+The goal with this is to have a quick way to import and test the module without having to build it.
+
+The source module manifest is also the only place where some of the values can be controlled. These values are typically difficult to calculate and are therefore not automated.
+
+## Module documentation
+
+The module documentation is built using platyPS and comment based help in the source code.
+The documentation is currently not published anywhere, but should be published to GitHub Pages in a future release.
 
 ## Sources
-PowerShell Gallery:
-- <https://learn.microsoft.com/en-us/powershell/gallery/overview?view=powershellget-2.x>
-- <https://learn.microsoft.com/en-us/powershell/gallery/concepts/publishing-guidelines?view=powershellget-2.x>
 
 Modules:
-- <https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_modules?view=powershell-7.3>
-- <https://learn.microsoft.com/en-us/powershell/scripting/developer/module/understanding-a-windows-powershell-module?view=powershell-7.3>
-- <https://learn.microsoft.com/en-us/powershell/scripting/developer/module/writing-a-windows-powershell-module?view=powershell-7.3>
+
+- [PowerShell scripting performance considerations](https://learn.microsoft.com/powershell/scripting/dev-cross-plat/performance/script-authoring-considerations)
+- [PowerShell module authoring considerations](https://learn.microsoft.com/powershell/scripting/dev-cross-plat/performance/module-authoring-considerations):
+
+Documentation:
+
+- [platyPS reference](https://learn.microsoft.com/powershell/module/platyps/?source=recommendations)
+- [PlatyPS overview](https://learn.microsoft.com/powershell/utility-modules/platyps/overview?view=ps-modules)
+- [about_Comment_Based_Help](https://go.microsoft.com/fwlink/?LinkID=123415)
+- [Supporting Updatable Help](https://learn.microsoft.com/powershell/scripting/developer/help/supporting-updatable-help)
 
 Module manifest:
-- <https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_module_manifests?view=powershell-7.3>
-- <https://learn.microsoft.com/en-us/powershell/scripting/developer/module/how-to-write-a-powershell-module-manifest?view=powershell-7.3>
-- <https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/new-modulemanifest?view=powershell-7.3>
-- <https://learn.microsoft.com/en-us/powershell/gallery/concepts/package-manifest-affecting-ui?view=powershellget-2.x#powershell-gallery-feature-elements-controlled-by-the-module-manifest>
 
-Requires:
-- <https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_requires?view=powershell-7.3>
-
-Shields:
-- <https://shields.io/badges> -> <https://img.shields.io/powershellgallery/p/:packageName.svg>
-
-Define quality:
-- <https://github.com/PowerShell/DscResources/blob/master/HighQualityModuleGuidelines.md#creating-a-high-quality-dsc-resource-module>
-
-
-
-The module loader file `module.psm1`:
-
-```powershell
-#
-# Script module for module 'PSScriptAnalyzer'
-#
-Set-StrictMode -Version Latest
-
-# Set up some helper variables to make it easier to work with the module
-$PSModule = $ExecutionContext.SessionState.Module
-$PSModuleRoot = $PSModule.ModuleBase
-
-# Import the appropriate nested binary module based on the current PowerShell version
-$binaryModuleRoot = $PSModuleRoot
-
-
-if (($PSVersionTable.Keys -contains "PSEdition") -and ($PSVersionTable.PSEdition -ne 'Desktop')) {
-    $binaryModuleRoot = Join-Path -Path $PSModuleRoot -ChildPath 'coreclr'
-}
-else
-{
-    if ($PSVersionTable.PSVersion -lt [Version]'5.0')
-    {
-        $binaryModuleRoot = Join-Path -Path $PSModuleRoot -ChildPath 'PSv3'
-    }
-}
-
-$binaryModulePath = Join-Path -Path $binaryModuleRoot -ChildPath 'Microsoft.Windows.PowerShell.ScriptAnalyzer.dll'
-$binaryModule = Import-Module -Name $binaryModulePath -PassThru
-
-# When the module is unloaded, remove the nested binary module that was loaded with it
-$PSModule.OnRemove = {
-    Remove-Module -ModuleInfo $binaryModule
-}
-```
-
-```powershell
-@{
-    # Script module or binary module file associated with this manifest.
-    RootModule = if($PSEdition -eq 'Core')
-    {
-        'coreclr\MyCoreClrRM.dll'
-    }
-    else # Desktop
-    {
-        'clr\MyFullClrRM.dll'
-    }
-
-    # Supported PSEditions
-    CompatiblePSEditions = 'Desktop', 'Core'
-
-    # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-    NestedModules = if($PSEdition -eq 'Core')
-    {
-        'coreclr\MyCoreClrNM1.dll',
-        'coreclr\MyCoreClrNM2.dll'
-    }
-    else # Desktop
-    {
-        'clr\MyFullClrNM1.dll',
-        'clr\MyFullClrNM2.dll'
-    }
-}
-```
-
-
-Best practice:
-- Performance [Script](https://learn.microsoft.com/en-us/powershell/scripting/dev-cross-plat/performance/script-authoring-considerations?view=powershell-7.3) [Module](https://learn.microsoft.com/en-us/powershell/scripting/dev-cross-plat/performance/module-authoring-considerations?view=powershell-7.3):
-  - Suppressing output
-    - $null = <statement>
-  - Array addition
-    - `[System.Collections.Generic.List[object]]::new()` and then `$list.Add($item)`
-    - `[System.Collections.ArrayList]::new()` and then `$list.Add($item)`
-  - String addition
-    - Use `-join` operator not `+=`
-  - Processing large files
-    ```powershell
-        try {
-            $stream = [System.IO.StreamReader]::new($path)
-            while ($line = $stream.ReadLine()) {
-                if ($line.Length -gt 10) {
-                    $line
-                }
-            }
-        } finally {
-            $stream.Dispose()
-        }
-    ```
-    Instead of `Get-Content $path | Where-Object { $_.Length -gt 10 }`
-  - Looking up entries by property in large collections
-    - Lookup using hash tables and keys to get items, instead of using where-object.
-  - Avoid Write-Host
-    - Use Write-Output instead, or Write-Verbose for pipeline logs.
-  - Avoid repeated calls to a function
-    - Move the loop into the function instead (call it only once).
-  - Avoid calling functions that support append, with append.
-    - Instead gather all things that must be set, and then call the function once to set them all.
-  - Dont use `*` in `...ToExport` properties for a module manifest.
-    - Instead use explicit names. Best approach is to use a build step to generate the list of functions, cmdlets, variables and aliases to export.
-    - If nothing is defined, then the default should be to export an empty array (`@()`).
-  - Avoid CDXML
-    - Use other types of modules instead. In the order listed below:
-      - Binary modules
-      - Script/Manifest modules
-      - CDXML modules
-- [Security](https://learn.microsoft.com/en-us/powershell/scripting/dev-cross-plat/security/preventing-script-injection?view=powershell-7.3)
-  - Preventing script injection attacks
-    - Restruct the use of `Invoke-Expression`.
-    - Use strongly typed parameters, and validate input. Think that all input can mask a command.
-    - Wrap strings in single quotes, and use the `-f` operator to insert variables.
-    - Use the EscapeSingleQuotedStringContent() method
-  - Detecting vulnerable code with Injection Hunter
-
-
-- <https://learn.microsoft.com/en-us/powershell/gallery/concepts/publishing-guidelines?view=powershellget-2.x#tag-your-package-with-the-compatible-pseditions-and-platforms>
-Writing docs:
-
-- <https://learn.microsoft.com/en-us/powershell/module/platyps/?source=recommendations>
-- <https://learn.microsoft.com/en-us/powershell/utility-modules/platyps/overview?view=ps-modules>
-- <https://go.microsoft.com/fwlink/?LinkID=123415>
-- <https://help.github.com/categories/writing-on-github/>
-- [What about PowerShell updateable help?](https://learn.microsoft.com/en-us/powershell/scripting/developer/help/supporting-updatable-help?view=powershell-7.3)
+- [about_Module_Manifests](https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_module_manifests)
+- [How to write a PowerShell module manifest](https://learn.microsoft.com/powershell/scripting/developer/module/how-to-write-a-powershell-module-manifest)
+- [New-ModuleManifest](https://learn.microsoft.com/powershell/module/microsoft.powershell.core/new-modulemanifest)
+- [Package metadata values that impact the PowerShell Gallery UI](https://learn.microsoft.com/powershell/gallery/concepts/package-manifest-affecting-ui#powershell-gallery-feature-elements-controlled-by-the-module-manifest)
+- [PowerShellGallery Publishing Guidelines and Best Practices](https://learn.microsoft.com/en-us/powershell/gallery/concepts/publishing-guidelines#tag-your-package-with-the-compatible-pseditions-and-platforms)
