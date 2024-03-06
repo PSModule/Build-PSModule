@@ -10,31 +10,31 @@ function Build-PSModuleDocumentation {
         It will generate the markdown files for the module help and copy them to the output folder.
 
         .EXAMPLE
-        Build-PSModuleDocumentation -SourceFolderPath 'C:\MyModule\src\MyModule' -OutputFolderPath 'C:\MyModule\build\MyModule'
+        Build-PSModuleDocumentation -ModuleOutputFolder 'C:\MyModule\src\MyModule' -DocsOutputFolder 'C:\MyModule\build\MyModule'
     #>
     [CmdletBinding()]
     param(
-        # Folder where the module source code is located. 'src/MyModule'
+        # Folder where the module source code is located. 'outputs/modules/MyModule'
         [Parameter(Mandatory)]
-        [System.IO.DirectoryInfo] $ModuleSourceFolder,
+        [System.IO.DirectoryInfo] $ModuleOutputFolder,
 
-        # Folder where the built modules are outputted. 'outputs/modules/MyModule'
+        # Folder where the documentation for the modules should be outputted. 'outputs/docs/MyModule'
         [Parameter(Mandatory)]
-        [System.IO.DirectoryInfo] $ModuleOutputFolder
+        [System.IO.DirectoryInfo] $DocsOutputFolder
     )
 
     Start-LogGroup "Docs - Dependencies"
-    $moduleName = Split-Path -Path $ModuleSourceFolder -Leaf
+    $moduleName = Split-Path -Path $ModuleOutputFolder -Leaf
 
-    Add-PSModulePath -Path (Split-Path -Path $ModuleSourceFolder -Parent)
-    Import-PSModule -SourceFolderPath $ModuleSourceFolder -ModuleName $moduleName
+    Add-PSModulePath -Path (Split-Path -Path $ModuleOutputFolder -Parent)
+    Import-PSModule -SourceFolderPath $ModuleOutputFolder -ModuleName $moduleName
 
     Start-LogGroup "Build documentation"
-    New-MarkdownHelp -Module $moduleName -OutputFolder $ModuleOutputFolder -Force -Verbose
+    New-MarkdownHelp -Module $moduleName -OutputFolder $DocsOutputFolder -Force -Verbose
     Stop-LogGroup
 
     Start-LogGroup "Build documentation - Result"
-    Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+    Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         Write-Verbose "[$_] - [$(Get-FileHash -Path $_.FullName -Algorithm SHA256)]"
     }
     Stop-LogGroup
