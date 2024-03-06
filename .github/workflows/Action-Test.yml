@@ -4,6 +4,9 @@ run-name: "Action-Test - [${{ github.event.pull_request.title }} #${{ github.eve
 
 on: [pull_request]
 
+env:
+  GH_TOKEN: ${{ github.token }}
+
 jobs:
   ActionTestDefault:
     name: Action-Test - [Default]
