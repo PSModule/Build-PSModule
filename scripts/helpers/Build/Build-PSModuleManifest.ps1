@@ -18,35 +18,36 @@ function Build-PSModuleManifest {
         Justification = 'No real reason. Just toget going.'
     )]
     param(
-        # Name of the module to process.
+        # Folder where the module source code is located. 'src/MyModule'
         [Parameter(Mandatory)]
-        [string] $Name,
+        [System.IO.DirectoryInfo] $ModuleSourceFolder,
 
-        # Path to the folder where the module source code is located.
+        # Folder where the built modules are outputted. 'outputs/modules/MyModule'
         [Parameter(Mandatory)]
-        [string] $SourceFolderPath,
-
-        # Path to the folder where the built modules are outputted.
-        [Parameter(Mandatory)]
-        [string] $OutputFolderPath
+        [System.IO.DirectoryInfo] $ModuleOutputFolder
     )
+
+    <#
+        $ModuleSourceFolder = Get-Item 'C:\Repos\GitHub\PSModule\Utilities\src\Utilities'
+        $ModuleOutputFolder = Get-Item 'C:\Repos\GitHub\PSModule\Utilities\outputs\modules\Utilities'
+    #>
+
 
     #region Build manifest file
     Start-LogGroup "Build manifest file"
-    Write-Verbose "Finding manifest file"
+    $moduleName = Split-Path -Path $ModuleSourceFolder -Leaf
+    $manifestFileName = "$moduleName.psd1"
+    $manifestOutputPath = Join-Path -Path $ModuleOutputFolder -ChildPath $manifestFileName
+    $manifestFile = Get-Item -Path $manifestOutputPath
+    $manifest = Get-ModuleManifest -Path $manifestFile -Verbose:$false
 
-    $manifestFile = Get-PSModuleManifest -SourceFolderPath $SourceFolderPath -As FileInfo
-    $manifestFileName = $manifestFile.Name
+    $manifest.RootModule = Get-PSModuleRootModule -SourceFolderPath $ModuleOutputFolder
+    $manifest.ModuleVersion = '0.0.0'
 
-    $manifest = Get-PSModuleManifest -SourceFolderPath $SourceFolderPath -As Hashtable
-
-    $manifest.RootModule = Get-PSModuleRootModule -SourceFolderPath $SourceFolderPath
-    $manifest.ModuleVersion = '999.0.0'
-
-    $manifest.Author = $manifest.Keys -contains 'Author' ? -not [string]::IsNullOrEmpty($manifest.Author) ? $manifest.Author : $env:GITHUB_REPOSITORY_OWNER : $env:GITHUB_REPOSITORY_OWNER
+    $manifest.Author = $manifest.Keys -contains 'Author' ? ($manifest.Author | IsNotNullOrEmpty) ? $manifest.Author : $env:GITHUB_REPOSITORY_OWNER : $env:GITHUB_REPOSITORY_OWNER
     Write-Verbose "[Author] - [$($manifest.Author)]"
 
-    $manifest.CompanyName = $manifest.Keys -contains 'CompanyName' ? -not [string]::IsNullOrEmpty($manifest.CompanyName) ? $manifest.CompanyName : $env:GITHUB_REPOSITORY_OWNER : $env:GITHUB_REPOSITORY_OWNER
+    $manifest.CompanyName = $manifest.Keys -contains 'CompanyName' ? ($manifest.CompanyName | IsNotNullOrEmpty) ? $manifest.CompanyName : $env:GITHUB_REPOSITORY_OWNER : $env:GITHUB_REPOSITORY_OWNER
     Write-Verbose "[CompanyName] - [$($manifest.CompanyName)]"
 
     $year = Get-Date -Format 'yyyy'
@@ -55,7 +56,8 @@ function Build-PSModuleManifest {
     $manifest.CopyRight = $manifest.Keys -contains 'CopyRight' ? -not [string]::IsNullOrEmpty($manifest.CopyRight) ? $manifest.CopyRight : $copyRight : $copyRight
     Write-Verbose "[CopyRight] - [$($manifest.CopyRight)]"
 
-    $manifest.Description = $manifest.Keys -contains 'Description' ? -not [string]::IsNullOrEmpty($manifest.Description) ? $manifest.Description : 'Unknown' : 'Unknown'
+    $repoDescription = gh repo view --json description | ConvertFrom-Json | Select-Object -ExpandProperty description
+    $manifest.Description = $manifest.Keys -contains 'Description' ? ($manifest.Description | IsNotNullOrEmpty) ? $manifest.Description : $repoDescription : $repoDescription
     Write-Verbose "[Description] - [$($manifest.Description)]"
 
     $manifest.PowerShellHostName = $manifest.Keys -contains 'PowerShellHostName' ? -not [string]::IsNullOrEmpty($manifest.PowerShellHostName) ? $manifest.PowerShellHostName : $null : $null
@@ -70,79 +72,79 @@ function Build-PSModuleManifest {
     $manifest.ClrVersion = $manifest.Keys -contains 'ClrVersion' ? -not [string]::IsNullOrEmpty($manifest.ClrVersion) ? $manifest.ClrVersion : $null : $null
     Write-Verbose "[ClrVersion] - [$($manifest.ClrVersion)]"
 
-    $manifest.ProcessorArchitecture = $manifest.Keys -contains 'ProcessorArchitecture' ? -not [string]::IsNullOrEmpty($manifest.ProcessorArchitecture) ? $manifest.ProcessorArchitecture : 'None' : 'None'
+    $manifest.ProcessorArchitecture = $manifest.Keys -contains 'ProcessorArchitecture' ? -not [string]::IsNullOrEmpty($manifest.ProcessorArchitecture) ? $manifest.ProcessorArchitecture : $null : $null
     Write-Verbose "[ProcessorArchitecture] - [$($manifest.ProcessorArchitecture)]"
 
-    #Get the path separator for the current OS
+    # Get the path separator for the current OS
     $pathSeparator = [System.IO.Path]::DirectorySeparatorChar
 
     Write-Verbose "[FileList]"
-    $files = $SourceFolderPath | Get-ChildItem -File -ErrorAction SilentlyContinue | Where-Object -Property Name -NotLike '*.ps1'
-    $files += $SourceFolderPath | Get-ChildItem -Directory | Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue
-    $files = $files | Select-Object -ExpandProperty FullName | ForEach-Object { $_.Replace($SourceFolderPath, '').TrimStart($pathSeparator) }
+    $files = $ModuleSourceFolder | Get-ChildItem -File -ErrorAction SilentlyContinue | Where-Object -Property Name -NotLike '*.ps1'
+    $files += $ModuleSourceFolder | Get-ChildItem -Directory | Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue
+    $files = $files | Select-Object -ExpandProperty FullName | ForEach-Object { $_.Replace($ModuleSourceFolder, '').TrimStart($pathSeparator) }
     $fileList = $files | Where-Object { $_ -notLike 'public*' -and $_ -notLike 'private*' -and $_ -notLike 'classes*' }
     $manifest.FileList = $fileList.count -eq 0 ? @() : @($fileList)
     $manifest.FileList | ForEach-Object { Write-Verbose "[FileList] - [$_]" }
 
     Write-Verbose "[RequiredAssemblies]"
-    $requiredAssembliesFolderPath = Join-Path $SourceFolderPath 'assemblies'
+    $requiredAssembliesFolderPath = Join-Path $ModuleSourceFolder 'assemblies'
     $requiredAssemblies = Get-ChildItem -Path $RequiredAssembliesFolderPath -Recurse -File -ErrorAction SilentlyContinue -Filter '*.dll' |
         Select-Object -ExpandProperty FullName |
-        ForEach-Object { $_.Replace($SourceFolderPath, '').TrimStart($pathSeparator) }
+        ForEach-Object { $_.Replace($ModuleSourceFolder, '').TrimStart($pathSeparator) }
     $manifest.RequiredAssemblies = $requiredAssemblies.count -eq 0 ? @() : @($requiredAssemblies)
     $manifest.RequiredAssemblies | ForEach-Object { Write-Verbose "[RequiredAssemblies] - [$_]" }
 
     Write-Verbose "[NestedModules]"
-    $nestedModulesFolderPath = Join-Path $SourceFolderPath 'modules'
+    $nestedModulesFolderPath = Join-Path $ModuleSourceFolder 'modules'
     $nestedModules = Get-ChildItem -Path $nestedModulesFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.psm1', '*.ps1' |
         Select-Object -ExpandProperty FullName |
-        ForEach-Object { $_.Replace($SourceFolderPath, '').TrimStart($pathSeparator) }
+        ForEach-Object { $_.Replace($ModuleSourceFolder, '').TrimStart($pathSeparator) }
     $manifest.NestedModules = $nestedModules.count -eq 0 ? @() : @($nestedModules)
     $manifest.NestedModules | ForEach-Object { Write-Verbose "[NestedModules] - [$_]" }
 
     Write-Verbose "[ScriptsToProcess]"
     $allScriptsToProcess = @('scripts', 'classes') | ForEach-Object {
         Write-Verbose "[ScriptsToProcess] - Processing [$_]"
-        $scriptsFolderPath = Join-Path $SourceFolderPath $_
+        $scriptsFolderPath = Join-Path $ModuleSourceFolder $_
         $scriptsToProcess = Get-ChildItem -Path $scriptsFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1' |
             Select-Object -ExpandProperty FullName |
-            ForEach-Object { $_.Replace($SourceFolderPath, '').TrimStart($pathSeparator) }
+            ForEach-Object { $_.Replace($ModuleSourceFolder, '').TrimStart($pathSeparator) }
             $scriptsToProcess
         }
         $manifest.ScriptsToProcess = $allScriptsToProcess.count -eq 0 ? @() : @($allScriptsToProcess)
         $manifest.ScriptsToProcess | ForEach-Object { Write-Verbose "[ScriptsToProcess] - [$_]" }
 
         Write-Verbose "[TypesToProcess]"
-        $typesToProcess = Get-ChildItem -Path $SourceFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.Types.ps1xml' |
+        $typesToProcess = Get-ChildItem -Path $ModuleSourceFolder -Recurse -File -ErrorAction SilentlyContinue -Include '*.Types.ps1xml' |
             Select-Object -ExpandProperty FullName |
-            ForEach-Object { $_.Replace($SourceFolderPath, '').TrimStart($pathSeparator) }
+            ForEach-Object { $_.Replace($ModuleSourceFolder, '').TrimStart($pathSeparator) }
     $manifest.TypesToProcess = $typesToProcess.count -eq 0 ? @() : @($typesToProcess)
     $manifest.TypesToProcess | ForEach-Object { Write-Verbose "[TypesToProcess] - [$_]" }
 
     Write-Verbose "[FormatsToProcess]"
-    $formatsToProcess = Get-ChildItem -Path $SourceFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.Format.ps1xml' |
+    $formatsToProcess = Get-ChildItem -Path $ModuleSourceFolder -Recurse -File -ErrorAction SilentlyContinue -Include '*.Format.ps1xml' |
         Select-Object -ExpandProperty FullName |
-        ForEach-Object { $_.Replace($SourceFolderPath, '').TrimStart($pathSeparator) }
+        ForEach-Object { $_.Replace($ModuleSourceFolder, '').TrimStart($pathSeparator) }
     $manifest.FormatsToProcess = $formatsToProcess.count -eq 0 ? @() : @($formatsToProcess)
     $manifest.FormatsToProcess | ForEach-Object { Write-Verbose "[FormatsToProcess] - [$_]" }
 
     Write-Verbose "[DscResourcesToExport]"
-    $dscResourcesToExportFolderPath = Join-Path $SourceFolderPath 'dscResources'
+    $dscResourcesToExportFolderPath = Join-Path $ModuleSourceFolder 'resources'
     $dscResourcesToExport = Get-ChildItem -Path $dscResourcesToExportFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.psm1' |
         Select-Object -ExpandProperty FullName |
-        ForEach-Object { $_.Replace($SourceFolderPath, '').TrimStart($pathSeparator) }
+        ForEach-Object { $_.Replace($ModuleSourceFolder, '').TrimStart($pathSeparator) }
     $manifest.DscResourcesToExport = $dscResourcesToExport.count -eq 0 ? @() : @($dscResourcesToExport)
     $manifest.DscResourcesToExport | ForEach-Object { Write-Verbose "[DscResourcesToExport] - [$_]" }
 
-    $manifest.FunctionsToExport = Get-PSModuleFunctionsToExport -SourceFolderPath $SourceFolderPath
-    $manifest.CmdletsToExport = Get-PSModuleCmdletsToExport -SourceFolderPath $SourceFolderPath
-    $manifest.AliasesToExport = Get-PSModuleAliasesToExport -SourceFolderPath $SourceFolderPath
-    $manifest.VariablesToExport = Get-PSModuleVariablesToExport -SourceFolderPath $SourceFolderPath
+    $manifest.FunctionsToExport = Get-PSModuleFunctionsToExport -SourceFolderPath $ModuleSourceFolder
+    $manifest.CmdletsToExport = Get-PSModuleCmdletsToExport -SourceFolderPath $ModuleSourceFolder
+    $manifest.AliasesToExport = Get-PSModuleAliasesToExport -SourceFolderPath $ModuleSourceFolder
+    $manifest.VariablesToExport = Get-PSModuleVariablesToExport -SourceFolderPath $ModuleSourceFolder
 
     Write-Verbose "[ModuleList]"
-    $moduleList = Get-ChildItem -Path $SourceFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.psm1' -Exclude "$Name.psm1" |
+    $moduleList = Get-ChildItem -Path $ModuleSourceFolder -Recurse -File -ErrorAction SilentlyContinue -Include '*.psm1' -Exclude $manifestFileName |
         Select-Object -ExpandProperty FullName |
-        ForEach-Object { $_.Replace($SourceFolderPath, '').TrimStart($pathSeparator) }
+        ForEach-Object { $_.Replace($ModuleSourceFolder, '').TrimStart($pathSeparator) }
     $manifest.ModuleList = $moduleList.count -eq 0 ? @() : @($moduleList)
     $manifest.ModuleList | ForEach-Object { Write-Verbose "[ModuleList] - [$_]" }
 
@@ -152,10 +154,10 @@ function Build-PSModuleManifest {
     $capturedVersions = @()
     $capturedPSEdition = @()
 
-    $files = $SourceFolderPath | Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue
+    $files = $ModuleSourceFolder | Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue
     Write-Verbose "[Gather] - Processing [$($files.Count)] files"
     foreach ($file in $files) {
-        $relativePath = $file.FullName.Replace($SourceFolderPath, '').TrimStart($pathSeparator)
+        $relativePath = $file.FullName.Replace($ModuleSourceFolder, '').TrimStart($pathSeparator)
         Write-Verbose "[Gather] - [$relativePath]"
 
         if ($file.extension -in '.psm1', '.ps1') {
@@ -242,7 +244,12 @@ function Build-PSModuleManifest {
     $PSData = $privateData.Keys -contains 'PSData' ? $null -ne $privateData.PSData ? $privateData.PSData : @{} : @{}
 
     Write-Verbose "[Tags]"
-    $manifest.Tags = $PSData.Keys -contains 'Tags' ? $null -ne $PSData.Tags ? $PSData.Tags : @() : @()
+    try {
+        $repoLabels = gh repo view --json repositoryTopics | ConvertFrom-Json | Select-Object -ExpandProperty repositoryTopics | Select-Object -ExpandProperty name
+    } catch {
+        $repoLabels = @()
+    }
+    $manifest.Tags = $PSData.Keys -contains 'Tags' ? $null -ne $PSData.Tags ? $PSData.Tags : $repoLabels : $repoLabels
     # Add tags for compatability mode. https://docs.microsoft.com/en-us/powershell/scripting/developer/module/how-to-write-a-powershell-module-manifest?view=powershell-7.1#compatibility-tags
     if ($manifest.CompatiblePSEditions -contains 'Desktop') {
         if ($manifest.Tags -notcontains 'PSEdition_Desktop') {
@@ -260,8 +267,6 @@ function Build-PSModuleManifest {
         throw "[Tags] - Cannot be PSEdition = 'Core' and PowerShellVersion < 6.0"
     }
     <#
-        PSEdition_Desktop: Packages that are compatible with Windows PowerShell
-        PSEdition_Core: Packages that are compatible with PowerShell 6 and higher
         Windows: Packages that are compatible with the Windows Operating System
         Linux: Packages that are compatible with Linux Operating Systems
         MacOS: Packages that are compatible with the Mac Operating System
@@ -269,21 +274,24 @@ function Build-PSModuleManifest {
     #>
 
     Write-Verbose "[LicenseUri]"
-    $manifest.LicenseUri = $PSData.Keys -contains 'LicenseUri' ? $null -ne $PSData.LicenseUri ? $PSData.LicenseUri : '' : ''
+    $licenseUri = "https://github.com/$env:GITHUB_REPOSITORY_OWNER/$env:GITHUB_REPOSITORY_NAME/blob/main/LICENSE"
+    $manifest.LicenseUri = $PSData.Keys -contains 'LicenseUri' ? $null -ne $PSData.LicenseUri ? $PSData.LicenseUri : $licenseUri : $licenseUri
     Write-Verbose "[LicenseUri] - [$($manifest.LicenseUri)]"
     if ([string]::IsNullOrEmpty($manifest.LicenseUri)) {
         $manifest.Remove('LicenseUri')
     }
 
     Write-Verbose "[ProjectUri]"
-    $manifest.ProjectUri = $PSData.Keys -contains 'ProjectUri' ? $null -ne $PSData.ProjectUri ? $PSData.ProjectUri : '' : ''
+    $projectUri = gh repo view --json url | ConvertFrom-Json | Select-Object -ExpandProperty url
+    $manifest.ProjectUri = $PSData.Keys -contains 'ProjectUri' ? $null -ne $PSData.ProjectUri ? $PSData.ProjectUri : $projectUri : $projectUri
     Write-Verbose "[ProjectUri] - [$($manifest.ProjectUri)]"
     if ([string]::IsNullOrEmpty($manifest.ProjectUri)) {
         $manifest.Remove('ProjectUri')
     }
 
     Write-Verbose "[IconUri]"
-    $manifest.IconUri = $PSData.Keys -contains 'IconUri' ? $null -ne $PSData.IconUri ? $PSData.IconUri : '' : ''
+    $iconUri = "https://raw.githubusercontent.com/$env:GITHUB_REPOSITORY_OWNER/$env:GITHUB_REPOSITORY_NAME/main/icon/icon.png"
+    $manifest.IconUri = $PSData.Keys -contains 'IconUri' ? $null -ne $PSData.IconUri ? $PSData.IconUri : $iconUri : $iconUri
     Write-Verbose "[IconUri] - [$($manifest.IconUri)]"
     if ([string]::IsNullOrEmpty($manifest.IconUri)) {
         $manifest.Remove('IconUri')
@@ -297,11 +305,8 @@ function Build-PSModuleManifest {
     }
 
     Write-Verbose "[PreRelease]"
-    $manifest.PreRelease = $PSData.Keys -contains 'PreRelease' ? $null -ne $PSData.PreRelease ? $PSData.PreRelease : '' : ''
-    Write-Verbose "[PreRelease] - [$($manifest.PreRelease)]"
-    if ([string]::IsNullOrEmpty($manifest.PreRelease)) {
-        $manifest.Remove('PreRelease')
-    }
+    $manifest.PreRelease = ""
+    # Is managed by the publish action
 
     Write-Verbose "[RequireLicenseAcceptance]"
     $manifest.RequireLicenseAcceptance = $PSData.Keys -contains 'RequireLicenseAcceptance' ? $null -ne $PSData.RequireLicenseAcceptance ? $PSData.RequireLicenseAcceptance : $false : $false
@@ -319,7 +324,7 @@ function Build-PSModuleManifest {
     }
 
     Write-Verbose 'Creating new manifest file in outputs folder'
-    $outputManifestPath = Join-Path -Path $OutputFolderPath $manifestFileName
+    $outputManifestPath = Join-Path -Path $ModuleOutputFolder $manifestFileName
     Write-Verbose "OutputManifestPath - [$outputManifestPath]"
     New-ModuleManifest -Path $outputManifestPath @manifest
     Stop-LogGroup

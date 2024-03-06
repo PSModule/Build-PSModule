@@ -18,7 +18,11 @@
 
     $manifestPropertyName = 'VariablesToExport'
 
-    $manifest = Get-PSModuleManifest -SourceFolderPath $SourceFolderPath -Verbose:$false
+    $moduleName = Split-Path -Path $SourceFolderPath -Leaf
+    $manifestFileName = "$moduleName.psd1"
+    $manifestFilePath = Join-Path -Path $SourceFolderPath $manifestFileName
+
+    $manifest = Get-ModuleManifest -Path $manifestFilePath -Verbose:$false
 
     Write-Verbose "[$manifestPropertyName]"
     $variablesToExport = ($manifest.VariablesToExport).count -eq 0 ? @() : @($manifest.VariablesToExport)

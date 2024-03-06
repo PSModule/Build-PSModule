@@ -18,7 +18,11 @@
 
     $manifestPropertyName = 'AliasesToExport'
 
-    $manifest = Get-PSModuleManifest -SourceFolderPath $SourceFolderPath -Verbose:$false
+    $moduleName = Split-Path -Path $SourceFolderPath -Leaf
+    $manifestFileName = "$moduleName.psd1"
+    $manifestFilePath = Join-Path -Path $SourceFolderPath $manifestFileName
+
+    $manifest = Get-ModuleManifest -Path $manifestFilePath -Verbose:$false
 
     Write-Verbose "[$manifestPropertyName]"
     $aliasesToExport = ($manifest.AliasesToExport).count -eq 0 ? '*' : @($manifest.AliasesToExport)

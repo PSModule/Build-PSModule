@@ -24,7 +24,11 @@
 
     Start-LogGroup "Importing module [$ModuleName]"
 
-    $manifestFile = Get-PSModuleManifest -SourceFolderPath $SourceFolderPath -As FileInfo -Verbose
+    $moduleName = Split-Path -Path $SourceFolderPath -Leaf
+    $manifestFileName = "$moduleName.psd1"
+    $manifestFilePath = Join-Path -Path $SourceFolderPath $manifestFileName
+
+    $manifestFile = Get-ModuleManifest -Path $manifestFilePath -As FileInfo -Verbose
 
     Write-verbose "Manifest file path: [$($manifestFile.FullName)]" -Verbose
 
