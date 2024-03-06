@@ -14,38 +14,22 @@ function Build-PSModuleBase {
     #>
     [CmdletBinding()]
     param(
-        # Name of the module to process.
-        [Parameter(Mandatory)]
-        [string] $Name,
-
         # Path to the folder where the module source code is located.
         [Parameter(Mandatory)]
-        [string] $SourceFolderPath,
+        [System.IO.DirectoryInfo] $ModuleSourceFolder,
 
         # Path to the folder where the built modules are outputted.
         [Parameter(Mandatory)]
-        [string] $OutputFolderPath
+        [System.IO.DirectoryInfo] $ModuleOutputFolder
     )
 
     Start-LogGroup "Build base"
 
-    Write-Verbose "Copying files from [$SourceFolderPath] to [$OutputFolderPath]"
-    Copy-Item -Path "$SourceFolderPath\*" -Destination $OutputFolderPath -Recurse -Force -Verbose
-    Stop-LogGroup
-
-    Start-LogGroup "Build base - Deleting unecessary files"
-    Write-Verbose "Deleting files from [$OutputFolderPath] that are not needed"
-    $deletePaths = @(
-        'init',
-        'private',
-        'public',
-        "$Name.psd1",
-        "$Name.psm1"
-    )
-    Get-ChildItem -Path $OutputFolderPath -Recurse -Force | Where-Object { $_.Name -in $deletePaths } | Remove-Item -Force -Recurse -Verbose
+    Write-Verbose "Copying files from [$ModuleSourceFolder] to [$ModuleOutputFolder]"
+    Copy-Item -Path "$ModuleSourceFolder\*" -Destination $ModuleOutputFolder -Recurse -Force -Verbose
     Stop-LogGroup
 
     Start-LogGroup "Build base - Result"
-    (Get-ChildItem -Path $OutputFolderPath -Recurse -Force).FullName | Sort-Object
+    (Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force).FullName | Sort-Object
     Stop-LogGroup
 }
