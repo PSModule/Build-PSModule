@@ -27,18 +27,13 @@ function Build-PSModuleManifest {
         [System.IO.DirectoryInfo] $ModuleOutputFolder
     )
 
-    <#
-        $ModuleSourceFolder = Get-Item 'C:\Repos\GitHub\PSModule\Utilities\src\Utilities'
-        $ModuleOutputFolder = Get-Item 'C:\Repos\GitHub\PSModule\Utilities\outputs\modules\Utilities'
-    #>
-
-
     #region Build manifest file
     Start-LogGroup "Build manifest file"
     $moduleName = Split-Path -Path $ModuleSourceFolder -Leaf
     $manifestFileName = "$moduleName.psd1"
     $manifestOutputPath = Join-Path -Path $ModuleOutputFolder -ChildPath $manifestFileName
     $manifestFile = Get-Item -Path $manifestOutputPath
+    Write-Verbose ($manifestFile | Format-List | Out-String)
     $manifest = Get-ModuleManifest -Path $manifestFile -Verbose:$false
 
     $manifest.RootModule = Get-PSModuleRootModule -SourceFolderPath $ModuleOutputFolder
