@@ -67,7 +67,7 @@ function Build-PSModuleManifest {
     $manifest.ClrVersion = $manifest.Keys -contains 'ClrVersion' ? -not [string]::IsNullOrEmpty($manifest.ClrVersion) ? $manifest.ClrVersion : $null : $null
     Write-Verbose "[ClrVersion] - [$($manifest.ClrVersion)]"
 
-    $manifest.ProcessorArchitecture = $manifest.Keys -contains 'ProcessorArchitecture' ? -not [string]::IsNullOrEmpty($manifest.ProcessorArchitecture) ? $manifest.ProcessorArchitecture : $null : $null
+    $manifest.ProcessorArchitecture = $manifest.Keys -contains 'ProcessorArchitecture' ? -not [string]::IsNullOrEmpty($manifest.ProcessorArchitecture) ? $manifest.ProcessorArchitecture : 'None' : 'None'
     Write-Verbose "[ProcessorArchitecture] - [$($manifest.ProcessorArchitecture)]"
 
     # Get the path separator for the current OS
