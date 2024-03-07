@@ -54,7 +54,7 @@ paths and calculations are based on this structure. Not following this might res
 │  │  ├─ classes/                       -> All .ps1 files are collected to ScriptsToProcess and loaded to the caller session (parent of module session)
 │  │  │  ├─ <ClassName>.ps1             -> loaded during import via ScritsToProcess
 │  │  │  ├─ <ClassName>.Format.ps1xml   -> loaded during import via FormatsToProcess (collected based on *.Formats.ps1xml files in the root of the folder)
-│  │  │  └─ <ClassName>.Type.ps1xml     -> loaded during import via TypesToProcess (collected based on *.Types.ps1xml files in the root of the folder)
+│  │  │  └─ <ClassName>.Types.ps1xml    -> loaded during import via TypesToProcess (collected based on *.Types.ps1xml files in the root of the folder)
 │  │  ├─ data/                          -> Loads .psd1 files into the module session.
 │  │  ├─ en/
 │  │  |  ├─ en-US/                      -> Search here first for OS = en-US, then parent, en. Get-Help and platyPS reads this.

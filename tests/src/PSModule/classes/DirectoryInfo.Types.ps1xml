@@ -1,0 +1,9 @@
+<Type>
+    <Name>System.IO.DirectoryInfo</Name>
+    <Members>
+        <NoteProperty>
+            <Name>Status</Name>
+            <Value>Success</Value>
+        </NoteProperty>
+    </Members>
+</Type>
