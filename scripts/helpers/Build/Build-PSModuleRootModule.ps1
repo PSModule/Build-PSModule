@@ -141,8 +141,10 @@ Write-Verbose "[`$scriptName] - [$relativePath] - Done"
     $params = @{
         Path  = $rootModuleFile
         Force = $true
-        Value = "Export-ModuleMember -Function '$functionsToExport' " +
-        "-Cmdlet '$cmdletsToExport' -Variable '$variablesToExport' -Alias '$aliasesToExport'"
+        Value = @"
+$exportsString
+Export-ModuleMember @exports
+"@
     }
     Add-Content @params
     #endregion - Export-ModuleMember
