@@ -140,7 +140,7 @@ Write-Verbose "[`$scriptName] - [$relativePath] - Done"
         Path  = $rootModuleFile
         Force = $true
         Value = @"
-$exportsString
+`$exports = $exportsString
 Export-ModuleMember @exports
 "@
     }
