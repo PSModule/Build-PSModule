@@ -48,6 +48,8 @@ function Build-PSModuleRootModule {
         Variable = Get-PSModuleVariablesToExport -SourceFolderPath $ModuleOutputFolder
         Alias    = Get-PSModuleAliasesToExport -SourceFolderPath $ModuleOutputFolder
     }
+
+    Write-Verbose ($exports | Out-String)
     #endregion - Analyze source files
 
     #region - Module header
