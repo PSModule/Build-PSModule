@@ -29,7 +29,6 @@
         Write-Verbose "[$manifestPropertyName] - [$($_.BaseName)] - [$containsFunction]"
         $containsFunction ? $_.BaseName : $null
     }
-    $functionsToExport = @($functionsToExport)
 
     $functionsToExport
 }
