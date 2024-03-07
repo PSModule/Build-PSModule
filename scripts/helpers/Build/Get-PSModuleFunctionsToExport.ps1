@@ -24,12 +24,13 @@
     $publicFolderPath = Join-Path $SourceFolderPath 'public'
     Write-Verbose "[$manifestPropertyName] - [$publicFolderPath]"
     $functionsToExport = $()
-    Get-ChildItem -Path $publicFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1' | ForEach-Object {
-        $fileContent = Get-Content -Path $_.FullName -Raw
+    $scriptFiles = Get-ChildItem -Path $publicFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1'
+    foreach ($file in $scriptFiles) {
+        $fileContent = Get-Content -Path $file.FullName -Raw
         $containsFunction = ($fileContent -match 'function ') -or ($fileContent -match 'filter ')
-        Write-Verbose "[$manifestPropertyName] - [$($_.BaseName)] - [$containsFunction]"
+        Write-Verbose "[$manifestPropertyName] - [$($file.BaseName)] - [$containsFunction]"
         if ($containsFunction) {
-            $functionsToExport.Add($_.BaseName)
+            $functionsToExport.Add($file.BaseName)
         }
     }
 
