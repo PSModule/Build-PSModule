@@ -25,6 +25,7 @@
     Write-Verbose "[$manifestPropertyName] - [$publicFolderPath]"
     $functionsToExport = $()
     $scriptFiles = Get-ChildItem -Path $publicFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1'
+    Write-Verbose "[$manifestPropertyName] - [$($scriptFiles.Count)]"
     foreach ($file in $scriptFiles) {
         $fileContent = Get-Content -Path $file.FullName -Raw
         $containsFunction = ($fileContent -match 'function ') -or ($fileContent -match 'filter ')
