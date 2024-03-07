@@ -16,12 +16,14 @@
         [string] $SourceFolderPath
     )
 
-    $rootModule = $(Get-ChildItem -Path $SourceFolderPath -File |
-            Where-Object { $_.BaseName -like $_.Directory.BaseName -and ($_.Extension -in '.psm1', '.ps1', '.dll', '.cdxml', '.xaml') } |
-            Select-Object -First 1 -ExpandProperty Name
-    )
+    $candidateFiles = Get-ChildItem -Path $SourceFolderPath -File | Where-Object { $_.BaseName -like $_.Directory.BaseName }
+    $rootModuleExtensions = '.psm1', '.ps1', '.dll', '.cdxml', '.xaml'
+    $rootModule = $rootModuleExtensions | ForEach-Object {
+        $candidateFiles | Where-Object { $_.Extension -in $_ }
+    } | Select-Object -First 1 -ExpandProperty Name
+
     if (-not $rootModule) {
-        Write-Verbose "No RootModule found"
+        Write-Verbose 'No RootModule found'
     }
 
     $moduleType = switch -Regex ($RootModule) {
