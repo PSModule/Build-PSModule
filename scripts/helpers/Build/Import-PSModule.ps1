@@ -36,7 +36,7 @@
     Write-Verbose "List loaded modules"
     $availableModules = Get-Module -ListAvailable -Refresh -Verbose:$false
     $availableModules | Select-Object Name, Version, Path | Sort-Object Name | Format-Table -AutoSize
-    Write-Verbose 'List  commands'
+    Write-Verbose 'List commands'
     Write-Verbose (Get-Command -Module $moduleName | Format-Table -AutoSize | Out-String)
 
     if ($ModuleName -notin $availableModules.Name) {

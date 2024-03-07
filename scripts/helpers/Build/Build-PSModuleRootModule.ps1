@@ -52,6 +52,8 @@ function Build-PSModuleRootModule {
         Variable = Get-PSModuleVariablesToExport -SourceFolderPath $ModuleOutputFolder
         Alias    = Get-PSModuleAliasesToExport -SourceFolderPath $ModuleOutputFolder
     }
+
+    $exports
     #endregion - Analyze source files
 
     #region - Module header
