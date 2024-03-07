@@ -121,16 +121,16 @@ Write-Verbose "[`$scriptName] - [$relativePath] - Done"
     #endregion - Add content from *.ps1 files on module root
 
     #region - Export-ModuleMember
-    $functionsToExport = Get-PSModuleFunctionsToExport -SourceFolderPath $ModuleOutputFolder
+    $functionsToExport = Get-PSModuleFunctionsToExport -SourceFolderPath $ModuleSourceFolder
     $functionsToExport = $($functionsToExport -join "','")
 
-    $cmdletsToExport = Get-PSModuleCmdletsToExport -SourceFolderPath $ModuleOutputFolder
+    $cmdletsToExport = Get-PSModuleCmdletsToExport -SourceFolderPath $ModuleSourceFolder
     $cmdletsToExport = $($cmdletsToExport -join "','")
 
-    $variablesToExport = Get-PSModuleVariablesToExport -SourceFolderPath $ModuleOutputFolder
+    $variablesToExport = Get-PSModuleVariablesToExport -SourceFolderPath $ModuleSourceFolder
     $variablesToExport = $($variablesToExport -join "','")
 
-    $aliasesToExport = Get-PSModuleAliasesToExport -SourceFolderPath $ModuleOutputFolder
+    $aliasesToExport = Get-PSModuleAliasesToExport -SourceFolderPath $ModuleSourceFolder
     $aliasesToExport = $($aliasesToExport -join "','")
 
     $params = @{
