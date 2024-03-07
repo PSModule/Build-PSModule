@@ -23,7 +23,7 @@
 
     $publicFolderPath = Join-Path $SourceFolderPath 'public'
     Write-Verbose "[$manifestPropertyName] - [$publicFolderPath]"
-    $functionsToExport = $()
+    $functionsToExport = [Collections.Generic.List[string]]::new()
     $scriptFiles = Get-ChildItem -Path $publicFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1'
     Write-Verbose "[$manifestPropertyName] - [$($scriptFiles.Count)]"
     foreach ($file in $scriptFiles) {
@@ -35,5 +35,5 @@
         }
     }
 
-    $functionsToExport
+    [array]$functionsToExport
 }
