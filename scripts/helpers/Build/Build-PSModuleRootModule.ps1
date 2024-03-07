@@ -53,8 +53,6 @@ function Build-PSModuleRootModule {
         Alias    = Get-PSModuleAliasesToExport -SourceFolderPath $ModuleOutputFolder
     }
 
-    $exports.Function += 'New-LogGroup', 'Stop-LogGroup', 'Start-LogGroup', 'Show-FileContent', 'Invoke-Formatter', 'Convert-HashtableToString', 'Add-ContentFromItem'
-
     $exports
     #endregion - Analyze source files
 
