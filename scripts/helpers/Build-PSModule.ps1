@@ -41,7 +41,7 @@ function Build-PSModule {
     Stop-LogGroup
 
     Build-PSModuleBase -ModuleSourceFolder $moduleSourceFolder -ModuleOutputFolder $moduleOutputFolder
-    Build-PSModuleManifest -ModuleSourceFolder $moduleSourceFolder -ModuleOutputFolder $moduleOutputFolder
+    Build-PSModuleManifest -ModuleOutputFolder $moduleOutputFolder
     Build-PSModuleRootModule -ModuleOutputFolder $moduleOutputFolder
     Build-PSModuleDocumentation -ModuleOutputFolder $moduleOutputFolder -DocsOutputFolder $docsOutputFolder
 }
