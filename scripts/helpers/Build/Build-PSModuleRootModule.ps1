@@ -42,8 +42,17 @@ function Build-PSModuleRootModule {
 
     #region Build root module
     Start-LogGroup 'Build root module'
-    $moduleName = Split-Path -Path $ModuleSourceFolder -Leaf
+    $moduleName = Split-Path -Path $ModuleOutputFolder -Leaf
     $rootModuleFile = New-Item -Path $ModuleOutputFolder -Name "$moduleName.psm1" -Force
+
+    #region - Analyze source files
+    $exports = @{
+        functionsToExport = Get-PSModuleFunctionsToExport -SourceFolderPath $ModuleOutputFolder
+        cmdletsToExport   = Get-PSModuleCmdletsToExport -SourceFolderPath $ModuleOutputFolder
+        variablesToExport = Get-PSModuleVariablesToExport -SourceFolderPath $ModuleOutputFolder
+        aliasesToExport   = Get-PSModuleAliasesToExport -SourceFolderPath $ModuleOutputFolder
+    }
+    #endregion - Analyze source files
 
     #region - Module header
     $headerFilePath = Join-Path -Path $ModuleOutputFolder -ChildPath 'header.ps1'
@@ -121,17 +130,9 @@ Write-Verbose "[`$scriptName] - [$relativePath] - Done"
     #endregion - Add content from *.ps1 files on module root
 
     #region - Export-ModuleMember
-    $functionsToExport = Get-PSModuleFunctionsToExport -SourceFolderPath $ModuleSourceFolder
-    $functionsToExport = $($functionsToExport -join "','")
+    $exportsString = Convert-HashtableToString -Hashtable $exports
 
-    $cmdletsToExport = Get-PSModuleCmdletsToExport -SourceFolderPath $ModuleSourceFolder
-    $cmdletsToExport = $($cmdletsToExport -join "','")
-
-    $variablesToExport = Get-PSModuleVariablesToExport -SourceFolderPath $ModuleSourceFolder
-    $variablesToExport = $($variablesToExport -join "','")
-
-    $aliasesToExport = Get-PSModuleAliasesToExport -SourceFolderPath $ModuleSourceFolder
-    $aliasesToExport = $($aliasesToExport -join "','")
+    Write-Verbose ($exportsString | Out-String)
 
     $params = @{
         Path  = $rootModuleFile
