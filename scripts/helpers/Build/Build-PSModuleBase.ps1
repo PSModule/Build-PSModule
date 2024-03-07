@@ -23,13 +23,13 @@ function Build-PSModuleBase {
         [System.IO.DirectoryInfo] $ModuleOutputFolder
     )
 
-    Start-LogGroup "Build base"
+    Start-LogGroup 'Build base'
 
     Write-Verbose "Copying files from [$ModuleSourceFolder] to [$ModuleOutputFolder]"
     Copy-Item -Path "$ModuleSourceFolder\*" -Destination $ModuleOutputFolder -Recurse -Force -Verbose
     Stop-LogGroup
 
-    Start-LogGroup "Build base - Result"
+    Start-LogGroup 'Build base - Result'
     (Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force).FullName | Sort-Object
     Stop-LogGroup
 }

@@ -29,18 +29,18 @@
     $manifestFilePath = Join-Path -Path $Path $manifestFileName
     $manifestFile = Get-ModuleManifest -Path $manifestFilePath -As FileInfo -Verbose
 
-    Write-verbose "Manifest file path: [$($manifestFile.FullName)]" -Verbose
+    Write-Verbose "Manifest file path: [$($manifestFile.FullName)]" -Verbose
     Resolve-PSModuleDependencies -ManifestFilePath $manifestFile
     Import-Module $ModuleName
 
-    Write-Verbose "List loaded modules"
+    Write-Verbose 'List loaded modules'
     $availableModules = Get-Module -ListAvailable -Refresh -Verbose:$false
     $availableModules | Select-Object Name, Version, Path | Sort-Object Name | Format-Table -AutoSize
     Write-Verbose 'List commands'
     Write-Verbose (Get-Command -Module $moduleName | Format-Table -AutoSize | Out-String)
 
     if ($ModuleName -notin $availableModules.Name) {
-        throw "Module not found"
+        throw 'Module not found'
     }
     Stop-LogGroup
 }

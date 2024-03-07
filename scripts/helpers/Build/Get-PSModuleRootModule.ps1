@@ -19,7 +19,7 @@
     $rootModuleExtensions = '.psm1', '.ps1', '.dll', '.cdxml', '.xaml'
     $candidateFiles = Get-ChildItem -Path $SourceFolderPath -File | Where-Object { ($_.BaseName -like $_.Directory.BaseName) -and ($_.Extension -in $rootModuleExtensions) }
 
-    Write-Verbose "Looking for root modules, matching extensions in order [$($rootModuleExtensions -join ', ')]" -verbose
+    Write-Verbose "Looking for root modules, matching extensions in order [$($rootModuleExtensions -join ', ')]" -Verbose
     :ext foreach ($ext in $rootModuleExtensions) {
         Write-Verbose "Looking for [$ext] files"
         foreach ($file in $candidateFiles) {

@@ -8,6 +8,10 @@
 
         "Hello, World!"
     #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSUseShouldProcessForStateChangingFunctions', $null, Scope='Function',
+        Justification = 'Reason for suppressing'
+    )]
     [CmdletBinding()]
     param (
         # Name of the person to greet.

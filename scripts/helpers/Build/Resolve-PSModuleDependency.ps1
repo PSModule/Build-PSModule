@@ -24,7 +24,7 @@
         [string] $ManifestFilePath
     )
 
-    Write-Verbose "Resolving dependencies"
+    Write-Verbose 'Resolving dependencies'
 
     $manifest = Import-PowerShellDataFile -Path $ManifestFilePath
     Write-Verbose "Reading [$ManifestFilePath]"
@@ -56,5 +56,5 @@
         $VerbosePreference = $VerbosePreferenceOriginal
         Write-Verbose "[$($installParams.Name)] - Done"
     }
-    Write-Verbose "Resolving dependencies - Done"
+    Write-Verbose 'Resolving dependencies - Done'
 }
