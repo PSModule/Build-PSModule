@@ -37,7 +37,7 @@ function Build-PSModuleManifest {
     $manifest = Get-ModuleManifest -Path $manifestFile -Verbose:$false
 
     $manifest.RootModule = Get-PSModuleRootModule -SourceFolderPath $ModuleOutputFolder
-    $manifest.ModuleVersion = '0.0.0'
+    $manifest.ModuleVersion = '0.0.1'
 
     $manifest.Author = $manifest.Keys -contains 'Author' ? ($manifest.Author | IsNotNullOrEmpty) ? $manifest.Author : $env:GITHUB_REPOSITORY_OWNER : $env:GITHUB_REPOSITORY_OWNER
     Write-Verbose "[Author] - [$($manifest.Author)]"
