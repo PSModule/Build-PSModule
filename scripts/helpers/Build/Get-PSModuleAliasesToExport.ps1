@@ -29,7 +29,6 @@
     $aliasesToExport | ForEach-Object {
         Write-Verbose "[$manifestPropertyName] - [$_]"
     }
-    $aliasesToExport = @($aliasesToExport)
 
     $aliasesToExport
 }

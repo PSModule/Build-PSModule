@@ -29,7 +29,6 @@
     $variablesToExport | ForEach-Object {
         Write-Verbose "[$manifestPropertyName] - [$_]"
     }
-    $variablesToExport = @($variablesToExport)
-
+    
     $variablesToExport
 }
