@@ -16,13 +16,21 @@
         [string] $SourceFolderPath
     )
 
-    $candidateFiles = Get-ChildItem -Path $SourceFolderPath -File | Where-Object { $_.BaseName -like $_.Directory.BaseName }
     $rootModuleExtensions = '.psm1', '.ps1', '.dll', '.cdxml', '.xaml'
+    $candidateFiles = Get-ChildItem -Path $SourceFolderPath -File | Where-Object { ($_.BaseName -like $_.Directory.BaseName) -and ($_.Extension -in $rootModuleExtensions) }
 
-    $rootModule = $rootModuleExtensions | ForEach-Object {
-        $extension = $_
-        $candidateFiles | ForEach-Object { Where-Object { $_.Extension -eq $extension } }
-    } | Select-Object -First 1 -ExpandProperty Name
+    Write-Verbose "Looking for root modules, matching extensions in order [$($rootModuleExtensions -join ', ')]" -verbose
+    :ext foreach ($ext in $rootModuleExtensions) {
+        Write-Verbose "Looking for [$ext] files"
+        foreach ($file in $candidateFiles) {
+            Write-Verbose " - [$($file.Name)]"
+            if ($file.Extension -eq $ext) {
+                Write-Verbose " - [$($file.Name)] - RootModule found!"
+                $rootModule = $file.Name
+                break ext
+            }
+        }
+    }
 
     if (-not $rootModule) {
         Write-Verbose 'No RootModule found'
