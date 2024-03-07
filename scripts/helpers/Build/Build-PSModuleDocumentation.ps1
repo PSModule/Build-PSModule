@@ -28,6 +28,7 @@ function Build-PSModuleDocumentation {
 
     Add-PSModulePath -Path (Split-Path -Path $ModuleOutputFolder -Parent)
     Import-PSModule -Path $ModuleOutputFolder -ModuleName $moduleName
+    Get-Command -Module $moduleName
 
     Start-LogGroup "Build documentation"
     New-MarkdownHelp -Module $moduleName -OutputFolder $DocsOutputFolder -Force -Verbose
