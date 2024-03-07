@@ -25,9 +25,11 @@
     $manifest = Get-ModuleManifest -Path $manifestFilePath -Verbose:$false
 
     Write-Verbose "[$manifestPropertyName]"
-    $aliasesToExport = ($manifest.AliasesToExport).count -eq 0 ? '*' : @($manifest.AliasesToExport)
+    $aliasesToExport = (($manifest.AliasesToExport).count -eq 0) -or ($manifest.AliasesToExport | IsNullOrEmpty) ? '*' : $manifest.AliasesToExport
     $aliasesToExport | ForEach-Object {
         Write-Verbose "[$manifestPropertyName] - [$_]"
     }
+    $aliasesToExport = @($aliasesToExport)
+
     $aliasesToExport
 }

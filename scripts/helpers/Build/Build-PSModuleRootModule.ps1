@@ -47,10 +47,10 @@ function Build-PSModuleRootModule {
 
     #region - Analyze source files
     $exports = @{
-        functionsToExport = Get-PSModuleFunctionsToExport -SourceFolderPath $ModuleOutputFolder
-        cmdletsToExport   = Get-PSModuleCmdletsToExport -SourceFolderPath $ModuleOutputFolder
-        variablesToExport = Get-PSModuleVariablesToExport -SourceFolderPath $ModuleOutputFolder
-        aliasesToExport   = Get-PSModuleAliasesToExport -SourceFolderPath $ModuleOutputFolder
+        Function = Get-PSModuleFunctionsToExport -SourceFolderPath $ModuleOutputFolder
+        Cmdlet   = Get-PSModuleCmdletsToExport -SourceFolderPath $ModuleOutputFolder
+        Variable = Get-PSModuleVariablesToExport -SourceFolderPath $ModuleOutputFolder
+        Alias    = Get-PSModuleAliasesToExport -SourceFolderPath $ModuleOutputFolder
     }
     #endregion - Analyze source files
 
