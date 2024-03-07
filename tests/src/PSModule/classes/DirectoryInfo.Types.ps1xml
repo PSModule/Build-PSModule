@@ -1,9 +1,21 @@
-<Type>
-    <Name>System.IO.DirectoryInfo</Name>
-    <Members>
-        <NoteProperty>
-            <Name>Status</Name>
-            <Value>Success</Value>
-        </NoteProperty>
-    </Members>
-</Type>
+<?xml version="1.0" encoding="utf-8"?>
+<Types>
+    <Type>
+        <Name>System.IO.FileInfo</Name>
+        <Members>
+            <NoteProperty>
+                <Name>Status</Name>
+                <Value>Success</Value>
+            </NoteProperty>
+        </Members>
+    </Type>
+    <Type>
+        <Name>System.IO.DirectoryInfo</Name>
+        <Members>
+            <NoteProperty>
+                <Name>Status</Name>
+                <Value>Success</Value>
+            </NoteProperty>
+        </Members>
+    </Type>
+</Types>
