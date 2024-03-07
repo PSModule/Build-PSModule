@@ -244,7 +244,7 @@ function Build-PSModuleManifest {
     } catch {
         $repoLabels = @()
     }
-    $manifest.Tags = $PSData.Keys -contains 'Tags' ? $null -ne $PSData.Tags ? $PSData.Tags : $repoLabels : $repoLabels
+    $manifest.Tags = $PSData.Keys -contains 'Tags' ? ($PSData.Tags).Count -gt 0 ? $PSData.Tags : $repoLabels : $repoLabels
     # Add tags for compatability mode. https://docs.microsoft.com/en-us/powershell/scripting/developer/module/how-to-write-a-powershell-module-manifest?view=powershell-7.1#compatibility-tags
     if ($manifest.CompatiblePSEditions -contains 'Desktop') {
         if ($manifest.Tags -notcontains 'PSEdition_Desktop') {
