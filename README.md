@@ -122,10 +122,10 @@ During the module manifest build process the following steps are performed:
 1. Get the list of modules by searching for all `*.psm1` files in the entire module source folder, excluding the root module and set the `ModuleList` property in the manifest.
 1. Gather information about required modules, PowerShell version, and compatible PS editions from the module source files and set the respective properties in the manifest.
 1. The following values are gathered from the GitHub repository:
-  - `Tags` are generated from Repository topics in addition to compatability tags gathered from the source code.
-  - `LicenseUri` is generated assuming there is a `LICENSE` file on the root of the repository.
-  - `ProjectUri` is the URL to the GitHub repository
-  - `IconUri` is generated assuming there is a `icon.png` file in the `icon` folder on the repository root.
+   - `Tags` are generated from Repository topics in addition to compatability tags gathered from the source code.
+   - `LicenseUri` is generated assuming there is a `LICENSE` file on the root of the repository.
+   - `ProjectUri` is the URL to the GitHub repository
+   - `IconUri` is generated assuming there is a `icon.png` file in the `icon` folder on the repository root.
 1. `ReleaseNotes` currently not automated, but could be the PR description or release description.
 1. `PreRelease` is not managed here, but is managed from [Publish-PSModule](https://github.com/PSModule/Publish-PSModule)
 1. `RequireLicenseAcceptance` is not automated and defaults to `false`, and

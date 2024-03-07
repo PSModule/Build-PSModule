@@ -10,6 +10,7 @@
         Get-PSModuleFunctionsToExport -SourceFolderPath 'C:\MyModule\src\MyModule'
     #>
     [CmdletBinding()]
+    [OutputType([array])]
     param(
         # Path to the folder where the module source code is located.
         [Parameter(Mandatory)]

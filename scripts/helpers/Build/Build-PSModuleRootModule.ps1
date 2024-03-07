@@ -31,10 +31,6 @@ function Build-PSModuleRootModule {
     #>
     [CmdletBinding()]
     param(
-        # Folder where the module source code is located. 'src/MyModule'
-        [Parameter(Mandatory)]
-        [System.IO.DirectoryInfo] $ModuleSourceFolder,
-
         # Folder where the built modules are outputted. 'outputs/modules/MyModule'
         [Parameter(Mandatory)]
         [System.IO.DirectoryInfo] $ModuleOutputFolder

@@ -42,6 +42,6 @@ function Build-PSModule {
 
     Build-PSModuleBase -ModuleSourceFolder $moduleSourceFolder -ModuleOutputFolder $moduleOutputFolder
     Build-PSModuleManifest -ModuleSourceFolder $moduleSourceFolder -ModuleOutputFolder $moduleOutputFolder
-    Build-PSModuleRootModule -ModuleSourceFolder $moduleSourceFolder -ModuleOutputFolder $moduleOutputFolder
+    Build-PSModuleRootModule -ModuleOutputFolder $moduleOutputFolder
     Build-PSModuleDocumentation -ModuleOutputFolder $moduleOutputFolder -DocsOutputFolder $docsOutputFolder
 }

@@ -18,10 +18,6 @@ function Build-PSModuleManifest {
         Justification = 'No real reason. Just toget going.'
     )]
     param(
-        # Folder where the module source code is located. 'src/MyModule'
-        [Parameter(Mandatory)]
-        [System.IO.DirectoryInfo] $ModuleSourceFolder,
-
         # Folder where the built modules are outputted. 'outputs/modules/MyModule'
         [Parameter(Mandatory)]
         [System.IO.DirectoryInfo] $ModuleOutputFolder
@@ -29,7 +25,7 @@ function Build-PSModuleManifest {
 
     #region Build manifest file
     Start-LogGroup 'Build manifest file'
-    $moduleName = Split-Path -Path $ModuleSourceFolder -Leaf
+    $moduleName = Split-Path -Path $ModuleOutputFolder -Leaf
     $manifestFileName = "$moduleName.psd1"
     $manifestOutputPath = Join-Path -Path $ModuleOutputFolder -ChildPath $manifestFileName
     $manifestFile = Get-Item -Path $manifestOutputPath
@@ -74,72 +70,72 @@ function Build-PSModuleManifest {
     $pathSeparator = [System.IO.Path]::DirectorySeparatorChar
 
     Write-Verbose '[FileList]'
-    $files = $ModuleSourceFolder | Get-ChildItem -File -ErrorAction SilentlyContinue | Where-Object -Property Name -NotLike '*.ps1'
-    $files += $ModuleSourceFolder | Get-ChildItem -Directory | Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue
-    $files = $files | Select-Object -ExpandProperty FullName | ForEach-Object { $_.Replace($ModuleSourceFolder, '').TrimStart($pathSeparator) }
+    $files = $ModuleOutputFolder | Get-ChildItem -File -ErrorAction SilentlyContinue | Where-Object -Property Name -NotLike '*.ps1'
+    $files += $ModuleOutputFolder | Get-ChildItem -Directory | Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue
+    $files = $files | Select-Object -ExpandProperty FullName | ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart($pathSeparator) }
     $fileList = $files | Where-Object { $_ -notLike 'public*' -and $_ -notLike 'private*' -and $_ -notLike 'classes*' }
     $manifest.FileList = $fileList.count -eq 0 ? @() : @($fileList)
     $manifest.FileList | ForEach-Object { Write-Verbose "[FileList] - [$_]" }
 
     Write-Verbose '[RequiredAssemblies]'
-    $requiredAssembliesFolderPath = Join-Path $ModuleSourceFolder 'assemblies'
+    $requiredAssembliesFolderPath = Join-Path $ModuleOutputFolder 'assemblies'
     $requiredAssemblies = Get-ChildItem -Path $RequiredAssembliesFolderPath -Recurse -File -ErrorAction SilentlyContinue -Filter '*.dll' |
         Select-Object -ExpandProperty FullName |
-        ForEach-Object { $_.Replace($ModuleSourceFolder, '').TrimStart($pathSeparator) }
+        ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart($pathSeparator) }
     $manifest.RequiredAssemblies = $requiredAssemblies.count -eq 0 ? @() : @($requiredAssemblies)
     $manifest.RequiredAssemblies | ForEach-Object { Write-Verbose "[RequiredAssemblies] - [$_]" }
 
     Write-Verbose '[NestedModules]'
-    $nestedModulesFolderPath = Join-Path $ModuleSourceFolder 'modules'
+    $nestedModulesFolderPath = Join-Path $ModuleOutputFolder 'modules'
     $nestedModules = Get-ChildItem -Path $nestedModulesFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.psm1', '*.ps1' |
         Select-Object -ExpandProperty FullName |
-        ForEach-Object { $_.Replace($ModuleSourceFolder, '').TrimStart($pathSeparator) }
+        ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart($pathSeparator) }
     $manifest.NestedModules = $nestedModules.count -eq 0 ? @() : @($nestedModules)
     $manifest.NestedModules | ForEach-Object { Write-Verbose "[NestedModules] - [$_]" }
 
     Write-Verbose '[ScriptsToProcess]'
     $allScriptsToProcess = @('scripts', 'classes') | ForEach-Object {
         Write-Verbose "[ScriptsToProcess] - Processing [$_]"
-        $scriptsFolderPath = Join-Path $ModuleSourceFolder $_
+        $scriptsFolderPath = Join-Path $ModuleOutputFolder $_
         $scriptsToProcess = Get-ChildItem -Path $scriptsFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1' |
             Select-Object -ExpandProperty FullName |
-            ForEach-Object { $_.Replace($ModuleSourceFolder, '').TrimStart($pathSeparator) }
+            ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart($pathSeparator) }
             $scriptsToProcess
         }
         $manifest.ScriptsToProcess = $allScriptsToProcess.count -eq 0 ? @() : @($allScriptsToProcess)
         $manifest.ScriptsToProcess | ForEach-Object { Write-Verbose "[ScriptsToProcess] - [$_]" }
 
         Write-Verbose '[TypesToProcess]'
-        $typesToProcess = Get-ChildItem -Path $ModuleSourceFolder -Recurse -File -ErrorAction SilentlyContinue -Include '*.Types.ps1xml' |
+        $typesToProcess = Get-ChildItem -Path $ModuleOutputFolder -Recurse -File -ErrorAction SilentlyContinue -Include '*.Types.ps1xml' |
             Select-Object -ExpandProperty FullName |
-            ForEach-Object { $_.Replace($ModuleSourceFolder, '').TrimStart($pathSeparator) }
+            ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart($pathSeparator) }
     $manifest.TypesToProcess = $typesToProcess.count -eq 0 ? @() : @($typesToProcess)
     $manifest.TypesToProcess | ForEach-Object { Write-Verbose "[TypesToProcess] - [$_]" }
 
     Write-Verbose '[FormatsToProcess]'
-    $formatsToProcess = Get-ChildItem -Path $ModuleSourceFolder -Recurse -File -ErrorAction SilentlyContinue -Include '*.Format.ps1xml' |
+    $formatsToProcess = Get-ChildItem -Path $ModuleOutputFolder -Recurse -File -ErrorAction SilentlyContinue -Include '*.Format.ps1xml' |
         Select-Object -ExpandProperty FullName |
-        ForEach-Object { $_.Replace($ModuleSourceFolder, '').TrimStart($pathSeparator) }
+        ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart($pathSeparator) }
     $manifest.FormatsToProcess = $formatsToProcess.count -eq 0 ? @() : @($formatsToProcess)
     $manifest.FormatsToProcess | ForEach-Object { Write-Verbose "[FormatsToProcess] - [$_]" }
 
     Write-Verbose '[DscResourcesToExport]'
-    $dscResourcesToExportFolderPath = Join-Path $ModuleSourceFolder 'resources'
+    $dscResourcesToExportFolderPath = Join-Path $ModuleOutputFolder 'resources'
     $dscResourcesToExport = Get-ChildItem -Path $dscResourcesToExportFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.psm1' |
         Select-Object -ExpandProperty FullName |
-        ForEach-Object { $_.Replace($ModuleSourceFolder, '').TrimStart($pathSeparator) }
+        ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart($pathSeparator) }
     $manifest.DscResourcesToExport = $dscResourcesToExport.count -eq 0 ? @() : @($dscResourcesToExport)
     $manifest.DscResourcesToExport | ForEach-Object { Write-Verbose "[DscResourcesToExport] - [$_]" }
 
-    $manifest.FunctionsToExport = Get-PSModuleFunctionsToExport -SourceFolderPath $ModuleSourceFolder
-    $manifest.CmdletsToExport = Get-PSModuleCmdletsToExport -SourceFolderPath $ModuleSourceFolder
-    $manifest.AliasesToExport = Get-PSModuleAliasesToExport -SourceFolderPath $ModuleSourceFolder
-    $manifest.VariablesToExport = Get-PSModuleVariablesToExport -SourceFolderPath $ModuleSourceFolder
+    $manifest.FunctionsToExport = Get-PSModuleFunctionsToExport -SourceFolderPath $ModuleOutputFolder
+    $manifest.CmdletsToExport = Get-PSModuleCmdletsToExport -SourceFolderPath $ModuleOutputFolder
+    $manifest.AliasesToExport = Get-PSModuleAliasesToExport -SourceFolderPath $ModuleOutputFolder
+    $manifest.VariablesToExport = Get-PSModuleVariablesToExport -SourceFolderPath $ModuleOutputFolder
 
     Write-Verbose '[ModuleList]'
-    $moduleList = Get-ChildItem -Path $ModuleSourceFolder -Recurse -File -ErrorAction SilentlyContinue -Include '*.psm1' -Exclude $manifestFileName |
+    $moduleList = Get-ChildItem -Path $ModuleOutputFolder -Recurse -File -ErrorAction SilentlyContinue -Include '*.psm1' -Exclude $manifestFileName |
         Select-Object -ExpandProperty FullName |
-        ForEach-Object { $_.Replace($ModuleSourceFolder, '').TrimStart($pathSeparator) }
+        ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart($pathSeparator) }
     $manifest.ModuleList = $moduleList.count -eq 0 ? @() : @($moduleList)
     $manifest.ModuleList | ForEach-Object { Write-Verbose "[ModuleList] - [$_]" }
 
@@ -149,10 +145,10 @@ function Build-PSModuleManifest {
     $capturedVersions = @()
     $capturedPSEdition = @()
 
-    $files = $ModuleSourceFolder | Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue
+    $files = $ModuleOutputFolder | Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue
     Write-Verbose "[Gather] - Processing [$($files.Count)] files"
     foreach ($file in $files) {
-        $relativePath = $file.FullName.Replace($ModuleSourceFolder, '').TrimStart($pathSeparator)
+        $relativePath = $file.FullName.Replace($ModuleOutputFolder, '').TrimStart($pathSeparator)
         Write-Verbose "[Gather] - [$relativePath]"
 
         if ($file.extension -in '.psm1', '.ps1') {
