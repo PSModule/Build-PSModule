@@ -15,7 +15,7 @@
     param(
         # Path to the folder where the module source code is located.
         [Parameter(Mandatory)]
-        [string] $SourceFolderPath,
+        [string] $Path,
 
         # Name of the module.
         [Parameter(Mandatory)]
@@ -24,9 +24,9 @@
 
     Start-LogGroup "Importing module [$ModuleName]"
 
-    $moduleName = Split-Path -Path $SourceFolderPath -Leaf
+    $moduleName = Split-Path -Path $Path -Leaf
     $manifestFileName = "$moduleName.psd1"
-    $manifestFilePath = Join-Path -Path $SourceFolderPath $manifestFileName
+    $manifestFilePath = Join-Path -Path $Path $manifestFileName
 
     $manifestFile = Get-ModuleManifest -Path $manifestFilePath -As FileInfo -Verbose
 
