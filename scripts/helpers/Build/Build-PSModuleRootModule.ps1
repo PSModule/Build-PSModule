@@ -151,19 +151,23 @@ Export-ModuleMember @exports
     #endregion Build root module
 
     #region Format root module
-    Start-LogGroup 'Format root module - Before format'
+    Start-LogGroup 'Build root module - Format root module - Before format'
     Show-FileContent -Path $rootModuleFile
     Stop-LogGroup
 
-    Start-LogGroup 'Format root module - Format'
+    Start-LogGroup 'Build root module - Format root module - Format'
     $AllContent = Get-Content -Path $rootModuleFile -Raw
     $settings = (Join-Path -Path $PSScriptRoot 'PSScriptAnalyzer.Tests.psd1')
     Invoke-Formatter -ScriptDefinition $AllContent -Settings $settings |
         Out-File -FilePath $rootModuleFile -Encoding utf8BOM -Force
     Stop-LogGroup
 
-    Start-LogGroup 'Format root module - Result'
+    Start-LogGroup 'Build root module - Format root module - Result'
     Show-FileContent -Path $rootModuleFile
     Stop-LogGroup
     #endregion Format root module
+
+    Start-LogGroup 'Build root module - Result'
+    (Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force).FullName | Sort-Object
+    Stop-LogGroup
 }
