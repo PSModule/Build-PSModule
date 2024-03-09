@@ -42,7 +42,6 @@
             $installParams.MaximumVersion = $requiredModule.MaximumVersion
         }
         $installParams.Verbose = $false
-        $installParams.Force = $true
 
         Write-Verbose "[$($installParams.Name)] - Installing module"
         $VerbosePreferenceOriginal = $VerbosePreference
