@@ -42,12 +42,11 @@
             $installParams.MaximumVersion = $requiredModule.MaximumVersion
         }
         $installParams.Verbose = $false
-        $installParams.Force = $true
 
         Write-Verbose "[$($installParams.Name)] - Installing module"
         $VerbosePreferenceOriginal = $VerbosePreference
         $VerbosePreference = 'SilentlyContinue'
-        Install-Module @installParams
+        Install-Module @installParams -AllowPrerelease:$false
         $VerbosePreference = $VerbosePreferenceOriginal
         Write-Verbose "[$($installParams.Name)] - Importing module"
         $VerbosePreferenceOriginal = $VerbosePreference

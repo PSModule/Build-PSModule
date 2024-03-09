@@ -15,6 +15,17 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Checkout tests -> PSModuleTest
+        uses: actions/checkout@v4
+        with:
+          repository: PSModule/PSModuleTest
+          path: tests
+
+      - name: Delete outputs
+        shell: pwsh
+        run: |
+          Remove-Item -Path tests/outputs -Recurse -Force -Verbose
+
       - name: Initialize environment
         uses: PSModule/Initialize-PSModule@main
 
