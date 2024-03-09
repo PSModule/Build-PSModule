@@ -1,0 +1,37 @@
+name: Build-PSModule (by PSModule)
+description: Build a PowerShell module to the PowerShell Gallery.
+author: PSModule
+branding:
+  icon: package
+  color: gray-dark
+
+inputs:
+  Name:
+    description: Name of the module to process.
+    required: false
+  Path:
+    description: Path to the folder where the modules are located.
+    required: false
+    default: src
+  ModulesOutputPath:
+    description: Path to the folder where the built modules are outputted.
+    required: false
+    default: outputs/modules
+  DocsOutputPath:
+    description: Path to the folder where the built docs are outputted.
+    required: false
+    default: outputs/docs
+
+runs:
+  using: composite
+  steps:
+    - name: Run Build-PSModule
+      shell: pwsh
+      env:
+        GITHUB_ACTION_INPUT_Name: ${{ inputs.Name }}
+        GITHUB_ACTION_INPUT_Path: ${{ inputs.Path }}
+        GITHUB_ACTION_INPUT_ModulesOutputPath: ${{ inputs.ModulesOutputPath }}
+        GITHUB_ACTION_INPUT_DocsOutputPath: ${{ inputs.DocsOutputPath }}
+      run: |
+        # Build-PSModule
+        . "$env:GITHUB_ACTION_PATH\scripts\main.ps1" -Verbose
