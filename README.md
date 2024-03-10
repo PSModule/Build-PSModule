@@ -154,6 +154,10 @@ The source module manifest is also the only place where some of the values can b
 The module documentation is built using platyPS and comment based help in the source code.
 The documentation is currently not published anywhere, but should be published to GitHub Pages in a future release.
 
+## Permissions
+
+The action does not require any permissions.
+
 ## Sources
 
 Module manifest:
