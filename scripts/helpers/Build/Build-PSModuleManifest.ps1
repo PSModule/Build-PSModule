@@ -165,10 +165,10 @@ function Build-PSModuleManifest {
                         Write-Verbose " - [#Requires -Modules] - [$_]"
                         $hashtable = '@\{[^}]*\}'
                         if ($_ -match $hashtable) {
-                            Write-Verbose " - [#Requires -Modules] - [$_] - Hashtable"
-                            $capturedModules += ConvertTo-Hashtable -InputString $_
+                            Write-Verbose " - [#Requires -Modules] - Hashtable"
+                            $capturedModules += $_
                         } else {
-                            Write-Verbose " - [#Requires -Modules] - [$_] - String"
+                            Write-Verbose " - [#Requires -Modules] - String"
                             $capturedModules += $_
                         }
                     }
@@ -176,13 +176,11 @@ function Build-PSModuleManifest {
                 # PowerShellVersion -> REQUIRES -Version <N>[.<n>], $null if not provided
                 '^\s*#Requires -Version (.+)$' {
                     Write-Verbose " - [#Requires -Version] - [$($matches[1])]"
-                    # Add captured module name to array
                     $capturedVersions += $matches[1]
                 }
-                #CompatiblePSEditions -> REQUIRES -PSEdition <PSEdition-Name>, $null if not provided
+                # CompatiblePSEditions -> REQUIRES -PSEdition <PSEdition-Name>, $null if not provided
                 '^\s*#Requires -PSEdition (.+)$' {
                     Write-Verbose " - [#Requires -PSEdition] - [$($matches[1])]"
-                    # Add captured module name to array
                     $capturedPSEdition += $matches[1]
                 }
             }
