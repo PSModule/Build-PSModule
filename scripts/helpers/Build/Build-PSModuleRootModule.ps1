@@ -74,7 +74,9 @@ Write-Verbose "[$scriptName] Importing module"
     #endregion - Module post-header
 
     #region - Data and variables
-    Add-Content -Path $rootModuleFile.FullName -Force -Value @'
+    if (Test-Path -Path (Join-Path -Path $ModuleOutputFolder -ChildPath 'data')) {
+
+        Add-Content -Path $rootModuleFile.FullName -Force -Value @'
 #region - Data import
 Write-Verbose "[$scriptName] - [data] - Processing folder"
 $dataFolder = (Join-Path $PSScriptRoot 'data')
@@ -89,6 +91,7 @@ Write-Verbose "[$scriptName] - [data] - Done"
 #endregion - Data import
 
 '@
+    }
     #endregion - Data and variables
 
     #region - Add content from subfolders

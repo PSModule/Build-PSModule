@@ -37,7 +37,7 @@ The root module file is the main file that is loaded when the module is imported
 It is built from the source code files in the module folder in the following order:
 
 1. Adds module headers from `header.ps1`.
-1. Adds data loader automation that loads files from the `data` folder as variables in the module scope. The variables are available using the ´$script:<filename>´ syntax.
+1. Adds data loader automation that loads files from the `data` folder as variables in the module scope, if it exists. The variables are available using the ´$script:<filename>´ syntax.
 1. Adds content from subfolders, in the order:
    - Init
    - Private
