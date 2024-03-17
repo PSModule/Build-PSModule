@@ -155,6 +155,7 @@ function Build-PSModuleManifest {
         if ($file.extension -in '.psm1', '.ps1') {
             $fileContent = Get-Content -Path $file
 
+            ## TESTING THIS
             switch -Regex ($fileContent) {
                 # RequiredModules -> REQUIRES -Modules <Module-Name> | <Hashtable>, @() if not provided
                 '^\s*#Requires -Modules (.+)$' {
