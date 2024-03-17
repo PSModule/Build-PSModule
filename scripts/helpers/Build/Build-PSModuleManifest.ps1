@@ -166,11 +166,7 @@ function Build-PSModuleManifest {
                         $hashtable = '@\{[^}]*\}'
                         if ($_ -match $hashtable) {
                             $hashtablePart = $matches[0]
-                            $modules = ConvertTo-Hashtable -InputString $hashtablePart
                             Write-Verbose " - [#Requires -Modules] - [$hashtablePart] - Hashtable"
-                            $modules.Keys | ForEach-Object {
-                                Write-Verbose "$($modules[$hashtablePart])]"
-                            }
                             $capturedModules += $modules
                         } else {
                             Write-Verbose " - [#Requires -Modules] - [$_] - String"
