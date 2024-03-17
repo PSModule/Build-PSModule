@@ -160,7 +160,7 @@ function Build-PSModuleManifest {
                 # RequiredModules -> REQUIRES -Modules <Module-Name> | <Hashtable>, @() if not provided
                 '^\s*#Requires -Modules (.+)$' {
                     # Add captured module name to array
-                    $capturedMatches = $matches[0].Split(',').trim()
+                    $capturedMatches = $matches[1].Split(',').trim()
                     $capturedMatches | ForEach-Object {
                         Write-Verbose " - [#Requires -Modules] - [$_]"
                         $hashtable = '@\{[^}]*\}'
