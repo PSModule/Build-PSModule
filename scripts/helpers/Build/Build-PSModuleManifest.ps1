@@ -162,13 +162,12 @@ function Build-PSModuleManifest {
                     # Add captured module name to array
                     $capturedMatches = $matches[1].Split(',').trim()
                     $capturedMatches | ForEach-Object {
-                        Write-Verbose " - [#Requires -Modules] - [$_]"
                         $hashtable = '@\{[^}]*\}'
                         if ($_ -match $hashtable) {
-                            Write-Verbose " - [#Requires -Modules] - Hashtable"
-                            $capturedModules += $_
+                            Write-Verbose " - [#Requires -Modules] - [$_] - Hashtable"
+                            $capturedModules += ConvertTo-Hashtable -InputString $_
                         } else {
-                            Write-Verbose " - [#Requires -Modules] - String"
+                            Write-Verbose " - [#Requires -Modules] - [$_] - String"
                             $capturedModules += $_
                         }
                     }
@@ -178,7 +177,7 @@ function Build-PSModuleManifest {
                     Write-Verbose " - [#Requires -Version] - [$($matches[1])]"
                     $capturedVersions += $matches[1]
                 }
-                # CompatiblePSEditions -> REQUIRES -PSEdition <PSEdition-Name>, $null if not provided
+                #CompatiblePSEditions -> REQUIRES -PSEdition <PSEdition-Name>, $null if not provided
                 '^\s*#Requires -PSEdition (.+)$' {
                     Write-Verbose " - [#Requires -PSEdition] - [$($matches[1])]"
                     $capturedPSEdition += $matches[1]
