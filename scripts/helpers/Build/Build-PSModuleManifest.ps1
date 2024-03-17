@@ -190,7 +190,6 @@ function Build-PSModuleManifest {
     }
 
     Write-Verbose '[RequiredModules]'
-    $capturedModules = $capturedModules
     $manifest.RequiredModules = $capturedModules
     $manifest.RequiredModules | ForEach-Object { Write-Verbose "[RequiredModules] - [$_]" }
 
