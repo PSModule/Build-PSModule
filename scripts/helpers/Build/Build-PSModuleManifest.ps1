@@ -163,12 +163,13 @@ function Build-PSModuleManifest {
                     $capturedMatches = $matches[1].Split(',').trim()
                     $capturedMatches | ForEach-Object {
                         Write-Verbose " - [#Requires -Modules] - [$_]"
-                        $hashtable = '\@\s*\{[^\}]*\}'
+                        $hashtable = '@\{[^}]*\}'
                         if ($_ -match $hashtable) {
-                            $modules = ConvertTo-Hashtable -InputString $_
-                            Write-Verbose " - [#Requires -Modules] - [$_] - Hashtable"
+                            $hashtablePart = $matches[0]
+                            $modules = ConvertTo-Hashtable -InputString $hashtablePart
+                            Write-Verbose " - [#Requires -Modules] - [$hashtablePart] - Hashtable"
                             $modules.Keys | ForEach-Object {
-                                Write-Verbose "$($modules[$_])]"
+                                Write-Verbose "$($modules[$hashtablePart])]"
                             }
                             $capturedModules += $modules
                         } else {
