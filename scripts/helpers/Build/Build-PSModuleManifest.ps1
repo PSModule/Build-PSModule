@@ -197,17 +197,37 @@ function Build-PSModuleManifest {
     Write-Verbose '[PowerShellVersion]'
     $capturedVersions = $capturedVersions | Sort-Object -Unique -Descending
     $capturedVersions | ForEach-Object { Write-Verbose "[PowerShellVersion] - [$_]" }
-    $manifest.PowerShellVersion = $capturedVersions.count -eq 0 ? [version]'7.0' : [version]($capturedVersions | Select-Object -First 1)
+    $manifest.PowerShellVersion = $capturedVersions.count -eq 0 ? [version]'5.1' : [version]($capturedVersions | Select-Object -First 1)
     Write-Verbose '[PowerShellVersion] - Selecting version'
     Write-Verbose "[PowerShellVersion] - [$($manifest.PowerShellVersion)]"
 
     Write-Verbose '[CompatiblePSEditions]'
     $capturedPSEdition = $capturedPSEdition | Sort-Object -Unique
     if ($capturedPSEdition.count -eq 2) {
-        throw 'The module is requires both Desktop and Core editions.'
+        throw @"
+Conflict detected:
+    The module requires both 'Desktop' and 'Core' editions.
+    'Desktop' and 'Core' editions cannot be required at the same time.
+"@
     }
     $manifest.CompatiblePSEditions = $capturedPSEdition.count -eq 0 ? @('Core', 'Desktop') : @($capturedPSEdition)
     $manifest.CompatiblePSEditions | ForEach-Object { Write-Verbose "[CompatiblePSEditions] - [$_]" }
+
+    if ($manifest.PowerShellVersion -gt '5.1' -and $manifest.CompatiblePSEditions -contains 'Desktop') {
+        throw @'
+Conflict detected:
+    The module requires PowerShellVersion > 5.1 while CompatiblePSEditions = 'Desktop'
+    'Desktop' edition is not supported for PowerShellVersion > 5.1
+'@
+    }
+
+    if ($manifest.CompatiblePSEditions -contains 'Core' -and $manifest.PowerShellVersion -lt '6.0') {
+        throw @'
+Conflict detected:
+    The module requires CompatiblePSEditions = 'Core' while PowerShellVersion < 6.0
+    'Core' edition is not supported for PowerShellVersion < 6.0
+'@
+    }
 
     Write-Verbose '[PrivateData]'
     $privateData = $manifest.Keys -contains 'PrivateData' ? $null -ne $manifest.PrivateData ? $manifest.PrivateData : @{} : @{}
@@ -318,17 +338,14 @@ function Build-PSModuleManifest {
     #endregion Build manifest file
 
     #region Format manifest file
-    Start-LogGroup 'Format manifest file - Before format'
+    Start-LogGroup 'Build manifest file - Result - Before format'
     Show-FileContent -Path $outputManifestPath
     Stop-LogGroup
 
-    Start-LogGroup 'Format manifest file - After'
+    Start-LogGroup 'Build manifest file - Result - After format'
     Set-ModuleManifest -Path $outputManifestPath
     Show-FileContent -Path $outputManifestPath
     Stop-LogGroup
 
-    Start-LogGroup 'Format manifest file - Result'
-    Show-FileContent -Path $outputManifestPath
-    Stop-LogGroup
     #endregion Format manifest file
 }

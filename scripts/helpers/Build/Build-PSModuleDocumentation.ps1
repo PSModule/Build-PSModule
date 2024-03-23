@@ -23,17 +23,14 @@ function Build-PSModuleDocumentation {
         [System.IO.DirectoryInfo] $DocsOutputFolder
     )
 
-    Start-LogGroup 'Docs - Dependencies'
+    Start-LogGroup 'Build docs - Dependencies'
     $moduleName = Split-Path -Path $ModuleOutputFolder -Leaf
 
     Add-PSModulePath -Path (Split-Path -Path $ModuleOutputFolder -Parent)
     Import-PSModule -Path $ModuleOutputFolder -ModuleName $moduleName
 
-    Start-LogGroup 'Build documentation'
+    Start-LogGroup 'Build docs - Generate markdown help'
     $null = New-MarkdownHelp -Module $moduleName -OutputFolder $DocsOutputFolder -Force -Verbose
-    Stop-LogGroup
-
-    Start-LogGroup 'Build documentation - Fix fence'
     Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $content = Get-Content -Path $_.FullName
         $fixedOpening = $false
@@ -51,15 +48,6 @@ function Build-PSModuleDocumentation {
         }
         $newContent | Set-Content -Path $_.FullName
     }
-    Stop-LogGroup
-
-    Start-LogGroup 'Build documentation - Result'
-    Write-Verbose (Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
-        @{
-            Name = $_.FullName
-            Hash = (Get-FileHash -Path $_.FullName -Algorithm SHA256).Hash
-        }
-    } | Format-Table -AutoSize | Out-String)
     Stop-LogGroup
 
     Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
