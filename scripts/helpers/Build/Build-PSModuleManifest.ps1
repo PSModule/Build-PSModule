@@ -155,21 +155,17 @@ function Build-PSModuleManifest {
         if ($file.extension -in '.psm1', '.ps1') {
             $fileContent = Get-Content -Path $file
 
+            ## TESTING THIS
             switch -Regex ($fileContent) {
                 # RequiredModules -> REQUIRES -Modules <Module-Name> | <Hashtable>, @() if not provided
                 '^\s*#Requires -Modules (.+)$' {
                     # Add captured module name to array
                     $capturedMatches = $matches[1].Split(',').trim()
                     $capturedMatches | ForEach-Object {
-                        Write-Verbose " - [#Requires -Modules] - [$_]"
-                        $hashtable = '\@\s*\{[^\}]*\}'
+                        $hashtable = '@\{[^}]*\}'
                         if ($_ -match $hashtable) {
-                            $modules = ConvertTo-Hashtable -InputString $_
                             Write-Verbose " - [#Requires -Modules] - [$_] - Hashtable"
-                            $modules.Keys | ForEach-Object {
-                                Write-Verbose "$($modules[$_])]"
-                            }
-                            $capturedModules += $modules
+                            $capturedModules += ConvertTo-Hashtable -InputString $_
                         } else {
                             Write-Verbose " - [#Requires -Modules] - [$_] - String"
                             $capturedModules += $_
@@ -179,13 +175,11 @@ function Build-PSModuleManifest {
                 # PowerShellVersion -> REQUIRES -Version <N>[.<n>], $null if not provided
                 '^\s*#Requires -Version (.+)$' {
                     Write-Verbose " - [#Requires -Version] - [$($matches[1])]"
-                    # Add captured module name to array
                     $capturedVersions += $matches[1]
                 }
                 #CompatiblePSEditions -> REQUIRES -PSEdition <PSEdition-Name>, $null if not provided
                 '^\s*#Requires -PSEdition (.+)$' {
                     Write-Verbose " - [#Requires -PSEdition] - [$($matches[1])]"
-                    # Add captured module name to array
                     $capturedPSEdition += $matches[1]
                 }
             }
@@ -193,7 +187,6 @@ function Build-PSModuleManifest {
     }
 
     Write-Verbose '[RequiredModules]'
-    $capturedModules = $capturedModules
     $manifest.RequiredModules = $capturedModules
     $manifest.RequiredModules | ForEach-Object { Write-Verbose "[RequiredModules] - [$_]" }
 
