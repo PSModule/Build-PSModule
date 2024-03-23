@@ -73,7 +73,7 @@ During the module manifest build process the following steps are performed:
 1. Get the list of DSC resources to export by searching for `*.psm1` files in the `resources` folder and set the `DscResourcesToExport` property in the manifest.
 1. Get the list of functions, cmdlets, aliases, and variables to export and set the respective properties in the manifest.
 1. Get the list of modules by searching for all `*.psm1` files in the entire module source folder, excluding the root module and set the `ModuleList` property in the manifest.
-1. Gather information about required modules, PowerShell version, and compatible PS editions from the module source files and set the respective properties in the manifest.
+1. Gather information from source files to update `RequiredModules`, `PowerShellVersion`, and `CompatiblePSEditions` properties.
 1. The following values are gathered from the GitHub repository:
    - `Tags` are generated from Repository topics in addition to compatability tags gathered from the source code.
    - `LicenseUri` is generated assuming there is a `LICENSE` file on the root of the repository.
