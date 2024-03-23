@@ -197,7 +197,7 @@ function Build-PSModuleManifest {
     Write-Verbose '[PowerShellVersion]'
     $capturedVersions = $capturedVersions | Sort-Object -Unique -Descending
     $capturedVersions | ForEach-Object { Write-Verbose "[PowerShellVersion] - [$_]" }
-    $manifest.PowerShellVersion = $capturedVersions.count -eq 0 ? [version]'7.0' : [version]($capturedVersions | Select-Object -First 1)
+    $manifest.PowerShellVersion = $capturedVersions.count -eq 0 ? [version]'5.1' : [version]($capturedVersions | Select-Object -First 1)
     Write-Verbose '[PowerShellVersion] - Selecting version'
     Write-Verbose "[PowerShellVersion] - [$($manifest.PowerShellVersion)]"
 
