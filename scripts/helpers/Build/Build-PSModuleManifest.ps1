@@ -204,17 +204,29 @@ function Build-PSModuleManifest {
     Write-Verbose '[CompatiblePSEditions]'
     $capturedPSEdition = $capturedPSEdition | Sort-Object -Unique
     if ($capturedPSEdition.count -eq 2) {
-        throw "A module cannot require both 'Desktop' and 'Core' editions."
+        throw @"
+Conflict detected:
+    The module requires both 'Desktop' and 'Core' editions.
+    'Desktop' and 'Core' editions cannot be required at the same time.
+"@
     }
     $manifest.CompatiblePSEditions = $capturedPSEdition.count -eq 0 ? @('Core', 'Desktop') : @($capturedPSEdition)
     $manifest.CompatiblePSEditions | ForEach-Object { Write-Verbose "[CompatiblePSEditions] - [$_]" }
 
     if ($manifest.PowerShellVersion -gt '5.1' -and $manifest.CompatiblePSEditions -contains 'Desktop') {
-        throw "[CompatiblePSEditions] - Cannot be PowerShellVersion > 5.1 and CompatiblePSEditions = 'Desktop'"
+        throw @'
+Conflict detected:
+    The module requires PowerShellVersion > 5.1 while CompatiblePSEditions = 'Desktop'
+    'Desktop' edition is not supported for PowerShellVersion > 5.1
+'@
     }
 
     if ($manifest.CompatiblePSEditions -contains 'Core' -and $manifest.PowerShellVersion -lt '6.0') {
-        throw "[CompatiblePSEditions] - Cannot be CompatiblePSEditions = 'Core' and PowerShellVersion < 6.0"
+        throw @'
+Conflict detected:
+    The module requires CompatiblePSEditions = 'Core' while PowerShellVersion < 6.0
+    'Core' edition is not supported for PowerShellVersion < 6.0
+'@
     }
 
     Write-Verbose '[PrivateData]'
