@@ -30,12 +30,43 @@ function Build-PSModuleDocumentation {
     Import-PSModule -Path $ModuleOutputFolder -ModuleName $moduleName
 
     Start-LogGroup 'Build documentation'
-    New-MarkdownHelp -Module $moduleName -OutputFolder $DocsOutputFolder -Force -Verbose
+    $null = New-MarkdownHelp -Module $moduleName -OutputFolder $DocsOutputFolder -Force -Verbose
+    Stop-LogGroup
+
+    Start-LogGroup 'Build documentation - Fix fence'
+    Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+        $content = Get-Content -Path $_.FullName
+        $fixedOpening = $false
+        $newContent = @()
+        foreach ($line in $content) {
+            if ($line -match '^```$' -and -not $fixedOpening) {
+                $line = $line -replace '^```$', '```powershell'
+                $fixedOpening = $true
+            } elseif ($line -match '^```.+$') {
+                $fixedOpening = $true
+            } elseif ($line -match '^```$'){
+                $fixedOpening = $false
+            }
+            $newContent += $line
+        }
+        $newContent | Set-Content -Path $_.FullName
+    }
     Stop-LogGroup
 
     Start-LogGroup 'Build documentation - Result'
-    Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
-        Write-Verbose "[$_] - [$(Get-FileHash -Path $_.FullName -Algorithm SHA256)]"
-    }
+    Write-Verbose (Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+        @{
+            Name = $_.FullName
+            Hash = (Get-FileHash -Path $_.FullName -Algorithm SHA256).Hash
+        }
+    } | Format-Table -AutoSize | Out-String)
     Stop-LogGroup
+
+    Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+        $fileName = $_.Name
+        $hash = (Get-FileHash -Path $_.FullName -Algorithm SHA256).Hash
+        Start-LogGroup "- File: [$fileName] - [$hash]"
+        Show-FileContent -Path $_
+        Stop-LogGroup
+    }
 }
