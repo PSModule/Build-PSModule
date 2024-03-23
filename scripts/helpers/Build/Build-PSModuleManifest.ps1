@@ -211,10 +211,6 @@ function Build-PSModuleManifest {
         Write-Verbose "[CompatiblePSEditions] - Defaulting to 'Core', as no PSEdition was specified and PowerShellVersion > 5.1"
         $capturedPSEdition = @('Core')
     }
-    if ($capturedPSEdition.count -eq 0 -and $manifest.PowerShellVersion -lt '6.0') {
-        Write-Verbose "[CompatiblePSEditions] - Defaulting to 'Desktop', as no PSEdition was specified and PowerShellVersion < 6.0"
-        $capturedPSEdition = @('Desktop')
-    }
     $manifest.CompatiblePSEditions = $capturedPSEdition.count -eq 0 ? @('Core', 'Desktop') : @($capturedPSEdition)
     $manifest.CompatiblePSEditions | ForEach-Object { Write-Verbose "[CompatiblePSEditions] - [$_]" }
 
