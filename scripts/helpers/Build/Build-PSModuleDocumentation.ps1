@@ -34,10 +34,14 @@ function Build-PSModuleDocumentation {
     Stop-LogGroup
 
     Start-LogGroup 'Build documentation - Fix fence'
+    $opening = $true
     Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
-        $content = Get-Content -Path $_.FullName
-        $content = $content -replace '```', '```powershell'
-        $content | Set-Content -Path $_.FullName
+        if ($opening) {
+            $content = Get-Content -Path $_.FullName
+            $content = $content -replace '^```$', '```powershell'
+            $content | Set-Content -Path $_.FullName
+            $opening = $false
+        }
     }
     Stop-LogGroup
 
