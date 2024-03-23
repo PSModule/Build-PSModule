@@ -204,29 +204,23 @@ function Build-PSModuleManifest {
     Write-Verbose '[CompatiblePSEditions]'
     $capturedPSEdition = $capturedPSEdition | Sort-Object -Unique
     if ($capturedPSEdition.count -eq 2) {
-        throw @"
-Conflict detected:
-    The module requires both 'Desktop' and 'Core' editions.
-    'Desktop' and 'Core' editions cannot be required at the same time.
-"@
+        throw "Conflict detected: The module requires both 'Desktop' and 'Core' editions." +
+        "'Desktop' and 'Core' editions cannot be required at the same time."
+    }
+    if ($capturedPSEdition.count -eq 0 -and $manifest.PowerShellVersion -gt '5.1') {
+        Write-Verbose "[CompatiblePSEditions] - Defaulting to 'Core', as no PSEdition was specified and PowerShellVersion > 5.1"
+        $capturedPSEdition = @('Core')
+    }
+    if ($capturedPSEdition.count -eq 0 -and $manifest.PowerShellVersion -lt '6.0') {
+        Write-Verbose "[CompatiblePSEditions] - Defaulting to 'Desktop', as no PSEdition was specified and PowerShellVersion < 6.0"
+        $capturedPSEdition = @('Desktop')
     }
     $manifest.CompatiblePSEditions = $capturedPSEdition.count -eq 0 ? @('Core', 'Desktop') : @($capturedPSEdition)
     $manifest.CompatiblePSEditions | ForEach-Object { Write-Verbose "[CompatiblePSEditions] - [$_]" }
 
     if ($manifest.PowerShellVersion -gt '5.1' -and $manifest.CompatiblePSEditions -contains 'Desktop') {
-        throw @'
-Conflict detected:
-    The module requires PowerShellVersion > 5.1 while CompatiblePSEditions = 'Desktop'
-    'Desktop' edition is not supported for PowerShellVersion > 5.1
-'@
-    }
-
-    if ($manifest.CompatiblePSEditions -contains 'Core' -and $manifest.PowerShellVersion -lt '6.0') {
-        throw @'
-Conflict detected:
-    The module requires CompatiblePSEditions = 'Core' while PowerShellVersion < 6.0
-    'Core' edition is not supported for PowerShellVersion < 6.0
-'@
+        throw "Conflict detected: The module requires PowerShellVersion > 5.1 while CompatiblePSEditions = 'Desktop'" +
+        "'Desktop' edition is not supported for PowerShellVersion > 5.1"
     }
 
     Write-Verbose '[PrivateData]'
