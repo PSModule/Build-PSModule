@@ -338,17 +338,14 @@ Conflict detected:
     #endregion Build manifest file
 
     #region Format manifest file
-    Start-LogGroup 'Format manifest file - Before format'
+    Start-LogGroup 'Build manifest file - Result - Before format'
     Show-FileContent -Path $outputManifestPath
     Stop-LogGroup
 
-    Start-LogGroup 'Format manifest file - After'
+    Start-LogGroup 'Build manifest file - Result - After format'
     Set-ModuleManifest -Path $outputManifestPath
     Show-FileContent -Path $outputManifestPath
     Stop-LogGroup
 
-    Start-LogGroup 'Format manifest file - Result'
-    Show-FileContent -Path $outputManifestPath
-    Stop-LogGroup
     #endregion Format manifest file
 }
