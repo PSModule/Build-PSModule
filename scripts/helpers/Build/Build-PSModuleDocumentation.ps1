@@ -30,7 +30,7 @@ function Build-PSModuleDocumentation {
     Import-PSModule -Path $ModuleOutputFolder -ModuleName $moduleName
 
     Start-LogGroup 'Build documentation'
-    New-MarkdownHelp -Module $moduleName -OutputFolder $DocsOutputFolder -Force -Verbose
+    $null = New-MarkdownHelp -Module $moduleName -OutputFolder $DocsOutputFolder -Force -Verbose
     Stop-LogGroup
 
     Start-LogGroup 'Build documentation - Fix fence'
