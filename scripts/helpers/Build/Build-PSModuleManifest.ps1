@@ -74,7 +74,7 @@ function Build-PSModuleManifest {
     $files = $ModuleOutputFolder | Get-ChildItem -File -ErrorAction SilentlyContinue | Where-Object -Property Name -NotLike '*.ps1'
     $files += $ModuleOutputFolder | Get-ChildItem -Directory | Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue
     $files = $files | Select-Object -ExpandProperty FullName | ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart($pathSeparator) }
-    $fileList = $files | Where-Object { $_ -notLike 'public*' -and $_ -notLike 'private*' }
+    $fileList = $files | Where-Object { $_ -NotLike 'init*' -and $_ -NotLike 'classes*' -and $_ -NotLike 'public*' -and $_ -NotLike 'private*' }
     $manifest.FileList = $fileList.count -eq 0 ? @() : @($fileList)
     $manifest.FileList | ForEach-Object { Write-Verbose "[FileList] - [$_]" }
 
