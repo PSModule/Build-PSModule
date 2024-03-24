@@ -31,7 +31,7 @@
 
     Write-Verbose "Manifest file path: [$($manifestFile.FullName)]" -Verbose
     Get-Module -Name $ModuleName -ListAvailable | Remove-Module -Force -Verbose:$false
-    Get-InstalledPSResource -Name $ModuleName | Uninstall-PSResource -SkipDependencyCheck -Verbose:$false
+    Get-InstalledPSResource | Where-Object Name -EQ $ModuleName | Uninstall-PSResource -SkipDependencyCheck -Verbose:$false
     Resolve-PSModuleDependencies -ManifestFilePath $manifestFile
     Import-Module -Name $ModuleName -RequiredVersion '999.0.0'
 
