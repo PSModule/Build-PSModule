@@ -96,6 +96,8 @@ Write-Verbose "[$scriptName] - [data] - Done"
 
     #region - Add content from subfolders
     $scriptFoldersToProcess = @(
+        'init',
+        'classes',
         'private',
         'public'
     )
