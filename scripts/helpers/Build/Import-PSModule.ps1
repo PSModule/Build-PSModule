@@ -30,8 +30,10 @@
     $manifestFile = Get-ModuleManifest -Path $manifestFilePath -As FileInfo -Verbose
 
     Write-Verbose "Manifest file path: [$($manifestFile.FullName)]" -Verbose
+    Remove-Module -Name $ModuleName -Force
+    Uninstall-PSResource -Name $ModuleName -Force -SkipDependencyCheck
     Resolve-PSModuleDependencies -ManifestFilePath $manifestFile
-    Import-Module $ModuleName
+    Import-Module -Name $ModuleName -RequiredVersion '999.0.0'
 
     Write-Verbose 'List loaded modules'
     $availableModules = Get-Module -ListAvailable -Refresh -Verbose:$false
