@@ -30,8 +30,8 @@
     $manifestFile = Get-ModuleManifest -Path $manifestFilePath -As FileInfo -Verbose
 
     Write-Verbose "Manifest file path: [$($manifestFile.FullName)]" -Verbose
-    Remove-Module -Name $ModuleName -Force
-    Uninstall-PSResource -Name $ModuleName -Force -SkipDependencyCheck
+    Get-Module -Name $ModuleName -ListAvailable | Remove-Module -Force -Verbose:$false
+    Get-InstalledPSResource -Name $ModuleName | Uninstall-PSResource -Force -SkipDependencyCheck -Verbose:$false
     Resolve-PSModuleDependencies -ManifestFilePath $manifestFile
     Import-Module -Name $ModuleName -RequiredVersion '999.0.0'
 
