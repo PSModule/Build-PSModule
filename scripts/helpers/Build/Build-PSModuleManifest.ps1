@@ -95,7 +95,7 @@ function Build-PSModuleManifest {
     $manifest.NestedModules | ForEach-Object { Write-Verbose "[NestedModules] - [$_]" }
 
     Write-Verbose '[ScriptsToProcess]'
-    $allScriptsToProcess = @('scripts', 'classes') | ForEach-Object {
+    $allScriptsToProcess = @('scripts') | ForEach-Object {
         Write-Verbose "[ScriptsToProcess] - Processing [$_]"
         $scriptsFolderPath = Join-Path $ModuleOutputFolder $_
         $scriptsToProcess = Get-ChildItem -Path $scriptsFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1' |
