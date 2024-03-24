@@ -333,8 +333,11 @@ function Build-PSModuleManifest {
     Show-FileContent -Path $outputManifestPath
     Stop-LogGroup
 
-    Start-LogGroup 'Build manifest file - Result - After format'
+    Start-LogGroup 'Build manifest file - Format'
     Set-ModuleManifest -Path $outputManifestPath
+    Stop-LogGroup
+
+    Start-LogGroup 'Build manifest file - Result - After format'
     Show-FileContent -Path $outputManifestPath
     Stop-LogGroup
 
