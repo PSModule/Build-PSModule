@@ -50,9 +50,9 @@ function Build-PSModuleDocumentation {
     }
     Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $content = Get-Content -Path $_.FullName -Raw
-        $content = $content -replace "\``", "``"
-        $content = $content -replace '\[', '['
-        $content = $content -replace '\]', ']'
+        $content = $content -replace "\\``", "``"
+        $content = $content -replace '\\[', '['
+        $content = $content -replace '\\]', ']'
         $content | Set-Content -Path $_.FullName
     }
     Stop-LogGroup
