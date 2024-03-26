@@ -12,6 +12,8 @@ function New-PSModuleTest {
 
         .NOTES
         Testing if a module can have a [Markdown based link](https://example.com).
+        !"#¤%&/()=?`´^¨*'-_+§½{[]}<>|@£$€¥¢:;.,"
+        \[This is a test\]
     #>
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
         'PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function',
