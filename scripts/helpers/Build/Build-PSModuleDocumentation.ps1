@@ -41,19 +41,29 @@ function Build-PSModuleDocumentation {
                 $fixedOpening = $true
             } elseif ($line -match '^```.+$') {
                 $fixedOpening = $true
-            } elseif ($line -match '^```$'){
+            } elseif ($line -match '^```$') {
                 $fixedOpening = $false
             }
             $newContent += $line
         }
         $newContent | Set-Content -Path $_.FullName
     }
+    Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+        $content = Get-Content -Path $_.FullName -Raw
+        $content = $content -replace '\\`', '`'
+        $content = $content -replace '\\\[', '['
+        $content = $content -replace '\\\]', ']'
+        $content = $content -replace '\\\<', '<'
+        $content = $content -replace '\\\>', '>'
+        $content = $content -replace '\\\\', '\'
+        $content | Set-Content -Path $_.FullName
+    }
     Stop-LogGroup
 
     Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $fileName = $_.Name
         $hash = (Get-FileHash -Path $_.FullName -Algorithm SHA256).Hash
-        Start-LogGroup "- File: [$fileName] - [$hash]"
+        Start-LogGroup " - [$fileName] - [$hash]"
         Show-FileContent -Path $_
         Stop-LogGroup
     }
