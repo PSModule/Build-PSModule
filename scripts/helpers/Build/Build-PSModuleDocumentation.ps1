@@ -49,7 +49,7 @@ function Build-PSModuleDocumentation {
         $newContent | Set-Content -Path $_.FullName
     }
     Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
-        $content = Get-Content -Path $_.FullName
+        $content = Get-Content -Path $_.FullName -Raw
         $content = $content -replace "\``", "``"
         $content = $content -replace '\[', '['
         $content = $content -replace '\]', ']'
@@ -60,7 +60,7 @@ function Build-PSModuleDocumentation {
     Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $fileName = $_.Name
         $hash = (Get-FileHash -Path $_.FullName -Algorithm SHA256).Hash
-        Start-LogGroup "- File: [$fileName] - [$hash]"
+        Start-LogGroup " - [$fileName] - [$hash]"
         Show-FileContent -Path $_
         Stop-LogGroup
     }
