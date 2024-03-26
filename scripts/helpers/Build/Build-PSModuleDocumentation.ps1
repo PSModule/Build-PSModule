@@ -41,12 +41,19 @@ function Build-PSModuleDocumentation {
                 $fixedOpening = $true
             } elseif ($line -match '^```.+$') {
                 $fixedOpening = $true
-            } elseif ($line -match '^```$'){
+            } elseif ($line -match '^```$') {
                 $fixedOpening = $false
             }
             $newContent += $line
         }
         $newContent | Set-Content -Path $_.FullName
+    }
+    Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+        $content = Get-Content -Path $_.FullName
+        $content = $content -replace "\``", "``"
+        $content = $content -replace '\[', '['
+        $content = $content -replace '\]', ']'
+        $content | Set-Content -Path $_.FullName
     }
     Stop-LogGroup
 
