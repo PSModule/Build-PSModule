@@ -53,6 +53,9 @@ function Build-PSModuleDocumentation {
         $content = $content -replace '\\`', '`'
         $content = $content -replace '\\\[', '['
         $content = $content -replace '\\\]', ']'
+        $content = $content -replace '\\\<', '<'
+        $content = $content -replace '\\\>', '>'
+        $content = $content -replace '\\\\', '\'
         $content | Set-Content -Path $_.FullName
     }
     Stop-LogGroup
