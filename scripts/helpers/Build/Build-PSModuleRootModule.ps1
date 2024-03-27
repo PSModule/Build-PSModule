@@ -42,12 +42,55 @@ function Build-PSModuleRootModule {
     $rootModuleFile = New-Item -Path $ModuleOutputFolder -Name "$moduleName.psm1" -Force
 
     #region - Analyze source files
-    $exports = @{
-        Function = Get-PSModuleFunctionsToExport -SourceFolderPath $ModuleOutputFolder
-        Cmdlet   = Get-PSModuleCmdletsToExport -SourceFolderPath $ModuleOutputFolder
-        Variable = Get-PSModuleVariablesToExport -SourceFolderPath $ModuleOutputFolder
-        Alias    = Get-PSModuleAliasesToExport -SourceFolderPath $ModuleOutputFolder
+
+    #region - Export-Classes
+    $classesFolder = Join-Path -Path $ModuleOutputFolder -ChildPath 'classes'
+    $classExports = ''
+    if (Test-Path -Path $classesFolder) {
+        $classes = Get-PSModuleClassesToExport -SourceFolderPath $ModuleOutputFolder
+        if ($classes.count -gt 0) {
+            $classExports = @'
+# Define the types to export with type accelerators.
+$ExportableTypes = @(
+
+'@
+            $classes | ForEach-Object {
+                $classExports += "    [$_]`n"
+            }
+
+            $classExports += @'
+)
+# Get the internal TypeAccelerators class to use its static methods.
+$TypeAcceleratorsClass = [psobject].Assembly.GetType(
+    'System.Management.Automation.TypeAccelerators'
+)
+# Ensure none of the types would clobber an existing type accelerator.
+# If a type accelerator with the same name exists, throw an exception.
+$ExistingTypeAccelerators = $TypeAcceleratorsClass::Get
+foreach ($Type in $ExportableTypes) {
+    if ($Type.FullName -in $ExistingTypeAccelerators.Keys) {
+        Write-Debug "Accelerator already exists [$($Type.FullName)]"
+    } else {
+        $TypeAcceleratorsClass::Add($Type.FullName, $Type)
     }
+}
+
+# Remove type accelerators when the module is removed.
+$MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
+    foreach ($Type in $ExportableTypes) {
+        $TypeAcceleratorsClass::Remove($Type.FullName)
+    }
+}.GetNewClosure()
+'@
+        }
+    }
+    #endregion - Export-Classes
+
+    $exports = [System.Collections.Specialized.OrderedDictionary]::new()
+    $exports.Add('Alias', (Get-PSModuleAliasesToExport -SourceFolderPath $ModuleOutputFolder))
+    $exports.Add('Cmdlet', (Get-PSModuleCmdletsToExport -SourceFolderPath $ModuleOutputFolder))
+    $exports.Add('Function', (Get-PSModuleFunctionsToExport -SourceFolderPath $ModuleOutputFolder))
+    $exports.Add('Variable', (Get-PSModuleVariablesToExport -SourceFolderPath $ModuleOutputFolder))
 
     Write-Verbose ($exports | Out-String)
     #endregion - Analyze source files
@@ -133,6 +176,8 @@ Write-Verbose "[`$scriptName] - [$relativePath] - Done"
     #endregion - Add content from *.ps1 files on module root
 
     #region - Export-ModuleMember
+    Add-Content -Path $rootModuleFile -Force -Value $classExports
+
     $exportsString = Convert-HashtableToString -Hashtable $exports
 
     Write-Verbose ($exportsString | Out-String)
@@ -141,6 +186,9 @@ Write-Verbose "[`$scriptName] - [$relativePath] - Done"
         Path  = $rootModuleFile
         Force = $true
         Value = @"
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    'PSUseConsistentWhitespace', '', Justification = 'PSScriptAnalyzer does not handle spacing in hashtables it seems.'
+)]
 `$exports = $exportsString
 Export-ModuleMember @exports
 "@
@@ -158,7 +206,7 @@ Export-ModuleMember @exports
 
     Start-LogGroup 'Build root module - Format'
     $AllContent = Get-Content -Path $rootModuleFile -Raw
-    $settings = (Join-Path -Path $PSScriptRoot 'PSScriptAnalyzer.Tests.psd1')
+    $settings = Join-Path -Path $PSScriptRoot 'PSScriptAnalyzer.Tests.psd1'
     Invoke-Formatter -ScriptDefinition $AllContent -Settings $settings |
         Out-File -FilePath $rootModuleFile -Encoding utf8BOM -Force
     Stop-LogGroup
