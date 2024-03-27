@@ -186,9 +186,6 @@ Write-Verbose "[`$scriptName] - [$relativePath] - Done"
         Path  = $rootModuleFile
         Force = $true
         Value = @"
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
-    'PSUseConsistentWhitespace', '', Justification = 'PSScriptAnalyzer does not handle spacing in hashtables it seems.'
-)]
 `$exports = $exportsString
 Export-ModuleMember @exports
 "@
