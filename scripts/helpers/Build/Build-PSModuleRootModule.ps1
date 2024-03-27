@@ -52,6 +52,7 @@ function Build-PSModuleRootModule {
             $classExports = @'
 # Define the types to export with type accelerators.
 $ExportableTypes = @(
+
 '@
             $classes | ForEach-Object {
                 $classExports += "    [$_]`n"
@@ -90,7 +91,7 @@ $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
     $exports.Add('Cmdlet', (Get-PSModuleCmdletsToExport -SourceFolderPath $ModuleOutputFolder))
     $exports.Add('Function', (Get-PSModuleFunctionsToExport -SourceFolderPath $ModuleOutputFolder))
     $exports.Add('Variable', (Get-PSModuleVariablesToExport -SourceFolderPath $ModuleOutputFolder))
-    
+
     Write-Verbose ($exports | Out-String)
     #endregion - Analyze source files
 
