@@ -85,13 +85,12 @@ $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
     }
     #endregion - Export-Classes
 
-    $exports = @{
-        Alias    = Get-PSModuleAliasesToExport -SourceFolderPath $ModuleOutputFolder
-        Cmdlet   = Get-PSModuleCmdletsToExport -SourceFolderPath $ModuleOutputFolder
-        Function = Get-PSModuleFunctionsToExport -SourceFolderPath $ModuleOutputFolder
-        Variable = Get-PSModuleVariablesToExport -SourceFolderPath $ModuleOutputFolder
-    }
-
+    $exports = [System.Collections.Specialized.OrderedDictionary]::new()
+    $exports.Add('Alias', (Get-PSModuleAliasesToExport -SourceFolderPath $ModuleOutputFolder))
+    $exports.Add('Cmdlet', (Get-PSModuleCmdletsToExport -SourceFolderPath $ModuleOutputFolder))
+    $exports.Add('Function', (Get-PSModuleFunctionsToExport -SourceFolderPath $ModuleOutputFolder))
+    $exports.Add('Variable', (Get-PSModuleVariablesToExport -SourceFolderPath $ModuleOutputFolder))
+    
     Write-Verbose ($exports | Out-String)
     #endregion - Analyze source files
 
