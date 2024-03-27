@@ -29,9 +29,10 @@
 
     foreach ($file in $files) {
         $content = Get-Content -Path $file.FullName -Raw
-        $null = [Regex]::Matches($content, '(?i)^(?:class|enum)\s+([^\s{]+)', 'Multiline')
-        foreach ($match in $matches) {
-            $match.Groups[1].Value
+        if ([Regex]::Matches($content, '(?i)^(?:class|enum)\s+([^\s{]+)', 'Multiline')) {
+            foreach ($match in $matches) {
+                $match.Groups[1].Value
+            }
         }
     }
 }
