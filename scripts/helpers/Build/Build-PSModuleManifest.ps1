@@ -43,7 +43,8 @@ function Build-PSModuleManifest {
         Remove-Item -Path $sourceManifestFilePath -Force -Verbose:$false
     }
 
-    $manifest.RootModule = "$moduleName.psm1"
+    $rootModule = "$moduleName.psm1"
+    $manifest.RootModule = $rootModule
     Write-Verbose "[RootModule] - [$($manifest.RootModule)]"
 
     $manifest.ModuleVersion = '999.0.0'
