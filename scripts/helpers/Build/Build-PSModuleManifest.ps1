@@ -353,8 +353,10 @@ function Build-PSModuleManifest {
     Start-LogGroup 'Build manifest file - Result - After format'
     Show-FileContent -Path $outputManifestPath
     Stop-LogGroup
-
-    $null = Test-ModuleManifest -Path $outputManifestPath
-
     #endregion Format manifest file
+
+    Start-LogGroup 'Build manifest file - Validate'
+    Test-ModuleManifest -Path $outputManifestPath
+    Stop-LogGroup
+
 }
