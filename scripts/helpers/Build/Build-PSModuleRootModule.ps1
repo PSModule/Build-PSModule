@@ -12,19 +12,19 @@ function Build-PSModuleRootModule {
 
         1. Module header from header.ps1 file. Usually to suppress code analysis warnings/errors and to add [CmdletBinding()] to the module.
         2. Data files are added from source files. These are also tracked based on visibility/exportability based on folder location:
-          1. private
-          2. public
+            1. private
+            2. public
         3. Combines *.ps1 files from the following folders in alphabetical order from each folder:
-          1. init
-          2. classes
-          3. private
-          4. public
-          5. Any remaining *.ps1 on module root.
+            1. init
+            2. classes
+            3. private
+            4. public
+            5. Any remaining *.ps1 on module root.
         3. Export-ModuleMember by using the functions, cmdlets, variables and aliases found in the source files.
-          - `Functions` will only contain functions that are from the `public` folder.
-          - `Cmdlets` will only contain cmdlets that are from the `public` folder.
-          - `Variables` will only contain variables that are from the `public` folder.
-          - `Aliases` will only contain aliases that are from the functions from the `public` folder.
+            - `Functions` will only contain functions that are from the `public` folder.
+            - `Cmdlets` will only contain cmdlets that are from the `public` folder.
+            - `Variables` will only contain variables that are from the `public` folder.
+            - `Aliases` will only contain aliases that are from the functions from the `public` folder.
 
         .EXAMPLE
         Build-PSModuleRootModule -SourceFolderPath 'C:\MyModule\src\MyModule' -OutputFolderPath 'C:\MyModule\build\MyModule'
