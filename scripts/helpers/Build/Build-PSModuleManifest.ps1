@@ -26,14 +26,17 @@ function Build-PSModuleManifest {
     #region Build manifest file
     Start-LogGroup 'Build manifest file'
     $moduleName = Split-Path -Path $ModuleOutputFolder -Leaf
-    $manifestFileName = "$moduleName.psd1"
-    $manifestOutputPath = Join-Path -Path $ModuleOutputFolder -ChildPath $manifestFileName
-    $manifestFile = Get-Item -Path $manifestOutputPath
-    Write-Verbose ($manifestFile | Format-List | Out-String)
-    $manifest = Get-ModuleManifest -Path $manifestFile -Verbose:$false
+    $sourceManifestFilePath = Join-Path -Path $ModuleOutputFolder -ChildPath "$moduleName.psd1"
+    if (-not (Test-Path -Path $sourceManifestFilePath)) {
+        $sourceManifestFilePath = Join-Path -Path $ModuleOutputFolder -ChildPath 'manifest.psd1'
+    }
+    $manifest = if (-not (Test-Path -Path $sourceManifestFilePath)) {
+        @{}
+    } else {
+        Get-ModuleManifest -Path $sourceManifestFilePath -Verbose:$false
+    }
 
-    $rootModule = Get-PSModuleRootModule -SourceFolderPath $ModuleOutputFolder
-    $manifest.RootModule = $rootModule
+    $manifest.RootModule = "$moduleName.psm1"
     $manifest.ModuleVersion = '999.0.0'
 
     $manifest.Author = $manifest.Keys -contains 'Author' ? ($manifest.Author | IsNotNullOrEmpty) ? $manifest.Author : $env:GITHUB_REPOSITORY_OWNER : $env:GITHUB_REPOSITORY_OWNER
@@ -322,7 +325,7 @@ function Build-PSModuleManifest {
     }
 
     Write-Verbose 'Creating new manifest file in outputs folder'
-    $outputManifestPath = Join-Path -Path $ModuleOutputFolder $manifestFileName
+    $outputManifestPath = Join-Path -Path $ModuleOutputFolder -ChildPath "$moduleName.psd1"
     Write-Verbose "OutputManifestPath - [$outputManifestPath]"
     New-ModuleManifest -Path $outputManifestPath @manifest
     Stop-LogGroup

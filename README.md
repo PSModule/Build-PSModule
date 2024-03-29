@@ -60,7 +60,7 @@ Most of the values in the module manifest file are calculated during the build p
 During the module manifest build process the following steps are performed:
 
 1. Get the manifest file from the source code. If it does not exist, a new manifest file is created.
-1. Find and set the `RootModule` based on filename and extension.
+1. Generate and set the `RootModule` based module name.
 1. Set a temporary `ModuleVersion`, as this is set during the release process by [Publish-PSModule](https://github.com/PSModule/Publish-PSModule).
 1. Set the `Author` and `CompanyName` based on GitHub Owner. If a value exists in the source manifest file, this value is used.
 1. Set the `Copyright` information based on a default text (`(c) 2024 >>OwnerName<<. All rights reserved.`) and adds either the `Author`, `CompanyName` or both (`Author | CompanyName`) when these are different. If a value exists in the source manifest file, this value is used.
@@ -93,7 +93,7 @@ Linking the description to the module manifest file might show more how this wor
 
 ```powershell
 @{
-    RootModule             = 'Utilities.psm1' # Get files from root of folder wher name is same as the folder and file extension is .psm1, .ps1, .psd1, .dll, .cdxml, .xaml. Error if there are multiple files that meet the criteria.
+    RootModule             = 'Utilities.psm1' # Generated from the module name, <moduleName>.psm1
     ModuleVersion          = '0.0.1' # Set during release using Publish-PSModule.
     CompatiblePSEditions   = @() # Get from source files, REQUIRES -PSEdition <PSEdition-Name>, null if not provided.
     GUID                   = '<GUID>' # Generated when finally saving the manifest using New-ModuleManifest.
