@@ -30,15 +30,18 @@ function Build-PSModuleManifest {
     if (-not (Test-Path -Path $sourceManifestFilePath)) {
         $sourceManifestFilePath = Join-Path -Path $ModuleOutputFolder -ChildPath 'manifest.psd1'
     }
-    $manifest = if (-not (Test-Path -Path $sourceManifestFilePath)) {
-        @{}
+    if (-not (Test-Path -Path $sourceManifestFilePath)) {
+        $manifest = @{}
     } else {
-        Get-ModuleManifest -Path $sourceManifestFilePath -Verbose:$false
+        $manifest = Get-ModuleManifest -Path $sourceManifestFilePath -Verbose:$false
         Remove-Item -Path $sourceManifestFilePath -Force -Verbose:$false
     }
 
     $manifest.RootModule = "$moduleName.psm1"
+    Write-Verbose "[RootModule] - [$($manifest.RootModule)]"
+
     $manifest.ModuleVersion = '999.0.0'
+    Write-Verbose "[ModuleVersion] - [$($manifest.ModuleVersion)]"
 
     $manifest.Author = $manifest.Keys -contains 'Author' ? ($manifest.Author | IsNotNullOrEmpty) ? $manifest.Author : $env:GITHUB_REPOSITORY_OWNER : $env:GITHUB_REPOSITORY_OWNER
     Write-Verbose "[Author] - [$($manifest.Author)]"
