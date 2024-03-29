@@ -26,14 +26,17 @@ function Build-PSModuleManifest {
     #region Build manifest file
     Start-LogGroup 'Build manifest file'
     $moduleName = Split-Path -Path $ModuleOutputFolder -Leaf
-    $manifestFileName = "$moduleName.psd1"
-    $manifestOutputPath = Join-Path -Path $ModuleOutputFolder -ChildPath $manifestFileName
-    $manifestFile = Get-Item -Path $manifestOutputPath
-    Write-Verbose ($manifestFile | Format-List | Out-String)
-    $manifest = Get-ModuleManifest -Path $manifestFile -Verbose:$false
+    $sourceManifestFilePath = Join-Path -Path $ModuleOutputFolder -ChildPath "$moduleName.psd1"
+    if (-not (Test-Path -Path $sourceManifestFilePath)) {
+        $sourceManifestFilePath = Join-Path -Path $ModuleOutputFolder -ChildPath 'manifest.psd1'
+    }
+    $manifest = if (-not (Test-Path -Path $sourceManifestFilePath)) {
+        @{}
+    } else {
+        Get-ModuleManifest -Path $sourceManifestFilePath -Verbose:$false
+    }
 
-    $rootModule = Get-PSModuleRootModule -SourceFolderPath $ModuleOutputFolder
-    $manifest.RootModule = $rootModule
+    $manifest.RootModule = "$moduleName.psm1"
     $manifest.ModuleVersion = '999.0.0'
 
     $manifest.Author = $manifest.Keys -contains 'Author' ? ($manifest.Author | IsNotNullOrEmpty) ? $manifest.Author : $env:GITHUB_REPOSITORY_OWNER : $env:GITHUB_REPOSITORY_OWNER
@@ -71,10 +74,19 @@ function Build-PSModuleManifest {
     $pathSeparator = [System.IO.Path]::DirectorySeparatorChar
 
     Write-Verbose '[FileList]'
-    $files = $ModuleOutputFolder | Get-ChildItem -File -ErrorAction SilentlyContinue | Where-Object -Property Name -NotLike '*.ps1'
-    $files += $ModuleOutputFolder | Get-ChildItem -Directory | Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue
+    $files = [System.Collections.Generic.List[System.IO.FileInfo]]::new()
+
+    # Get files on module root
+    $ModuleOutputFolder | Get-ChildItem -File -ErrorAction SilentlyContinue | Where-Object -Property Name -NotLike '*.ps1' |
+        ForEach-Object { $files.Add($_) }
+
+    # Get files on module subfolders, excluding the following folders 'init', 'classes', 'public', 'private'
+    $skipList = @('init', 'classes', 'public', 'private')
+    $ModuleOutputFolder | Get-ChildItem -Directory | Where-Object { $_.Name -NotIn $skipList } |
+        Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue | ForEach-Object { $files.Add($_) }
+
+    # Get the relative file path and store it in the manifest
     $files = $files | Select-Object -ExpandProperty FullName | ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart($pathSeparator) }
-    $fileList = $files | Where-Object { $_ -NotLike 'init*' -and $_ -NotLike 'classes*' -and $_ -NotLike 'public*' -and $_ -NotLike 'private*' }
     $manifest.FileList = $fileList.count -eq 0 ? @() : @($fileList)
     $manifest.FileList | ForEach-Object { Write-Verbose "[FileList] - [$_]" }
 
@@ -142,9 +154,9 @@ function Build-PSModuleManifest {
 
 
     Write-Verbose '[Gather]'
-    $capturedModules = @()
-    $capturedVersions = @()
-    $capturedPSEdition = @()
+    $capturedModules = [System.Collections.Generic.List[System.Object]]::new()
+    $capturedVersions = [System.Collections.Generic.List[string]]::new()
+    $capturedPSEdition = [System.Collections.Generic.List[string]]::new()
 
     $files = $ModuleOutputFolder | Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue
     Write-Verbose "[Gather] - Processing [$($files.Count)] files"
@@ -165,22 +177,22 @@ function Build-PSModuleManifest {
                         $hashtable = '@\{[^}]*\}'
                         if ($_ -match $hashtable) {
                             Write-Verbose " - [#Requires -Modules] - [$_] - Hashtable"
-                            $capturedModules += ConvertTo-Hashtable -InputString $_
+                            $capturedModules.Add((ConvertTo-Hashtable -InputString $_))
                         } else {
                             Write-Verbose " - [#Requires -Modules] - [$_] - String"
-                            $capturedModules += $_
+                            $capturedModules.Add($_)
                         }
                     }
                 }
                 # PowerShellVersion -> REQUIRES -Version <N>[.<n>], $null if not provided
                 '^\s*#Requires -Version (.+)$' {
                     Write-Verbose " - [#Requires -Version] - [$($matches[1])]"
-                    $capturedVersions += $matches[1]
+                    $capturedVersions.Add($matches[1])
                 }
                 #CompatiblePSEditions -> REQUIRES -PSEdition <PSEdition-Name>, $null if not provided
                 '^\s*#Requires -PSEdition (.+)$' {
                     Write-Verbose " - [#Requires -PSEdition] - [$($matches[1])]"
-                    $capturedPSEdition += $matches[1]
+                    $capturedPSEdition.Add($matches[1])
                 }
             }
         }
@@ -244,7 +256,7 @@ function Build-PSModuleManifest {
     } catch {
         $repoLabels = @()
     }
-    $manifestTags = [Collections.Generic.List[string]]::new()
+    $manifestTags = [System.Collections.Generic.List[string]]::new()
     $tags = $PSData.Keys -contains 'Tags' ? ($PSData.Tags).Count -gt 0 ? $PSData.Tags : $repoLabels : $repoLabels
     $tags | ForEach-Object { $manifestTags.Add($_) }
     # Add tags for compatability mode. https://docs.microsoft.com/en-us/powershell/scripting/developer/module/how-to-write-a-powershell-module-manifest?view=powershell-7.1#compatibility-tags
@@ -322,7 +334,7 @@ function Build-PSModuleManifest {
     }
 
     Write-Verbose 'Creating new manifest file in outputs folder'
-    $outputManifestPath = Join-Path -Path $ModuleOutputFolder $manifestFileName
+    $outputManifestPath = Join-Path -Path $ModuleOutputFolder -ChildPath "$moduleName.psd1"
     Write-Verbose "OutputManifestPath - [$outputManifestPath]"
     New-ModuleManifest -Path $outputManifestPath @manifest
     Stop-LogGroup
