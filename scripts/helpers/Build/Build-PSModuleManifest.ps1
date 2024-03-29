@@ -27,13 +27,19 @@ function Build-PSModuleManifest {
     Start-LogGroup 'Build manifest file'
     $moduleName = Split-Path -Path $ModuleOutputFolder -Leaf
     $sourceManifestFilePath = Join-Path -Path $ModuleOutputFolder -ChildPath "$moduleName.psd1"
+    Write-Verbose "[SourceManifestFilePath] - [$sourceManifestFilePath]"
     if (-not (Test-Path -Path $sourceManifestFilePath)) {
+        Write-Verbose "[SourceManifestFilePath] - [$sourceManifestFilePath] - Not found"
         $sourceManifestFilePath = Join-Path -Path $ModuleOutputFolder -ChildPath 'manifest.psd1'
     }
     if (-not (Test-Path -Path $sourceManifestFilePath)) {
+        Write-Verbose "[SourceManifestFilePath] - [$sourceManifestFilePath] - Not found"
         $manifest = @{}
+        Write-Verbose "[Manifest] - Loading empty manifest"
     } else {
+        Write-Verbose "[SourceManifestFilePath] - [$sourceManifestFilePath] - Found"
         $manifest = Get-ModuleManifest -Path $sourceManifestFilePath -Verbose:$false
+        Write-Verbose '[Manifest] - Loading from file'
         Remove-Item -Path $sourceManifestFilePath -Force -Verbose:$false
     }
 
