@@ -365,8 +365,4 @@ function Build-PSModuleManifest {
     Stop-LogGroup
     #endregion Format manifest file
 
-    Start-LogGroup 'Build manifest file - Validate'
-    Test-ModuleManifest -Path $outputManifestPath
-    Stop-LogGroup
-
 }
