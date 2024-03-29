@@ -34,6 +34,7 @@ function Build-PSModuleManifest {
         @{}
     } else {
         Get-ModuleManifest -Path $sourceManifestFilePath -Verbose:$false
+        Remove-Item -Path $sourceManifestFilePath -Force -Verbose:$false
     }
 
     $manifest.RootModule = "$moduleName.psm1"
