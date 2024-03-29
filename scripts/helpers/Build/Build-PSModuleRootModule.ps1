@@ -216,7 +216,14 @@ Export-ModuleMember @exports
     Stop-LogGroup
     #endregion Format root module
 
-    Start-LogGroup 'Build module - Result - File list'
+    #region Validate root module
+    Start-LogGroup 'Build root module - Validate - Import'
+    Add-PSModulePath -Path (Split-Path -Path $ModuleOutputFolder -Parent)
+    Import-PSModule -Path $ModuleOutputFolder -ModuleName $ModuleName
+    Stop-LogGroup
+
+    Start-LogGroup 'Build root module - Validate - File list'
     (Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force).FullName | Sort-Object
     Stop-LogGroup
+    #endregion Validate root module
 }

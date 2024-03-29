@@ -26,12 +26,7 @@ function Build-PSModuleDocumentation {
         [Parameter(Mandatory)]
         [System.IO.DirectoryInfo] $DocsOutputFolder
     )
-
-    Start-LogGroup 'Build docs - Dependencies'
-
-    Add-PSModulePath -Path (Split-Path -Path $ModuleOutputFolder -Parent)
-    Import-PSModule -Path $ModuleOutputFolder -ModuleName $ModuleName
-
+    
     Start-LogGroup 'Build docs - Generate markdown help'
     $null = New-MarkdownHelp -Module $ModuleName -OutputFolder $DocsOutputFolder -Force -Verbose
     Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
