@@ -34,7 +34,7 @@ function Build-PSModuleManifest {
         @{}
     } else {
         Get-ModuleManifest -Path $sourceManifestFilePath -Verbose:$false
-        Remove-Item -Path $sourceManifestFilePath -Force -Verbose:$false
+        # Remove-Item -Path $sourceManifestFilePath -Force -Verbose:$false
     }
 
     $manifest.RootModule = "$moduleName.psm1"
@@ -353,6 +353,8 @@ function Build-PSModuleManifest {
     Start-LogGroup 'Build manifest file - Result - After format'
     Show-FileContent -Path $outputManifestPath
     Stop-LogGroup
+
+    $null = Test-ModuleManifest -Path $outputManifestPath
 
     #endregion Format manifest file
 }
