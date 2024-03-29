@@ -31,6 +31,10 @@ function Build-PSModuleRootModule {
     #>
     [CmdletBinding()]
     param(
+        # Name of the module.
+        [Parameter(Mandatory)]
+        [string] $ModuleName,
+
         # Folder where the built modules are outputted. 'outputs/modules/MyModule'
         [Parameter(Mandatory)]
         [System.IO.DirectoryInfo] $ModuleOutputFolder
@@ -38,8 +42,7 @@ function Build-PSModuleRootModule {
 
     #region Build root module
     Start-LogGroup 'Build root module'
-    $moduleName = Split-Path -Path $ModuleOutputFolder -Leaf
-    $rootModuleFile = New-Item -Path $ModuleOutputFolder -Name "$moduleName.psm1" -Force
+    $rootModuleFile = New-Item -Path $ModuleOutputFolder -Name "$ModuleName.psm1" -Force
 
     #region - Analyze source files
 

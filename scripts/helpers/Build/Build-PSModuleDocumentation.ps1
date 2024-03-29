@@ -14,6 +14,10 @@ function Build-PSModuleDocumentation {
     #>
     [CmdletBinding()]
     param(
+        # Name of the module.
+        [Parameter(Mandatory)]
+        [string] $ModuleName,
+
         # Folder where the module source code is located. 'outputs/modules/MyModule'
         [Parameter(Mandatory)]
         [System.IO.DirectoryInfo] $ModuleOutputFolder,
@@ -24,13 +28,12 @@ function Build-PSModuleDocumentation {
     )
 
     Start-LogGroup 'Build docs - Dependencies'
-    $moduleName = Split-Path -Path $ModuleOutputFolder -Leaf
 
     Add-PSModulePath -Path (Split-Path -Path $ModuleOutputFolder -Parent)
-    Import-PSModule -Path $ModuleOutputFolder -ModuleName $moduleName
+    Import-PSModule -Path $ModuleOutputFolder -ModuleName $ModuleName
 
     Start-LogGroup 'Build docs - Generate markdown help'
-    $null = New-MarkdownHelp -Module $moduleName -OutputFolder $DocsOutputFolder -Force -Verbose
+    $null = New-MarkdownHelp -Module $ModuleName -OutputFolder $DocsOutputFolder -Force -Verbose
     Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $content = Get-Content -Path $_.FullName
         $fixedOpening = $false
