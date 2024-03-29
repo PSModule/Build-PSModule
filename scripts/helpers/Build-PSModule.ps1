@@ -10,6 +10,10 @@ function Build-PSModule {
     #>
     [CmdletBinding()]
     param(
+        # Name of the module.
+        [Parameter(Mandatory)]
+        [string] $ModuleName,
+
         # Path to the folder where the modules are located.
         [Parameter(Mandatory)]
         [string] $ModuleSourceFolderPath,
@@ -23,9 +27,7 @@ function Build-PSModule {
         [string] $DocsOutputFolderPath
     )
 
-    $moduleName = Split-Path -Path $ModuleSourceFolderPath -Leaf
-
-    Start-LogGroup "Building module [$moduleName]"
+    Start-LogGroup "Building module [$ModuleName]"
     Write-Verbose "Source path:          [$ModuleSourceFolderPath]"
     if (-not (Test-Path -Path $ModuleSourceFolderPath)) {
         Write-Error "Source folder not found at [$ModuleSourceFolderPath]"
@@ -33,10 +35,10 @@ function Build-PSModule {
     }
     $moduleSourceFolder = Get-Item -Path $ModuleSourceFolderPath
 
-    $moduleOutputFolder = New-Item -Path $ModulesOutputFolderPath -Name $moduleName -ItemType Directory -Force
+    $moduleOutputFolder = New-Item -Path $ModulesOutputFolderPath -Name $ModuleName -ItemType Directory -Force
     Write-Verbose "Module output folder: [$ModulesOutputFolderPath]"
 
-    $docsOutputFolder = New-Item -Path $DocsOutputFolderPath -Name $moduleName -ItemType Directory -Force
+    $docsOutputFolder = New-Item -Path $DocsOutputFolderPath -Name $ModuleName -ItemType Directory -Force
     Write-Verbose "Docs output folder:   [$DocsOutputFolderPath]"
     Stop-LogGroup
 
