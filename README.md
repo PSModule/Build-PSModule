@@ -36,38 +36,40 @@ During the build process the following steps are performed:
 The root module file is the main file that is loaded when the module is imported.
 It is built from the source code files in the module folder in the following order:
 
-1. Adds module headers from `header.ps1`.
+1. Adds module headers from `header.ps1` if it exists and removes the file from the module folder.
 1. Adds data loader automation that loads files from the `data` folder as variables in the module scope, if it exists. The variables are available using the ´$script:<filename>´ syntax.
-1. Adds content from subfolders, in the order:
-   - Init
-   - Private
-   - Public
-   - *.ps1 on module root
-1. Adds the Export-ModuleMember function to the end of the file, to make sure that only the functions, cmdlets, variables and aliases that are defined in the module are exported.
+1. Adds content from subfolders, if they exists, and removes them from the module folder in the following order:
+   - `init`
+   - `classes`
+   - `private`
+   - `public`
+   - `*.ps1` on module root
+1. Adds a `class` and `enum` exporter that exports all classes and enums in the module to the caller session, using TypeAccelerators.
+1. Adds the `Export-ModuleMember` function to the end of the file, to make sure that only the functions, cmdlets, variables and aliases that are defined in the module are exported.
 
-### The root module in the `src` folder
+### Root module
 
-The root module file that is included in the source files contains the same functionality but is not optimized for performance.
-The goal with this is to have a quick way to import and test the module without having to build it.
+The `src` folder may contain a 'root module' file. If present, the build function will disregard this file and build a new root module file based on the source code in the module folder.
 
 ## Module manifest
 
 The module manifest file is the file that describes the module and its content. It is used by PowerShell to load the module and its prerequisites.
-The file also contains important metadata that is used by the PowerShell Gallery.
+The file also contains important metadata that is used by the PowerShell Gallery. If a file exists in the source code folder `src` it will be used as a base for the module manifest file.
+Most of the values in the module manifest file are calculated during the build process however some of these will not be touched if specified in the source manifest file.
 
 During the module manifest build process the following steps are performed:
 
-1. Get the manifest file from the source code. Content from this file overrides any value that would be calculated based on the source code.
+1. Get the manifest file from the source code. If it does not exist, a new manifest file is created.
 1. Find and set the `RootModule` based on filename and extension.
 1. Set a temporary `ModuleVersion`, as this is set during the release process by [Publish-PSModule](https://github.com/PSModule/Publish-PSModule).
-1. Set the `Author` and `CompanyName` based on GitHub Owner.
-1. Set the `Copyright` information based on a default text (`(c) 2024 >>OwnerName<<. All rights reserved.`) and adds either the `Author`, `CompanyName` or both (`Author | CompanyName`) when these are different.
-1. Set the `Description` based on the GitHub repository description.
-1. Set various properties in the manifest such as `PowerShellHostName`, `PowerShellHostVersion`, `DotNetFrameworkVersion`, `ClrVersion`, and `ProcessorArchitecture`. There is currently no automation for these properties.
+1. Set the `Author` and `CompanyName` based on GitHub Owner. If a value exists in the source manifest file, this value is used.
+1. Set the `Copyright` information based on a default text (`(c) 2024 >>OwnerName<<. All rights reserved.`) and adds either the `Author`, `CompanyName` or both (`Author | CompanyName`) when these are different. If a value exists in the source manifest file, this value is used.
+1. Set the `Description` based on the GitHub repository description. If a value exists in the source manifest file, this value is used.
+1. Set various properties in the manifest such as `PowerShellHostName`, `PowerShellHostVersion`, `DotNetFrameworkVersion`, `ClrVersion`, and `ProcessorArchitecture`. There is currently no automation for these properties. If a value exists in the source manifest file, this value is used.
 1. Get the list of files in the module source folder and set the `FileList` property in the manifest.
 1. Get the list of required assemblies (`*.dll` files) from the `assemblies` folder and set the `RequiredAssemblies` property in the manifest.
 1. Get the list of nested modules (`*.psm1` files) from the `modules` folder and set the `NestedModules` property in the manifest.
-1. Get the list of scripts to process (`*.ps1` files) from the `classes` and `scripts` folders and set the `ScriptsToProcess` property in the manifest. This ensures that the scripts are loaded to the caller session (parent of module session).
+1. Get the list of scripts to process (`*.ps1` files) from the `scripts` folders and set the `ScriptsToProcess` property in the manifest. This ensures that the scripts are loaded to the caller session (parent of module session).
 1. Get the list of types to process by searching for `*.Types.ps1xml` files in the entire module source folder and set the `TypesToProcess` property in the manifest.
 1. Get the list of formats to process by searching for `*.Format.ps1xml` files in the entire module source folder and set the `FormatsToProcess` property in the manifest.
 1. Get the list of DSC resources to export by searching for `*.psm1` files in the `resources` folder and set the `DscResourcesToExport` property in the manifest.
@@ -76,14 +78,14 @@ During the module manifest build process the following steps are performed:
 1. Gather information from source files to update `RequiredModules`, `PowerShellVersion`, and `CompatiblePSEditions` properties.
 1. The following values are gathered from the GitHub repository:
    - `Tags` are generated from Repository topics in addition to compatability tags gathered from the source code.
-   - `LicenseUri` is generated assuming there is a `LICENSE` file on the root of the repository.
-   - `ProjectUri` is the URL to the GitHub repository
-   - `IconUri` is generated assuming there is a `icon.png` file in the `icon` folder on the repository root.
+   - `LicenseUri` is generated assuming there is a `LICENSE` file on the root of the repository. If a value exists in the source manifest file, this value is used.
+   - `ProjectUri` is the URL to the GitHub repository. If a value exists in the source manifest file, this value is used.
+   - `IconUri` is generated assuming there is a `icon.png` file in the `icon` folder on the repository root. If a value exists in the source manifest file, this value is used.
 1. `ReleaseNotes` currently not automated, but could be the PR description or release description.
 1. `PreRelease` is not managed here, but is managed from [Publish-PSModule](https://github.com/PSModule/Publish-PSModule)
-1. `RequireLicenseAcceptance` is not automated and defaults to `false`, and
-1. `ExternalModuleDependencies` is currenlty not automated.
-1. `HelpInfoURI` is not automated.
+1. `RequireLicenseAcceptance` is not automated and defaults to `false`. If a value exists in the source manifest file, this value is used.
+1. `ExternalModuleDependencies` is currenlty not automated. If a value exists in the source manifest file, this value is used.
+1. `HelpInfoURI` is not automated. If a value exists in the source manifest file, this value is used.
 1. Create a new manifest file in the output folder with the gathered info above. This also generates a new `GUID` for the module.
 1. Format the manifest file using the `Set-ModuleManifest` function from the [Utilities](https://github.com/PSModule/Utilities) module.
 
@@ -142,16 +144,9 @@ Linking the description to the module manifest file might show more how this wor
 }
 ```
 
-### The module manifest in the `src` folder
-
-The module manifest file that is included in the source files contains the same functionality but is not optimized for performance and does not automatically gather all the information that is gathered during the build process.
-The goal with this is to have a quick way to import and test the module without having to build it.
-
-The source module manifest is also the only place where some of the values can be controlled. These values are typically difficult to calculate and are not automated.
-
 ## Module documentation
 
-The module documentation is built using platyPS and comment based help in the source code.
+The module documentation is built using `platyPS` and comment based help in the source code.
 The documentation is currently not published anywhere, but should be published to GitHub Pages in a future release.
 
 ## Permissions
