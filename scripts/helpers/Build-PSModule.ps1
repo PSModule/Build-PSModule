@@ -46,8 +46,4 @@ function Build-PSModule {
     Build-PSModuleManifest -ModuleOutputFolder $moduleOutputFolder
     Build-PSModuleRootModule -ModuleOutputFolder $moduleOutputFolder
     Build-PSModuleDocumentation -ModuleOutputFolder $moduleOutputFolder -DocsOutputFolder $docsOutputFolder
-
-    Start-LogGroup 'Validate - Module manifest'
-    Test-ModuleManifest -Path $outputManifestPath
-    Stop-LogGroup
 }

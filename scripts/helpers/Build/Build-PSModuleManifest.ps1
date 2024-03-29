@@ -35,7 +35,7 @@ function Build-PSModuleManifest {
     if (-not (Test-Path -Path $sourceManifestFilePath)) {
         Write-Verbose "[SourceManifestFilePath] - [$sourceManifestFilePath] - Not found"
         $manifest = @{}
-        Write-Verbose "[Manifest] - Loading empty manifest"
+        Write-Verbose '[Manifest] - Loading empty manifest'
     } else {
         Write-Verbose "[SourceManifestFilePath] - [$sourceManifestFilePath] - Found"
         $manifest = Get-ModuleManifest -Path $sourceManifestFilePath -Verbose:$false
@@ -365,4 +365,7 @@ function Build-PSModuleManifest {
     Stop-LogGroup
     #endregion Format manifest file
 
+    Start-LogGroup 'Build manifest file - Validate'
+    Test-ModuleManifest -Path $outputManifestPath
+    Stop-LogGroup
 }
