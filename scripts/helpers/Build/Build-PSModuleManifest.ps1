@@ -74,11 +74,11 @@ function Build-PSModuleManifest {
     $pathSeparator = [System.IO.Path]::DirectorySeparatorChar
 
     Write-Verbose '[FileList]'
-    $ModuleOutputFolder = 'C:\Repos\GitHub\PSModule\Framework\Build-PSModule\tests\src'
     $files = [System.Collections.Generic.List[System.IO.FileInfo]]::new()
 
     # Get files on module root
-    $ModuleOutputFolder | Get-ChildItem -File -ErrorAction SilentlyContinue | Where-Object -Property Name -NotLike '*.ps1' | ForEach-Object { $files.Add($_) }
+    $ModuleOutputFolder | Get-ChildItem -File -ErrorAction SilentlyContinue | Where-Object -Property Name -NotLike '*.ps1' |
+        ForEach-Object { $files.Add($_) }
 
     # Get files on module subfolders, excluding the following folders 'init', 'classes', 'public', 'private'
     $skipList = @('init', 'classes', 'public', 'private')
