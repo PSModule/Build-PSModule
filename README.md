@@ -33,6 +33,9 @@ During the build process the following steps are performed:
 
 ## Root module
 
+The `src` folder may contain a 'root module' file. If present, the build function will disregard this file
+and build a new root module file based on the source code in the module folder.
+
 The root module file is the main file that is loaded when the module is imported.
 It is built from the source code files in the module folder in the following order:
 
@@ -46,10 +49,6 @@ It is built from the source code files in the module folder in the following ord
    - `*.ps1` on module root
 1. Adds a `class` and `enum` exporter that exports all classes and enums in the module to the caller session, using TypeAccelerators.
 1. Adds the `Export-ModuleMember` function to the end of the file, to make sure that only the functions, cmdlets, variables and aliases that are defined in the module are exported.
-
-### Root module
-
-The `src` folder may contain a 'root module' file. If present, the build function will disregard this file and build a new root module file based on the source code in the module folder.
 
 ## Module manifest
 
