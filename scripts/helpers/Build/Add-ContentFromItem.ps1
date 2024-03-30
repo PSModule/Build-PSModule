@@ -47,7 +47,7 @@ Write-Verbose "[`$scriptName] - [$relativeFolderPath] - Processing folder"
         $relativeFolderPath = $relativeFolderPath.TrimStart($pathSeparator)
         $relativeFolderPath = $relativeFolderPath -Split $pathSeparator
         $relativeFolderPath = $relativeFolderPath -Join ' - '
-        
+
         Add-Content -Path $RootModuleFilePath -Force -Value @"
 #region - From $relativeFilePath
 Write-Verbose "[`$scriptName] - [$relativeFilePath] - Importing"

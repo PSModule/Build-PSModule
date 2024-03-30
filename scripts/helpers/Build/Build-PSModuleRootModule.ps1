@@ -168,7 +168,7 @@ Write-Verbose "[$scriptName] - [data] - Done"
         $relativePath = $relativePath.TrimStart($pathSeparator)
         $relativePath = $relativePath -Split $pathSeparator
         $relativePath = $relativePath -Join ' - '
-        
+
         Add-Content -Path $rootModuleFile -Force -Value @"
 #region - From $relativePath
 Write-Verbose "[`$scriptName] - [$relativePath] - Importing"
