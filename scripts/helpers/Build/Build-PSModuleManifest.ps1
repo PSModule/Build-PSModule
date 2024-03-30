@@ -368,7 +368,13 @@ function Build-PSModuleManifest {
     Stop-LogGroup
     #endregion Format manifest file
 
-    Start-LogGroup 'Build manifest file - Validate'
+    #region Install Prerequsites
+    Start-LogGroup 'Build manifest file - Validate - Install module dependencies'
+    Resolve-PSModuleDependency -ManifestFilePath $manifestFilePath
+    Stop-LogGroup
+    #endregion Install Prerequsites
+
+    Start-LogGroup 'Build manifest file - Validate - Test manifest file'
     Test-ModuleManifest -Path $outputManifestPath
     Stop-LogGroup
 }
