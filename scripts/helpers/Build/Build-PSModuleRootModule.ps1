@@ -12,34 +12,40 @@ function Build-PSModuleRootModule {
 
         1. Module header from header.ps1 file. Usually to suppress code analysis warnings/errors and to add [CmdletBinding()] to the module.
         2. Data files are added from source files. These are also tracked based on visibility/exportability based on folder location:
-          1. private
-          2. public
+            1. private
+            2. public
         3. Combines *.ps1 files from the following folders in alphabetical order from each folder:
-          1. init
-          2. classes
-          3. private
-          4. public
-          5. Any remaining *.ps1 on module root.
+            1. init
+            2. classes
+            3. private
+            4. public
+            5. Any remaining *.ps1 on module root.
         3. Export-ModuleMember by using the functions, cmdlets, variables and aliases found in the source files.
-          - `Functions` will only contain functions that are from the `public` folder.
-          - `Cmdlets` will only contain cmdlets that are from the `public` folder.
-          - `Variables` will only contain variables that are from the `public` folder.
-          - `Aliases` will only contain aliases that are from the functions from the `public` folder.
+            - `Functions` will only contain functions that are from the `public` folder.
+            - `Cmdlets` will only contain cmdlets that are from the `public` folder.
+            - `Variables` will only contain variables that are from the `public` folder.
+            - `Aliases` will only contain aliases that are from the functions from the `public` folder.
 
         .EXAMPLE
         Build-PSModuleRootModule -SourceFolderPath 'C:\MyModule\src\MyModule' -OutputFolderPath 'C:\MyModule\build\MyModule'
     #>
     [CmdletBinding()]
     param(
+        # Name of the module.
+        [Parameter(Mandatory)]
+        [string] $ModuleName,
+
         # Folder where the built modules are outputted. 'outputs/modules/MyModule'
         [Parameter(Mandatory)]
         [System.IO.DirectoryInfo] $ModuleOutputFolder
     )
 
+    # Get the path separator for the current OS
+    $pathSeparator = [System.IO.Path]::DirectorySeparatorChar
+
     #region Build root module
     Start-LogGroup 'Build root module'
-    $moduleName = Split-Path -Path $ModuleOutputFolder -Leaf
-    $rootModuleFile = New-Item -Path $ModuleOutputFolder -Name "$moduleName.psm1" -Force
+    $rootModuleFile = New-Item -Path $ModuleOutputFolder -Name "$ModuleName.psm1" -Force
 
     #region - Analyze source files
 
@@ -158,16 +164,20 @@ Write-Verbose "[$scriptName] - [data] - Done"
     #region - Add content from *.ps1 files on module root
     $files = $ModuleOutputFolder | Get-ChildItem -File -Force -Filter '*.ps1'
     foreach ($file in $files) {
-        $relativePath = $file.FullName.Replace($ModuleOutputFolder, '').TrimStart($pathSeparator)
+        $relativePath = $file.FullName -Replace $ModuleOutputFolder, ''
+        $relativePath = $relativePath.TrimStart($pathSeparator)
+        $relativePath = $relativePath -Split $pathSeparator | ForEach-Object { "[$_]" }
+        $relativePath = $relativePath -Join ' - '
+
         Add-Content -Path $rootModuleFile -Force -Value @"
 #region - From $relativePath
-Write-Verbose "[`$scriptName] - [$relativePath] - Importing"
+Write-Verbose "[`$scriptName] - $relativePath - Importing"
 
 "@
         Get-Content -Path $file.FullName | Add-Content -Path $rootModuleFile -Force
 
         Add-Content -Path $rootModuleFile -Force -Value @"
-Write-Verbose "[`$scriptName] - [$relativePath] - Done"
+Write-Verbose "[`$scriptName] - $relativePath - Done"
 #endregion - From $relativePath
 
 "@
@@ -213,7 +223,14 @@ Export-ModuleMember @exports
     Stop-LogGroup
     #endregion Format root module
 
-    Start-LogGroup 'Build module - Result - File list'
+    #region Validate root module
+    Start-LogGroup 'Build root module - Validate - Import'
+    Add-PSModulePath -Path (Split-Path -Path $ModuleOutputFolder -Parent)
+    Import-PSModule -Path $ModuleOutputFolder -ModuleName $ModuleName
+    Stop-LogGroup
+
+    Start-LogGroup 'Build root module - Validate - File list'
     (Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force).FullName | Sort-Object
     Stop-LogGroup
+    #endregion Validate root module
 }

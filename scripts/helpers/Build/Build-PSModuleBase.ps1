@@ -14,6 +14,10 @@ function Build-PSModuleBase {
     #>
     [CmdletBinding()]
     param(
+        # Name of the module.
+        [Parameter(Mandatory)]
+        [string] $ModuleName,
+
         # Path to the folder where the module source code is located.
         [Parameter(Mandatory)]
         [System.IO.DirectoryInfo] $ModuleSourceFolder,
@@ -24,9 +28,9 @@ function Build-PSModuleBase {
     )
 
     Start-LogGroup 'Build base'
-
     Write-Verbose "Copying files from [$ModuleSourceFolder] to [$ModuleOutputFolder]"
-    Copy-Item -Path "$ModuleSourceFolder\*" -Destination $ModuleOutputFolder -Recurse -Force -Verbose
+    Copy-Item -Path "$ModuleSourceFolder\*" -Destination $ModuleOutputFolder -Recurse -Force -Verbose -Exclude "$ModuleName.psm1"
+    New-Item -Path $ModuleOutputFolder -Name "$ModuleName.psm1" -ItemType File -Force -Verbose
     Stop-LogGroup
 
     Start-LogGroup 'Build base - Result'

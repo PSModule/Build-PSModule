@@ -18,6 +18,10 @@ function Build-PSModuleManifest {
         Justification = 'No real reason. Just to get going.'
     )]
     param(
+        # Name of the module.
+        [Parameter(Mandatory)]
+        [string] $ModuleName,
+
         # Folder where the built modules are outputted. 'outputs/modules/MyModule'
         [Parameter(Mandatory)]
         [System.IO.DirectoryInfo] $ModuleOutputFolder
@@ -25,19 +29,29 @@ function Build-PSModuleManifest {
 
     #region Build manifest file
     Start-LogGroup 'Build manifest file'
-    $moduleName = Split-Path -Path $ModuleOutputFolder -Leaf
-    $sourceManifestFilePath = Join-Path -Path $ModuleOutputFolder -ChildPath "$moduleName.psd1"
+    $sourceManifestFilePath = Join-Path -Path $ModuleOutputFolder -ChildPath "$ModuleName.psd1"
+    Write-Verbose "[SourceManifestFilePath] - [$sourceManifestFilePath]"
     if (-not (Test-Path -Path $sourceManifestFilePath)) {
+        Write-Verbose "[SourceManifestFilePath] - [$sourceManifestFilePath] - Not found"
         $sourceManifestFilePath = Join-Path -Path $ModuleOutputFolder -ChildPath 'manifest.psd1'
     }
-    $manifest = if (-not (Test-Path -Path $sourceManifestFilePath)) {
-        @{}
+    if (-not (Test-Path -Path $sourceManifestFilePath)) {
+        Write-Verbose "[SourceManifestFilePath] - [$sourceManifestFilePath] - Not found"
+        $manifest = @{}
+        Write-Verbose '[Manifest] - Loading empty manifest'
     } else {
-        Get-ModuleManifest -Path $sourceManifestFilePath -Verbose:$false
+        Write-Verbose "[SourceManifestFilePath] - [$sourceManifestFilePath] - Found"
+        $manifest = Get-ModuleManifest -Path $sourceManifestFilePath -Verbose:$false
+        Write-Verbose '[Manifest] - Loading from file'
+        Remove-Item -Path $sourceManifestFilePath -Force -Verbose:$false
     }
 
-    $manifest.RootModule = "$moduleName.psm1"
+    $rootModule = "$ModuleName.psm1"
+    $manifest.RootModule = $rootModule
+    Write-Verbose "[RootModule] - [$($manifest.RootModule)]"
+
     $manifest.ModuleVersion = '999.0.0'
+    Write-Verbose "[ModuleVersion] - [$($manifest.ModuleVersion)]"
 
     $manifest.Author = $manifest.Keys -contains 'Author' ? ($manifest.Author | IsNotNullOrEmpty) ? $manifest.Author : $env:GITHUB_REPOSITORY_OWNER : $env:GITHUB_REPOSITORY_OWNER
     Write-Verbose "[Author] - [$($manifest.Author)]"
@@ -334,7 +348,7 @@ function Build-PSModuleManifest {
     }
 
     Write-Verbose 'Creating new manifest file in outputs folder'
-    $outputManifestPath = Join-Path -Path $ModuleOutputFolder -ChildPath "$moduleName.psd1"
+    $outputManifestPath = Join-Path -Path $ModuleOutputFolder -ChildPath "$ModuleName.psd1"
     Write-Verbose "OutputManifestPath - [$outputManifestPath]"
     New-ModuleManifest -Path $outputManifestPath @manifest
     Stop-LogGroup
@@ -352,6 +366,9 @@ function Build-PSModuleManifest {
     Start-LogGroup 'Build manifest file - Result - After format'
     Show-FileContent -Path $outputManifestPath
     Stop-LogGroup
-
     #endregion Format manifest file
+
+    Start-LogGroup 'Build manifest file - Validate'
+    Test-ModuleManifest -Path $outputManifestPath
+    Stop-LogGroup
 }

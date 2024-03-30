@@ -42,8 +42,8 @@ function Build-PSModule {
     Write-Verbose "Docs output folder:   [$DocsOutputFolderPath]"
     Stop-LogGroup
 
-    Build-PSModuleBase -ModuleSourceFolder $moduleSourceFolder -ModuleOutputFolder $moduleOutputFolder
-    Build-PSModuleManifest -ModuleOutputFolder $moduleOutputFolder
-    Build-PSModuleRootModule -ModuleOutputFolder $moduleOutputFolder
-    Build-PSModuleDocumentation -ModuleOutputFolder $moduleOutputFolder -DocsOutputFolder $docsOutputFolder
+    Build-PSModuleBase -ModuleName $ModuleName -ModuleSourceFolder $moduleSourceFolder -ModuleOutputFolder $moduleOutputFolder
+    Build-PSModuleManifest -ModuleName $ModuleName -ModuleOutputFolder $moduleOutputFolder
+    Build-PSModuleRootModule -ModuleName $ModuleName -ModuleOutputFolder $moduleOutputFolder
+    Build-PSModuleDocumentation -ModuleName $ModuleName -DocsOutputFolder $docsOutputFolder
 }
