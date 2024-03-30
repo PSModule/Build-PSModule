@@ -40,6 +40,9 @@ function Build-PSModuleRootModule {
         [System.IO.DirectoryInfo] $ModuleOutputFolder
     )
 
+    # Get the path separator for the current OS
+    $pathSeparator = [System.IO.Path]::DirectorySeparatorChar
+
     #region Build root module
     Start-LogGroup 'Build root module'
     $rootModuleFile = New-Item -Path $ModuleOutputFolder -Name "$ModuleName.psm1" -Force
@@ -161,7 +164,11 @@ Write-Verbose "[$scriptName] - [data] - Done"
     #region - Add content from *.ps1 files on module root
     $files = $ModuleOutputFolder | Get-ChildItem -File -Force -Filter '*.ps1'
     foreach ($file in $files) {
-        $relativePath = $file.FullName.Replace($ModuleOutputFolder, '').TrimStart($pathSeparator)
+        $relativePath = $Path -Replace $RootPath, ''
+        $relativePath = $relativePath.TrimStart($pathSeparator)
+        $relativePath = $relativePath -Split $pathSeparator
+        $relativePath = $relativePath -Join ' - '
+        
         Add-Content -Path $rootModuleFile -Force -Value @"
 #region - From $relativePath
 Write-Verbose "[`$scriptName] - [$relativePath] - Importing"
