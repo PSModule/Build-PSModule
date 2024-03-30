@@ -171,13 +171,13 @@ Write-Verbose "[$scriptName] - [data] - Done"
 
         Add-Content -Path $rootModuleFile -Force -Value @"
 #region - From $relativePath
-Write-Verbose "[`$scriptName] - [$relativePath] - Importing"
+Write-Verbose "[`$scriptName] - $relativePath - Importing"
 
 "@
         Get-Content -Path $file.FullName | Add-Content -Path $rootModuleFile -Force
 
         Add-Content -Path $rootModuleFile -Force -Value @"
-Write-Verbose "[`$scriptName] - [$relativePath] - Done"
+Write-Verbose "[`$scriptName] - $relativePath - Done"
 #endregion - From $relativePath
 
 "@

@@ -32,7 +32,7 @@
 
     Add-Content -Path $RootModuleFilePath -Force -Value @"
 #region - From $relativeFolderPath
-Write-Verbose "[`$scriptName] - [$relativeFolderPath] - Processing folder"
+Write-Verbose "[`$scriptName] - $relativeFolderPath - Processing folder"
 
 "@
 
@@ -50,19 +50,19 @@ Write-Verbose "[`$scriptName] - [$relativeFolderPath] - Processing folder"
 
         Add-Content -Path $RootModuleFilePath -Force -Value @"
 #region - From $relativeFilePath
-Write-Verbose "[`$scriptName] - [$relativeFilePath] - Importing"
+Write-Verbose "[`$scriptName] - $relativeFilePath - Importing"
 
 "@
         Get-Content -Path $file.FullName | Add-Content -Path $RootModuleFilePath -Force
         Add-Content -Path $RootModuleFilePath -Value @"
 
-Write-Verbose "[`$scriptName] - [$relativeFilePath] - Done"
+Write-Verbose "[`$scriptName] - $relativeFilePath - Done"
 #endregion - From $relativeFilePath
 "@
     }
     Add-Content -Path $RootModuleFilePath -Force -Value @"
 
-Write-Verbose "[`$scriptName] - [$relativeFolderPath] - Done"
+Write-Verbose "[`$scriptName] - $relativeFolderPath - Done"
 #endregion - From $relativeFolderPath
 
 "@
