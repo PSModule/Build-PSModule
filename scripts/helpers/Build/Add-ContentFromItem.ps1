@@ -27,7 +27,8 @@
 
     $relativeFolderPath = $Path -Replace $RootPath, ''
     $relativeFolderPath = $relativeFolderPath.TrimStart($pathSeparator)
-    $relativeFolderPath = $relativeFolderPath -Replace $pathSeparator, ' - '
+    $relativeFolderPath = $relativeFolderPath -Split $pathSeparator
+    $relativeFolderPath = $relativeFolderPath -Join ' - '
 
     Add-Content -Path $RootModuleFilePath -Force -Value @"
 #region - From $relativeFolderPath
