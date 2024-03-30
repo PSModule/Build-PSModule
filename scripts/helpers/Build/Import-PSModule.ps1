@@ -22,8 +22,6 @@
         [string] $ModuleName
     )
 
-    Start-LogGroup "Importing module [$ModuleName]"
-
     $moduleName = Split-Path -Path $Path -Leaf
     $manifestFileName = "$moduleName.psd1"
     $manifestFilePath = Join-Path -Path $Path $manifestFileName
@@ -44,5 +42,4 @@
     if ($ModuleName -notin $availableModules.Name) {
         throw 'Module not found'
     }
-    Stop-LogGroup
 }
