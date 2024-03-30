@@ -18,15 +18,11 @@ function Build-PSModuleDocumentation {
         [Parameter(Mandatory)]
         [string] $ModuleName,
 
-        # Folder where the module source code is located. 'outputs/modules/MyModule'
-        [Parameter(Mandatory)]
-        [System.IO.DirectoryInfo] $ModuleOutputFolder,
-
         # Folder where the documentation for the modules should be outputted. 'outputs/docs/MyModule'
         [Parameter(Mandatory)]
         [System.IO.DirectoryInfo] $DocsOutputFolder
     )
-    
+
     Start-LogGroup 'Build docs - Generate markdown help'
     $null = New-MarkdownHelp -Module $ModuleName -OutputFolder $DocsOutputFolder -Force -Verbose
     Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
