@@ -166,7 +166,7 @@ Write-Verbose "[$scriptName] - [data] - Done"
     foreach ($file in $files) {
         $relativePath = $file.FullName -Replace $ModuleOutputFolder, ''
         $relativePath = $relativePath.TrimStart($pathSeparator)
-        $relativePath = $relativePath -Split $pathSeparator
+        $relativePath = $relativePath -Split $pathSeparator | ForEach-Object { "[$_]" }
         $relativePath = $relativePath -Join ' - '
 
         Add-Content -Path $rootModuleFile -Force -Value @"

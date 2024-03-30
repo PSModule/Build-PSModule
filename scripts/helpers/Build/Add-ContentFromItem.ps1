@@ -27,7 +27,7 @@
 
     $relativeFolderPath = $Path -Replace $RootPath, ''
     $relativeFolderPath = $relativeFolderPath.TrimStart($pathSeparator)
-    $relativeFolderPath = $relativeFolderPath -Split $pathSeparator
+    $relativeFolderPath = $relativeFolderPath -Split $pathSeparator | ForEach-Object { "[$_]" }
     $relativeFolderPath = $relativeFolderPath -Join ' - '
 
     Add-Content -Path $RootModuleFilePath -Force -Value @"
@@ -45,7 +45,7 @@ Write-Verbose "[`$scriptName] - [$relativeFolderPath] - Processing folder"
     foreach ($file in $files) {
         $relativeFilePath = $file.FullName -Replace $RootPath, ''
         $relativeFilePath = $relativeFilePath.TrimStart($pathSeparator)
-        $relativeFilePath = $relativeFilePath -Split $pathSeparator
+        $relativeFilePath = $relativeFilePath -Split $pathSeparator | ForEach-Object { "[$_]" }
         $relativeFilePath = $relativeFilePath -Join ' - '
 
         Add-Content -Path $RootModuleFilePath -Force -Value @"
