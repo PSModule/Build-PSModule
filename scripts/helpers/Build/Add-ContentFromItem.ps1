@@ -22,7 +22,12 @@
         [Parameter(Mandatory)]
         [string] $RootPath
     )
-    $relativeFolderPath = $Path.Replace($RootPath, '').TrimStart($pathSeparator)
+    # Get the path separator for the current OS
+    $pathSeparator = [System.IO.Path]::DirectorySeparatorChar
+
+    $relativeFolderPath = $Path.Replace($RootPath, '')
+    $relativeFolderPath = $relativeFolderPath.TrimStart($pathSeparator)
+    $relativeFolderPath = $relativeFolderPath.Replace($pathSeparator, ' - ')
 
     Add-Content -Path $RootModuleFilePath -Force -Value @"
 #region - From $relativeFolderPath
