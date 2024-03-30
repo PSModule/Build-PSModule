@@ -164,7 +164,7 @@ Write-Verbose "[$scriptName] - [data] - Done"
     #region - Add content from *.ps1 files on module root
     $files = $ModuleOutputFolder | Get-ChildItem -File -Force -Filter '*.ps1'
     foreach ($file in $files) {
-        $relativePath = $Path -Replace $RootPath, ''
+        $relativePath = $file.FullName -Replace $ModuleOutputFolder, ''
         $relativePath = $relativePath.TrimStart($pathSeparator)
         $relativePath = $relativePath -Split $pathSeparator
         $relativePath = $relativePath -Join ' - '

@@ -43,10 +43,10 @@ Write-Verbose "[`$scriptName] - [$relativeFolderPath] - Processing folder"
 
     $files = $Path | Get-ChildItem -File -Force -Filter '*.ps1' | Sort-Object -Property FullName
     foreach ($file in $files) {
-        $relativeFolderPath = $Path -Replace $RootPath, ''
-        $relativeFolderPath = $relativeFolderPath.TrimStart($pathSeparator)
-        $relativeFolderPath = $relativeFolderPath -Split $pathSeparator
-        $relativeFolderPath = $relativeFolderPath -Join ' - '
+        $relativeFilePath = $file.FullName -Replace $RootPath, ''
+        $relativeFilePath = $relativeFilePath.TrimStart($pathSeparator)
+        $relativeFilePath = $relativeFilePath -Split $pathSeparator
+        $relativeFilePath = $relativeFilePath -Join ' - '
 
         Add-Content -Path $RootModuleFilePath -Force -Value @"
 #region - From $relativeFilePath
