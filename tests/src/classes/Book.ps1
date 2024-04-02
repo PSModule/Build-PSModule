@@ -131,12 +131,10 @@ class BookList {
     }
 }
 
-enum Type {
-    Fiction
-    NonFiction
-    Reference
-    Biography
-    Autobiography
+enum Binding {
+    Hardcover
+    Paperback
+    EBook
 }
 
 enum Genre {
