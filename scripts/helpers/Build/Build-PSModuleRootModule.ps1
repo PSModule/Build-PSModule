@@ -77,7 +77,9 @@ foreach ($Type in $ExportableTypes) {
     if ($Type.FullName -in $ExistingTypeAccelerators.Keys) {
         Write-Debug "Accelerator already exists [$($Type.FullName)]"
     } else {
+        Write-Verbose "[$scriptName] - [class/enum] - [$Type] - Exporting"
         $TypeAcceleratorsClass::Add($Type.FullName, $Type)
+        Write-Verbose "[$scriptName] - [class/enum] - [$Type] - Done"
     }
 }
 
