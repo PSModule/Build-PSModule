@@ -66,7 +66,7 @@ $ExportableEnums = @(
 
             $classExports += @'
 )
-$ExportableEnums | Foreach-Object { Write-Verbose "Exporting enum '$Type'." }
+$ExportableEnums | Foreach-Object { Write-Verbose "Exporting enum '$($_.FullName)'." }
 $ExportableClasses = @(
 
 '@
@@ -76,7 +76,7 @@ $ExportableClasses = @(
 
             $classExports += @'
 )
-$ExportableClasses | Foreach-Object { Write-Verbose "Exporting class '$Type'." }
+$ExportableClasses | Foreach-Object { Write-Verbose "Exporting class '$($_.FullName)'." }
 # Get the internal TypeAccelerators class to use its static methods.
 $TypeAcceleratorsClass = [psobject].Assembly.GetType(
     'System.Management.Automation.TypeAccelerators'
