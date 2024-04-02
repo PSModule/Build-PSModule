@@ -84,7 +84,7 @@ $TypeAcceleratorsClass = [psobject].Assembly.GetType(
 $ExistingTypeAccelerators = $TypeAcceleratorsClass::Get
 foreach ($Type in $ExportableEnums) {
     if ($Type.FullName -in $ExistingTypeAccelerators.Keys) {
-        Write-Debug "Class already exists [$($Type.FullName)]"
+        Write-Verbose "Enum already exists [$($Type.FullName)]"
     } else {
         $TypeAcceleratorsClass::Add($Type.FullName, $Type)
         Write-Verbose "Exporting enum '$Type'."
@@ -92,7 +92,7 @@ foreach ($Type in $ExportableEnums) {
 }
 foreach ($Type in $ExportableClasses) {
     if ($Type.FullName -in $ExistingTypeAccelerators.Keys) {
-        Write-Debug "Class already exists [$($Type.FullName)]"
+        Write-Verbose "Class already exists [$($Type.FullName)]"
     } else {
         $TypeAcceleratorsClass::Add($Type.FullName, $Type)
         Write-Verbose "Exporting class '$Type'."
