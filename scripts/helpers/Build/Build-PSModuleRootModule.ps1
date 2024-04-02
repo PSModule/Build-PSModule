@@ -136,7 +136,7 @@ param()
     #region - Module post-header
     Add-Content -Path $rootModuleFile -Force -Value @"
 `$scriptName = '$ModuleName'
-Write-Verbose "[`$scriptName] Importing module"
+Write-Verbose "[`$scriptName] - Importing module"
 
 "@
     #endregion - Module post-header
@@ -184,6 +184,7 @@ Write-Verbose "[$scriptName] - [data] - Done"
     $files = $ModuleOutputFolder | Get-ChildItem -File -Force -Filter '*.ps1'
     foreach ($file in $files) {
         $relativePath = $file.FullName -Replace $ModuleOutputFolder, ''
+        $relativePath = $relativePath -Replace $file.Extension, ''
         $relativePath = $relativePath.TrimStart($pathSeparator)
         $relativePath = $relativePath -Split $pathSeparator | ForEach-Object { "[$_]" }
         $relativePath = $relativePath -Join ' - '
