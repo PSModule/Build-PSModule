@@ -26,7 +26,7 @@
     $pathSeparator = [System.IO.Path]::DirectorySeparatorChar
 
     $relativeFolderPath = $Path -Replace $RootPath, ''
-    $relativeFolderPath = $relativeFolderPath.Replace($file.Extension, '')
+    $relativeFolderPath = $relativeFolderPath -Replace $file.Extension, ''
     $relativeFolderPath = $relativeFolderPath.TrimStart($pathSeparator)
     $relativeFolderPath = $relativeFolderPath -Split $pathSeparator | ForEach-Object { "[$_]" }
     $relativeFolderPath = $relativeFolderPath -Join ' - '
@@ -45,7 +45,7 @@ Write-Verbose "[`$scriptName] - $relativeFolderPath - Processing folder"
     $files = $Path | Get-ChildItem -File -Force -Filter '*.ps1' | Sort-Object -Property FullName
     foreach ($file in $files) {
         $relativeFilePath = $file.FullName -Replace $RootPath, ''
-        $relativeFilePath = $relativeFilePath.Replace($file.Extension, '')
+        $relativeFilePath = $relativeFilePath -Replace $file.Extension, ''
         $relativeFilePath = $relativeFilePath.TrimStart($pathSeparator)
         $relativeFilePath = $relativeFilePath -Split $pathSeparator | ForEach-Object { "[$_]" }
         $relativeFilePath = $relativeFilePath -Join ' - '
