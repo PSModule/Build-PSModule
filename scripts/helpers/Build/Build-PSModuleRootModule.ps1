@@ -57,10 +57,19 @@ function Build-PSModuleRootModule {
         if ($classes.count -gt 0) {
             $classExports = @'
 # Define the types to export with type accelerators.
-$ExportableTypes = @(
+$ExportableClasses = @(
 
 '@
-            $classes | ForEach-Object {
+            $classes.Name | Where-Object Type -EQ 'class' | ForEach-Object {
+                $classExports += "    [$_]`n"
+            }
+
+            $classExports += @'
+)
+$ExportableEnums = @(
+
+'@
+            $classes.Name | Where-Object Type -EQ 'enum' | ForEach-Object {
                 $classExports += "    [$_]`n"
             }
 
@@ -73,19 +82,27 @@ $TypeAcceleratorsClass = [psobject].Assembly.GetType(
 # Ensure none of the types would clobber an existing type accelerator.
 # If a type accelerator with the same name exists, throw an exception.
 $ExistingTypeAccelerators = $TypeAcceleratorsClass::Get
-foreach ($Type in $ExportableTypes) {
+foreach ($Type in $ExportableEnums) {
     if ($Type.FullName -in $ExistingTypeAccelerators.Keys) {
-        Write-Debug "Accelerator already exists [$($Type.FullName)]"
+        Write-Debug "Class already exists [$($Type.FullName)]"
     } else {
-        Write-Verbose "[$scriptName] - [class/enum] - [$Type] - Exporting"
         $TypeAcceleratorsClass::Add($Type.FullName, $Type)
-        Write-Verbose "[$scriptName] - [class/enum] - [$Type] - Done"
+        Write-Verbose "Exporting enum '$Type'."
+    }
+}
+foreach ($Type in $ExportableClasses) {
+    if ($Type.FullName -in $ExistingTypeAccelerators.Keys) {
+        Write-Debug "Class already exists [$($Type.FullName)]"
+    } else {
+        $TypeAcceleratorsClass::Add($Type.FullName, $Type)
+        Write-Verbose "Exporting class '$Type'."
     }
 }
 
+
 # Remove type accelerators when the module is removed.
 $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
-    foreach ($Type in $ExportableTypes) {
+    foreach ($Type in ($ExportableEnums + $ExportableClasses)) {
         $TypeAcceleratorsClass::Remove($Type.FullName)
     }
 }.GetNewClosure()
