@@ -115,11 +115,11 @@ param()
     #endregion - Module header
 
     #region - Module post-header
-    Add-Content -Path $rootModuleFile -Force -Value @'
-$scriptName = $MyInvocation.MyCommand.Name
-Write-Verbose "[$scriptName] Importing module"
+    Add-Content -Path $rootModuleFile -Force -Value @"
+`$scriptName = '$ModuleName'
+Write-Verbose "[`$scriptName] Importing module"
 
-'@
+"@
     #endregion - Module post-header
 
     #region - Data and variables
@@ -131,9 +131,9 @@ Write-Verbose "[$scriptName] - [data] - Processing folder"
 $dataFolder = (Join-Path $PSScriptRoot 'data')
 Write-Verbose "[$scriptName] - [data] - [$dataFolder]"
 Get-ChildItem -Path "$dataFolder" -Recurse -Force -Include '*.psd1' -ErrorAction SilentlyContinue | ForEach-Object {
-    Write-Verbose "[$scriptName] - [data] - [$($_.Name)] - Importing"
+    Write-Verbose "[$scriptName] - [data] - [$($_.BaseName)] - Importing"
     New-Variable -Name $_.BaseName -Value (Import-PowerShellDataFile -Path $_.FullName) -Force
-    Write-Verbose "[$scriptName] - [data] - [$($_.Name)] - Done"
+    Write-Verbose "[$scriptName] - [data] - [$($_.BaseName)] - Done"
 }
 
 Write-Verbose "[$scriptName] - [data] - Done"
