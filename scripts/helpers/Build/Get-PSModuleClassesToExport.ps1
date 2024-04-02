@@ -29,9 +29,12 @@
 
     foreach ($file in $files) {
         $content = Get-Content -Path $file.FullName -Raw
-        $stringMatches = [Regex]::Matches($content, '(?i)^(?:class|enum)\s+([^\s{]+)', 'Multiline')
+        $stringMatches = [Regex]::Matches($content, '(?i)^(class|enum)\s+([^\s{]+)', 'Multiline')
         foreach ($match in $stringMatches) {
-            $match.Groups[1].Value
+            [pscustomobject]@{
+                Type = $match.Groups[1].Value
+                Name = $match.Groups[2].Value
+            }
         }
     }
 }

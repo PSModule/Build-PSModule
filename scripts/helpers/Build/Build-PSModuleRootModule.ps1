@@ -57,11 +57,20 @@ function Build-PSModuleRootModule {
         if ($classes.count -gt 0) {
             $classExports = @'
 # Define the types to export with type accelerators.
-$ExportableTypes = @(
+$ExportableClasses = @(
 
 '@
-            $classes | ForEach-Object {
-                $classExports += "    [$_]`n"
+            $classes | Where-Object Type -EQ 'class' | ForEach-Object {
+                $classExports += "    [$($_.Name)]`n"
+            }
+
+            $classExports += @'
+)
+$ExportableEnums = @(
+
+'@
+            $classes | Where-Object Type -EQ 'enum' | ForEach-Object {
+                $classExports += "    [$($_.Name)]`n"
             }
 
             $classExports += @'
@@ -73,17 +82,27 @@ $TypeAcceleratorsClass = [psobject].Assembly.GetType(
 # Ensure none of the types would clobber an existing type accelerator.
 # If a type accelerator with the same name exists, throw an exception.
 $ExistingTypeAccelerators = $TypeAcceleratorsClass::Get
-foreach ($Type in $ExportableTypes) {
+foreach ($Type in $ExportableEnums) {
     if ($Type.FullName -in $ExistingTypeAccelerators.Keys) {
-        Write-Debug "Accelerator already exists [$($Type.FullName)]"
+        Write-Warning "Enum already exists [$($Type.FullName)]. Skipping."
     } else {
         $TypeAcceleratorsClass::Add($Type.FullName, $Type)
+        Write-Verbose "Exporting enum '$Type'."
+    }
+}
+foreach ($Type in $ExportableClasses) {
+    if ($Type.FullName -in $ExistingTypeAccelerators.Keys) {
+        Write-Warning "Class already exists [$($Type.FullName)]. Skipping."
+    } else {
+        $TypeAcceleratorsClass::Add($Type.FullName, $Type)
+        Write-Verbose "Exporting class '$Type'."
     }
 }
 
+
 # Remove type accelerators when the module is removed.
 $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
-    foreach ($Type in $ExportableTypes) {
+    foreach ($Type in ($ExportableEnums + $ExportableClasses)) {
         $TypeAcceleratorsClass::Remove($Type.FullName)
     }
 }.GetNewClosure()
@@ -115,11 +134,11 @@ param()
     #endregion - Module header
 
     #region - Module post-header
-    Add-Content -Path $rootModuleFile -Force -Value @'
-$scriptName = $MyInvocation.MyCommand.Name
-Write-Verbose "[$scriptName] Importing module"
+    Add-Content -Path $rootModuleFile -Force -Value @"
+`$scriptName = '$ModuleName'
+Write-Verbose "[`$scriptName] - Importing module"
 
-'@
+"@
     #endregion - Module post-header
 
     #region - Data and variables
@@ -131,9 +150,9 @@ Write-Verbose "[$scriptName] - [data] - Processing folder"
 $dataFolder = (Join-Path $PSScriptRoot 'data')
 Write-Verbose "[$scriptName] - [data] - [$dataFolder]"
 Get-ChildItem -Path "$dataFolder" -Recurse -Force -Include '*.psd1' -ErrorAction SilentlyContinue | ForEach-Object {
-    Write-Verbose "[$scriptName] - [data] - [$($_.Name)] - Importing"
+    Write-Verbose "[$scriptName] - [data] - [$($_.BaseName)] - Importing"
     New-Variable -Name $_.BaseName -Value (Import-PowerShellDataFile -Path $_.FullName) -Force
-    Write-Verbose "[$scriptName] - [data] - [$($_.Name)] - Done"
+    Write-Verbose "[$scriptName] - [data] - [$($_.BaseName)] - Done"
 }
 
 Write-Verbose "[$scriptName] - [data] - Done"
@@ -165,6 +184,7 @@ Write-Verbose "[$scriptName] - [data] - Done"
     $files = $ModuleOutputFolder | Get-ChildItem -File -Force -Filter '*.ps1'
     foreach ($file in $files) {
         $relativePath = $file.FullName -Replace $ModuleOutputFolder, ''
+        $relativePath = $relativePath -Replace $file.Extension, ''
         $relativePath = $relativePath.TrimStart($pathSeparator)
         $relativePath = $relativePath -Split $pathSeparator | ForEach-Object { "[$_]" }
         $relativePath = $relativePath -Join ' - '
