@@ -60,8 +60,8 @@ function Build-PSModuleRootModule {
 $ExportableClasses = @(
 
 '@
-            $classes.Name | Where-Object Type -EQ 'class' | ForEach-Object {
-                $classExports += "    [$_]`n"
+            $classes | Where-Object Type -EQ 'class' | ForEach-Object {
+                $classExports += "    [$($_.Name)]`n"
             }
 
             $classExports += @'
@@ -69,8 +69,8 @@ $ExportableClasses = @(
 $ExportableEnums = @(
 
 '@
-            $classes.Name | Where-Object Type -EQ 'enum' | ForEach-Object {
-                $classExports += "    [$_]`n"
+            $classes | Where-Object Type -EQ 'enum' | ForEach-Object {
+                $classExports += "    [$($_.Name)]`n"
             }
 
             $classExports += @'
