@@ -57,15 +57,6 @@ function Build-PSModuleRootModule {
         if ($classes.count -gt 0) {
             $classExports = @'
 # Define the types to export with type accelerators.
-$ExportableClasses = @(
-
-'@
-            $classes | Where-Object Type -EQ 'class' | ForEach-Object {
-                $classExports += "    [$($_.Name)]`n"
-            }
-
-            $classExports += @'
-)
 $ExportableEnums = @(
 
 '@
@@ -75,6 +66,17 @@ $ExportableEnums = @(
 
             $classExports += @'
 )
+$ExportableEnums | Foreach-Object { Write-Verbose "Exporting enum '$Type'." }
+$ExportableClasses = @(
+
+'@
+            $classes | Where-Object Type -EQ 'class' | ForEach-Object {
+                $classExports += "    [$($_.Name)]`n"
+            }
+
+            $classExports += @'
+)
+$ExportableClasses | Foreach-Object { Write-Verbose "Exporting class '$Type'." }
 # Get the internal TypeAccelerators class to use its static methods.
 $TypeAcceleratorsClass = [psobject].Assembly.GetType(
     'System.Management.Automation.TypeAccelerators'
@@ -86,16 +88,16 @@ foreach ($Type in $ExportableEnums) {
     if ($Type.FullName -in $ExistingTypeAccelerators.Keys) {
         Write-Warning "Enum already exists [$($Type.FullName)]. Skipping."
     } else {
+        Write-Verbose "Importing enum '$Type'."
         $TypeAcceleratorsClass::Add($Type.FullName, $Type)
-        Write-Verbose "Exporting enum '$Type'."
     }
 }
 foreach ($Type in $ExportableClasses) {
     if ($Type.FullName -in $ExistingTypeAccelerators.Keys) {
         Write-Warning "Class already exists [$($Type.FullName)]. Skipping."
     } else {
+        Write-Verbose "Importing class '$Type'."
         $TypeAcceleratorsClass::Add($Type.FullName, $Type)
-        Write-Verbose "Exporting class '$Type'."
     }
 }
 
