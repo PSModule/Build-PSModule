@@ -134,6 +134,20 @@ param()
     }
     #endregion - Module header
 
+    #region - $IsWindows
+    Write-Verbose "Adding variable for `$IsWindows for compatibility with Windows PowerShell."
+    Add-Content -Path $rootModuleFile -Force -Value @'
+
+if ($PSVersionTable.PSVersion -lt '6.0') {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSAvoidAssignmentToAutomaticVariable', '', Justification = 'Compatibility with PowerShell 6.0 and newer.'
+    )]
+    $IsWindows = [System.Environment]::OSVersion.Platform -eq 'Win32NT'
+}
+
+'@
+    #endregion - $IsWindows
+
     #region - Module post-header
     Add-Content -Path $rootModuleFile -Force -Value @"
 `$scriptName = '$ModuleName'
