@@ -45,5 +45,11 @@ function Build-PSModule {
     Build-PSModuleBase -ModuleName $ModuleName -ModuleSourceFolder $moduleSourceFolder -ModuleOutputFolder $moduleOutputFolder
     Build-PSModuleManifest -ModuleName $ModuleName -ModuleOutputFolder $moduleOutputFolder
     Build-PSModuleRootModule -ModuleName $ModuleName -ModuleOutputFolder $moduleOutputFolder
+    Update-PSModuleManifestAliasesToExport -ModuleName $ModuleName -ModuleOutputFolder $moduleOutputFolder
     Build-PSModuleDocumentation -ModuleName $ModuleName -DocsOutputFolder $docsOutputFolder
+
+    $outputManifestPath = Join-Path -Path $ModuleOutputFolder -ChildPath "$ModuleName.psd1"
+    Start-LogGroup 'Build manifest file - Final Result'
+    Show-FileContent -Path $outputManifestPath
+    Stop-LogGroup
 }
