@@ -1,4 +1,12 @@
-function Update-PSModuleAliases {
+function Update-PSModuleManifestAliasesToExport {
+    <#
+        .SYNOPSIS
+        Updates the aliases to export in the module manifest.
+    #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function',
+        Justification = 'Updates a file that is being built.'
+    )]
     [CmdletBinding()]
     param(
         # Name of the module.
@@ -10,13 +18,7 @@ function Update-PSModuleAliases {
         [System.IO.DirectoryInfo] $ModuleOutputFolder
     )
 
-    Write-Verbose "Updating aliases for module [$ModuleName]"
-    Write-Verbose "Module output folder: [$ModuleOutputFolder]"
-
     $aliases = Get-Command -Module $ModuleName -CommandType Alias
-    Write-Verbose ($aliases | Out-String)
-    Write-Verbose ($aliases.Name | Out-String)
-
     $outputManifestPath = Join-Path -Path $ModuleOutputFolder -ChildPath "$ModuleName.psd1"
     Set-ModuleManifest -Path $outputManifestPath -AliasesToExport $aliases.Name -Verbose:$false
 }
