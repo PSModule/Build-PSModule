@@ -17,4 +17,6 @@ function Update-PSModuleAliases {
     Write-Verbose ($aliases | Out-String)
     Write-Verbose ($aliases.Name | Out-String)
 
+    $outputManifestPath = Join-Path -Path $ModuleOutputFolder -ChildPath "$ModuleName.psd1"
+    Set-ModuleManifest -Path $outputManifestPath -AliasesToExport $aliases.Name -Verbose:$false
 }
