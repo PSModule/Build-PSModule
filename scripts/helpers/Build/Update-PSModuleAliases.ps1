@@ -13,5 +13,8 @@ function Update-PSModuleAliases {
     Write-Verbose "Updating aliases for module [$ModuleName]"
     Write-Verbose "Module output folder: [$ModuleOutputFolder]"
 
-    Get-Alias | Select *
+    $aliases = Get-Command -Module $ModuleName -CommandType Alias
+    Write-Verbose ($aliases | Out-String)
+    Write-Verbose ($aliases.Name | Out-String)
+
 }
