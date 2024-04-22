@@ -29,4 +29,4 @@ runs:
       shell: pwsh
       run: |
         # Build-PSModule
-        . \scripts\main.ps1 -Verbose
+        . 'scripts\main.ps1' -Verbose
