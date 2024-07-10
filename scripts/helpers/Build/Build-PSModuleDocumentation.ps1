@@ -95,8 +95,9 @@ function Build-PSModuleDocumentation {
     Stop-LogGroup
 
     Start-LogGroup 'Build docs - Token replacement on mkdocs.yml'
-    $mkdocsContent = Get-Content -Path $mkdocsPath
-    $mkdocsContent = $mkdocsContent.Replace('\$\{\{ REPO_NAME \}\}', $ModuleName)
+    $mkdocsContent = Get-Content -Path $mkdocsPath -Raw
+    $mkdocsContent = $mkdocsContent.Replace('${{ REPO_NAME }}', $env:GITHUB_REPOSITORY_NAME)
+    $mkdocsContent = $mkdocsContent.Replace('${{ ORG_NAME }}', $env:GITHUB_REPOSITORY_OWNER)
     $mkdocsContent | Set-Content -Path $mkdocsPath
     Stop-LogGroup
 

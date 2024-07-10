@@ -43,8 +43,8 @@ theme:
     - search.suggest
     - search.highlight
 
-repo_name: PSModule/${{ REPO_NAME }}
-repo_url: https://github.com/PSModule/${{ REPO_NAME }}
+repo_name: ${{ ORG_NAME }}/${{ REPO_NAME }}
+repo_url: https://github.com/${{ ORG_NAME }}/${{ REPO_NAME }}
 
 plugins:
   - search
@@ -65,10 +65,10 @@ extra:
   social:
     - icon: fontawesome/brands/discord
       link: https://discord.gg/jedJWCPAhD
-      name: PSModule on Discord
+      name: ${{ ORG_NAME }} on Discord
     - icon: fontawesome/brands/github
-      link: https://github.com/PSModule/
-      name: PSModule on GitHub
+      link: https://github.com/${{ ORG_NAME }}/
+      name: ${{ ORG_NAME }} on GitHub
   consent:
     title: Cookie consent
     description: >-
