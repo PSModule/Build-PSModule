@@ -38,7 +38,7 @@ function Build-PSModule {
     $moduleOutputFolder = New-Item -Path $ModulesOutputFolderPath -Name $ModuleName -ItemType Directory -Force
     Write-Verbose "Module output folder: [$ModulesOutputFolderPath]"
 
-    $docsOutputFolder = New-Item -Path $DocsOutputFolderPath -Name $ModuleName -ItemType Directory -Force
+    $docsOutputFolder = New-Item -Path $DocsOutputFolderPath -Name 'docs' -ItemType Directory -Force
     Write-Verbose "Docs output folder:   [$DocsOutputFolderPath]"
     Stop-LogGroup
 
@@ -46,7 +46,8 @@ function Build-PSModule {
     Build-PSModuleManifest -ModuleName $ModuleName -ModuleOutputFolder $moduleOutputFolder
     Build-PSModuleRootModule -ModuleName $ModuleName -ModuleOutputFolder $moduleOutputFolder
     Update-PSModuleManifestAliasesToExport -ModuleName $ModuleName -ModuleOutputFolder $moduleOutputFolder
-    Build-PSModuleDocumentation -ModuleName $ModuleName -DocsOutputFolder $docsOutputFolder
+
+    Build-PSModuleDocumentation -ModuleName $ModuleName -ModuleSourceFolder $moduleSourceFolder -DocsOutputFolder $docsOutputFolder
 
     $outputManifestPath = Join-Path -Path $ModuleOutputFolder -ChildPath "$ModuleName.psd1"
     Start-LogGroup 'Build manifest file - Final Result'

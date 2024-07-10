@@ -20,7 +20,7 @@ inputs:
   DocsOutputPath:
     description: Path to the folder where the built docs are outputted.
     required: false
-    default: outputs/docs
+    default: outputs/site
 
 runs:
   using: composite
