@@ -99,4 +99,8 @@ function Build-PSModuleDocumentation {
     $mkdocsContent = $mkdocsContent.Replace('\$\{\{ REPO_NAME \}\}', $ModuleName)
     $mkdocsContent | Set-Content -Path $mkdocsPath
     Stop-LogGroup
+
+    Start-LogGroup 'Build docs - mkdocs.yml - Final Result'
+    Show-FileContent -Path $mkdocsPath
+    Stop-LogGroup
 }
