@@ -20,7 +20,6 @@ During the build process the following steps are performed:
 1. Copies the source code of the module to an output folder.
 1. Builds the module manifest file based of info on the GitHub repository and source code. Read the [Module Manifest](#module-manifest) section for more information.
 1. Builds the root module (.psm1) file by combining source code and adding automation into the root module file. Read the [Root module](#root-module) section for more information.
-1. Builds the module documentation using platyPS and comment based help in the source code. Read the [Module documentation](#module-documentation) section for more information.
 
 ## Usage
 
@@ -29,7 +28,6 @@ During the build process the following steps are performed:
 | `Name` | Name of the module to process. | `false` |  |
 | `Path` | Path to the folder where the modules are located. | `false` | `src` |
 | `ModulesOutputPath` | Path to the folder where the built modules are outputted. | `false` | `outputs/modules` |
-| `DocsOutputPath` | Path to the folder where the built docs are outputted. | `false` | `outputs/docs` |
 
 ## Root module
 
@@ -143,11 +141,6 @@ Linking the description to the module manifest file might show more how this wor
 }
 ```
 
-## Module documentation
-
-The module documentation is built using `platyPS` and comment based help in the source code.
-The documentation is currently not published anywhere, but should be published to GitHub Pages in a future release.
-
 ## Permissions
 
 The action does not require any permissions.
@@ -167,10 +160,3 @@ Modules:
 
 - [PowerShell scripting performance considerations](https://learn.microsoft.com/powershell/scripting/dev-cross-plat/performance/script-authoring-considerations)
 - [PowerShell module authoring considerations](https://learn.microsoft.com/powershell/scripting/dev-cross-plat/performance/module-authoring-considerations):
-
-Documentation:
-
-- [platyPS reference](https://learn.microsoft.com/powershell/module/platyps/?source=recommendations)
-- [PlatyPS overview](https://learn.microsoft.com/powershell/utility-modules/platyps/overview?view=ps-modules)
-- [about_Comment_Based_Help](https://go.microsoft.com/fwlink/?LinkID=123415)
-- [Supporting Updatable Help](https://learn.microsoft.com/powershell/scripting/developer/help/supporting-updatable-help)

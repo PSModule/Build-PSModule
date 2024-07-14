@@ -17,10 +17,6 @@ inputs:
     description: Path to the folder where the built modules are outputted.
     required: false
     default: outputs/modules
-  DocsOutputPath:
-    description: Path to the folder where the built docs are outputted.
-    required: false
-    default: outputs/site
 
 runs:
   using: composite
@@ -31,7 +27,6 @@ runs:
         GITHUB_ACTION_INPUT_Name: ${{ inputs.Name }}
         GITHUB_ACTION_INPUT_Path: ${{ inputs.Path }}
         GITHUB_ACTION_INPUT_ModulesOutputPath: ${{ inputs.ModulesOutputPath }}
-        GITHUB_ACTION_INPUT_DocsOutputPath: ${{ inputs.DocsOutputPath }}
       run: |
         # Build-PSModule
         . "$env:GITHUB_ACTION_PATH\scripts\main.ps1" -Verbose
