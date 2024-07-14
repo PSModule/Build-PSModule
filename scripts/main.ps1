@@ -23,13 +23,10 @@ if (-not (Test-Path -Path $moduleSourceFolderPath)) {
 
 $modulesOutputFolderPath = Join-Path $env:GITHUB_WORKSPACE $env:GITHUB_ACTION_INPUT_ModulesOutputPath
 Write-Verbose "Modules output path: [$modulesOutputFolderPath]"
-$docsOutputFolderPath = Join-Path $env:GITHUB_WORKSPACE $env:GITHUB_ACTION_INPUT_DocsOutputPath
-Write-Verbose "Docs output path:    [$docsOutputFolderPath]"
 Stop-LogGroup
 $params = @{
     ModuleName              = $moduleName
     ModuleSourceFolderPath  = $moduleSourceFolderPath
     ModulesOutputFolderPath = $modulesOutputFolderPath
-    DocsOutputFolderPath    = $docsOutputFolderPath
 }
 Build-PSModule @params
