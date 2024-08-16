@@ -9,6 +9,7 @@
         .EXAMPLE
         Get-PSModuleVariablesToExport -SourceFolderPath 'C:\MyModule\src\MyModule'
     #>
+    [OutputType([Collections.Generic.List[string]])]
     [CmdletBinding()]
     param(
         # Path to the folder where the module source code is located.
@@ -18,10 +19,6 @@
 
     $manifestPropertyName = 'VariablesToExport'
 
-    $moduleName = Split-Path -Path $SourceFolderPath -Leaf
-    $manifestFileName = "$moduleName.psd1"
-    $manifestFilePath = Join-Path -Path $SourceFolderPath -ChildPath $manifestFileName
-    $manifest = Get-ModuleManifest -Path $manifestFilePath -Verbose:$false
     Write-Verbose "[$manifestPropertyName]"
 
     $variableFolderPath = Join-Path -Path $SourceFolderPath -ChildPath 'public'
