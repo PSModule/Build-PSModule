@@ -28,7 +28,9 @@
     $scriptFilePaths | ForEach-Object {
         $ast = [System.Management.Automation.Language.Parser]::ParseFile($_, [ref]$null, [ref]$null)
         $variables = Get-RootLevelVariable -Ast $ast
-        $variablesToExport.Add($variables)
+        $variables | ForEach-Object {
+            $variablesToExport.Add($_)
+        }
     }
 
     $variablesToExport | ForEach-Object {
