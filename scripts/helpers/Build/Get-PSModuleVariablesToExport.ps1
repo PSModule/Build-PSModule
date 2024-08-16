@@ -27,12 +27,12 @@
     $variableFolderPath = Join-Path -Path $SourceFolderPath -ChildPath 'public'
     $scriptFilePaths = Get-ChildItem -Path $variableFolderPath -Recurse -File -Filter *.ps1 | Select-Object -ExpandProperty FullName
 
-    $collectedVariablesToExport = $scriptFilePaths | ForEach-Object {
-        Get-RootLevelVariable -Ast [System.Management.Automation.Language.Parser]::ParseFile($_, [ref]$null, [ref]$null)
+    $variablesToExport = [Collections.Generic.List[string]]::new()
+    $scriptFilePaths | ForEach-Object {
+        $ast = [System.Management.Automation.Language.Parser]::ParseFile($_, [ref]$null, [ref]$null)
+        $variables = Get-RootLevelVariable -Ast $ast
+        $variablesToExport.Add($variables)
     }
-
-    $variablesToExport = (($manifest.VariablesToExport).count -eq 0) -or ($manifest.VariablesToExport | IsNullOrEmpty) ? '' : $manifest.VariablesToExport
-    $variablesToExport += $collectedVariablesToExport | Sort-Object -Unique
 
     $variablesToExport | ForEach-Object {
         Write-Verbose "[$manifestPropertyName] - [$_]"
