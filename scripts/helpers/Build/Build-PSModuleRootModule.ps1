@@ -11,9 +11,7 @@ function Build-PSModuleRootModule {
         During compilation, the source files are added to the root module file in the following order:
 
         1. Module header from header.ps1 file. Usually to suppress code analysis warnings/errors and to add [CmdletBinding()] to the module.
-        2. Data files are added from source files. These are also tracked based on visibility/exportability based on folder location:
-            1. private
-            2. public
+        2. Data files are added from source files.
         3. Combines *.ps1 files from the following folders in alphabetical order from each folder:
             1. init
             2. classes
@@ -50,12 +48,12 @@ function Build-PSModuleRootModule {
     #region - Analyze source files
 
     #region - Export-Classes
-    $classesFolder = Join-Path -Path $ModuleOutputFolder -ChildPath 'classes'
+    $classesFolder = Join-Path -Path $ModuleOutputFolder -ChildPath 'classes/public'
     $classExports = ''
     if (Test-Path -Path $classesFolder) {
-        $classes = Get-PSModuleClassesToExport -SourceFolderPath $ModuleOutputFolder
+        $classes = Get-PSModuleClassesToExport -SourceFolderPath $classesFolder
         if ($classes.count -gt 0) {
-            $classExports = @'
+            $classExports += @'
 # Get the internal TypeAccelerators class to use its static methods.
 $TypeAcceleratorsClass = [psobject].Assembly.GetType(
     'System.Management.Automation.TypeAccelerators'
@@ -180,9 +178,12 @@ Write-Verbose "[$scriptName] - [data] - Done"
     #region - Add content from subfolders
     $scriptFoldersToProcess = @(
         'init',
-        'classes',
-        'private',
-        'public'
+        'classes/private',
+        'classes/public',
+        'functions/private',
+        'functions/public',
+        'variables/private',
+        'variables/public'
     )
 
     foreach ($scriptFolder in $scriptFoldersToProcess) {

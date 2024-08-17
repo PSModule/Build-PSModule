@@ -95,7 +95,7 @@ function Build-PSModuleManifest {
         ForEach-Object { $files.Add($_) }
 
     # Get files on module subfolders, excluding the following folders 'init', 'classes', 'public', 'private'
-    $skipList = @('init', 'classes', 'public', 'private')
+    $skipList = @('init', 'classes', 'functions', 'variables')
     $ModuleOutputFolder | Get-ChildItem -Directory | Where-Object { $_.Name -NotIn $skipList } |
         Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue | ForEach-Object { $files.Add($_) }
 
@@ -165,7 +165,6 @@ function Build-PSModuleManifest {
         ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart($pathSeparator) }
     $manifest.ModuleList = $moduleList.count -eq 0 ? @() : @($moduleList)
     $manifest.ModuleList | ForEach-Object { Write-Verbose "[ModuleList] - [$_]" }
-
 
     Write-Verbose '[Gather]'
     $capturedModules = [System.Collections.Generic.List[System.Object]]::new()

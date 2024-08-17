@@ -21,7 +21,7 @@
 
     Write-Verbose "[$manifestPropertyName]"
 
-    $variableFolderPath = Join-Path -Path $SourceFolderPath -ChildPath 'public'
+    $variableFolderPath = Join-Path -Path $SourceFolderPath -ChildPath 'variables/public'
     $scriptFilePaths = Get-ChildItem -Path $variableFolderPath -Recurse -File -Filter *.ps1 | Select-Object -ExpandProperty FullName
 
     $variablesToExport = [Collections.Generic.List[string]]::new()
