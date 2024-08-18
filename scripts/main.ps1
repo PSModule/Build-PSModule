@@ -3,10 +3,13 @@
 [CmdletBinding()]
 param()
 
-Start-LogGroup 'Loading helper scripts'
-Get-ChildItem -Path (Join-Path -Path $env:GITHUB_ACTION_PATH -ChildPath 'scripts' 'helpers') -Filter '*.ps1' -Recurse |
-    ForEach-Object { Write-Verbose "[$($_.FullName)]"; . $_.FullName }
-Stop-LogGroup
+$path = (Join-Path -Path $PSScriptRoot -ChildPath 'helpers')
+LogGroup "Loading helper scripts from [$path]" {
+    Get-ChildItem -Path $path -Filter '*.ps1' -Recurse | ForEach-Object {
+        Write-Verbose "[$($_.FullName)]"
+        . $_.FullName
+    }
+}
 
 Start-LogGroup 'Loading inputs'
 $moduleName = ($env:GITHUB_ACTION_INPUT_Name | IsNullOrEmpty) ? $env:GITHUB_REPOSITORY_NAME : $env:GITHUB_ACTION_INPUT_Name
