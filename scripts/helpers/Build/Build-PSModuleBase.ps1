@@ -13,6 +13,10 @@ function Build-PSModuleBase {
         Build-PSModuleBase -SourceFolderPath 'C:\MyModule\src\MyModule' -OutputFolderPath 'C:\MyModule\build\MyModule'
     #>
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSReviewUnusedParameter', '', Scope = 'Function',
+        Justification = 'LogGroup - Scoping affects the variables line of sight.'
+    )]
     param(
         # Name of the module.
         [Parameter(Mandatory)]
@@ -34,6 +38,6 @@ function Build-PSModuleBase {
     }
 
     LogGroup 'Build base - Result' {
-    (Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force).FullName | Sort-Object
+        (Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force).FullName | Sort-Object
     }
 }

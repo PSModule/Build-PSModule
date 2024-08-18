@@ -14,8 +14,12 @@ function Build-PSModuleManifest {
     #>
     [CmdletBinding()]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
-        'PSAvoidLongLines', '',
-        Justification = 'No real reason. Just to get going.'
+        'PSAvoidLongLines', '', Scope = 'Function',
+        Justification = 'Easier to read the multi ternery operators in a single line.'
+    )]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSReviewUnusedParameter', '', Scope = 'Function',
+        Justification = 'LogGroup - Scoping affects the variables line of sight.'
     )]
     param(
         # Name of the module.
@@ -289,11 +293,11 @@ function Build-PSModuleManifest {
             throw "[Tags] - Cannot be PSEdition = 'Core' and PowerShellVersion < 6.0"
         }
         <#
-        Windows: Packages that are compatible with the Windows Operating System
-        Linux: Packages that are compatible with Linux Operating Systems
-        MacOS: Packages that are compatible with the Mac Operating System
-        https://learn.microsoft.com/en-us/powershell/gallery/concepts/package-manifest-affecting-ui?view=powershellget-2.x#tag-details
-    #>
+            Windows: Packages that are compatible with the Windows Operating System
+            Linux: Packages that are compatible with Linux Operating Systems
+            MacOS: Packages that are compatible with the Mac Operating System
+            https://learn.microsoft.com/en-us/powershell/gallery/concepts/package-manifest-affecting-ui?view=powershellget-2.x#tag-details
+        #>
 
         Write-Verbose '[LicenseUri]'
         $licenseUri = "https://github.com/$env:GITHUB_REPOSITORY_OWNER/$env:GITHUB_REPOSITORY_NAME/blob/main/LICENSE"
