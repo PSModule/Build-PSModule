@@ -104,7 +104,7 @@ function Build-PSModuleManifest {
 
         # Get the relative file path and store it in the manifest
         $files = $files | Select-Object -ExpandProperty FullName | ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart($pathSeparator) }
-        $manifest.FileList = $fileList.count -eq 0 ? @() : @($fileList)
+        $manifest.FileList = $files.count -eq 0 ? @() : @($files)
         $manifest.FileList | ForEach-Object { Write-Verbose "[FileList] - [$_]" }
 
         Write-Verbose '[RequiredAssemblies]'
