@@ -32,6 +32,7 @@ runs:
         GITHUB_ACTION_INPUT_Path: ${{ inputs.Path }}
         GITHUB_ACTION_INPUT_ModulesOutputPath: ${{ inputs.ModulesOutputPath }}
         GITHUB_ACTION_INPUT_DocsOutputPath: ${{ inputs.DocsOutputPath }}
-      run: |
-        # Build-PSModule
-        . "${{ github.action_path }}\scripts\main.ps1" -Verbose
+      with:
+        Script: |
+          # Build-PSModule
+          . "${{ github.action_path }}\scripts\main.ps1" -Verbose
