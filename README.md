@@ -18,9 +18,9 @@ This GitHub Action is a part of the [PSModule framework](https://github.com/PSMo
 During the build process the following steps are performed:
 
 1. Copies the source code of the module to an output folder.
-1. Builds the module manifest file based of info on the GitHub repository and source code. Read the [Module Manifest](#module-manifest) section for more information.
-1. Builds the root module (.psm1) file by combining source code and adding automation into the root module file. Read the [Root module](#root-module) section for more information.
-1. Builds the module documentation using platyPS and comment based help in the source code. Read the [Module documentation](#module-documentation) section for more information.
+1. Builds the module manifest file based of info on the GitHub repository and source code. For more information, please read the [Module Manifest](#module-manifest) section.
+1. Builds the root module (.psm1) file by combining source code and adding automation into the root module file. For more information, please read the [Root module](#root-module) section.
+1. Builds the module documentation using platyPS and comment based help in the source code. For more information, please read the [Module documentation](#module-documentation) section.
 
 ## Usage
 
@@ -33,28 +33,34 @@ During the build process the following steps are performed:
 
 ## Root module
 
-The `src` folder may contain a 'root module' file. If present, the build function will disregard this file
-and build a new root module file based on the source code in the module folder.
+The `src` folder may contain a 'root module' file. If present, the build function will disregard this file and build a new root module file based on
+the source code in the module folder.
 
-The root module file is the main file that is loaded when the module is imported.
-It is built from the source code files in the module folder in the following order:
+The root module file is the main file that is loaded when the module is imported. It is built from the source code files in the module folder in the
+following order:
 
-1. Adds module headers from `header.ps1` if it exists and removes the file from the module folder.
-1. Adds data loader automation that loads files from the `data` folder as variables in the module scope, if it exists. The variables are available using the ´$script:<filename>´ syntax.
-1. Adds content from subfolders, if they exists, and removes them from the module folder in the following order:
+1. Adds a module header from `header.ps1` if it exists and removes the file from the module folder.
+1. Adds a data loader that loads files from the `data` folder as variables in the module scope, if the folder exists. The variables are available
+using the `$script:<filename>` syntax.
+1. Adds content from subfolders into the root module file and removes them from the module folder in the following order:
    - `init`
-   - `classes`
-   - `private`
-   - `public`
+   - `classes/private`
+   - `classes/public`
+   - `functions/private`
+   - `functions/public`
+   - `variables/private`
+   - `variables/public`
    - `*.ps1` on module root
-1. Adds a `class` and `enum` exporter that exports all classes and enums in the module to the caller session, using TypeAccelerators.
-1. Adds the `Export-ModuleMember` function to the end of the file, to make sure that only the functions, cmdlets, variables and aliases that are defined in the module are exported.
+1. Adds a `class` and `enum` exporter that exports the ones from `classes/public` folder to the caller session, using [TypeAccelerators](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_classes?view=powershell-7.4#exporting-classes-with-type-accelerators).
+1. Adds the `Export-ModuleMember` function to the end of the file, to make sure that only the functions, cmdlets, variables and aliases that are
+defined in the `public` folders are exported.
 
 ## Module manifest
 
 The module manifest file is the file that describes the module and its content. It is used by PowerShell to load the module and its prerequisites.
-The file also contains important metadata that is used by the PowerShell Gallery. If a file exists in the source code folder `src` it will be used as a base for the module manifest file.
-Most of the values in the module manifest file are calculated during the build process however some of these will not be touched if specified in the source manifest file.
+The file also contains important metadata that is used by the PowerShell Gallery. If a file exists in the source code folder `src` it will be used as
+a base for the module manifest file. Most of the values in the module manifest file will be calculated during the build process however some of these
+will not be touched if specified in the source manifest file.
 
 During the module manifest build process the following steps are performed:
 
@@ -72,7 +78,7 @@ During the module manifest build process the following steps are performed:
 1. Get the list of types to process by searching for `*.Types.ps1xml` files in the entire module source folder and set the `TypesToProcess` property in the manifest.
 1. Get the list of formats to process by searching for `*.Format.ps1xml` files in the entire module source folder and set the `FormatsToProcess` property in the manifest.
 1. Get the list of DSC resources to export by searching for `*.psm1` files in the `resources` folder and set the `DscResourcesToExport` property in the manifest.
-1. Get the list of functions, cmdlets, aliases, and variables to export and set the respective properties in the manifest.
+1. Get the list of functions, cmdlets, aliases, and variables from the respective `<type>\public` folder set the respective properties in the manifest.
 1. Get the list of modules by searching for all `*.psm1` files in the entire module source folder, excluding the root module and set the `ModuleList` property in the manifest.
 1. Gather information from source files to update `RequiredModules`, `PowerShellVersion`, and `CompatiblePSEditions` properties.
 1. The following values are gathered from the GitHub repository:
@@ -114,8 +120,8 @@ Linking the description to the module manifest file might show more how this wor
     NestedModules          = @() # Get from modules\*.psm1.
     FunctionsToExport      = @() # Get from public\*.ps1.
     CmdletsToExport        = @() # Get from manifest file, @() if not provided.
-    VariablesToExport      = @() # To be automated, currently adds '@()' to the manifest file.
-    AliasesToExport        = '*' # To be automated, currently adds '*' to the manifest file.
+    VariablesToExport      = @() # Get from variables\public\*.ps1.
+    AliasesToExport        = '*' # Get from functions\public\*.ps1.
     DscResourcesToExport   = @() # Get from resources\*.psm1.
     ModuleList             = @() # Get from listing all .\*.psm1 files - Informational only.
     FileList               = @() # Get from listing all .\* files - Informational only.
