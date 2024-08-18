@@ -27,20 +27,20 @@ function Build-PSModule {
         [string] $DocsOutputFolderPath
     )
 
-    Start-LogGroup "Building module [$ModuleName]"
-    Write-Verbose "Source path:          [$ModuleSourceFolderPath]"
-    if (-not (Test-Path -Path $ModuleSourceFolderPath)) {
-        Write-Error "Source folder not found at [$ModuleSourceFolderPath]"
-        exit 1
+    LogGroup "Building module [$ModuleName]" {
+        Write-Verbose "Source path:          [$ModuleSourceFolderPath]"
+        if (-not (Test-Path -Path $ModuleSourceFolderPath)) {
+            Write-Error "Source folder not found at [$ModuleSourceFolderPath]"
+            exit 1
+        }
+        $moduleSourceFolder = Get-Item -Path $ModuleSourceFolderPath
+
+        $moduleOutputFolder = New-Item -Path $ModulesOutputFolderPath -Name $ModuleName -ItemType Directory -Force
+        Write-Verbose "Module output folder: [$ModulesOutputFolderPath]"
+
+        $docsOutputFolder = New-Item -Path $DocsOutputFolderPath -Name $ModuleName -ItemType Directory -Force
+        Write-Verbose "Docs output folder:   [$DocsOutputFolderPath]"
     }
-    $moduleSourceFolder = Get-Item -Path $ModuleSourceFolderPath
-
-    $moduleOutputFolder = New-Item -Path $ModulesOutputFolderPath -Name $ModuleName -ItemType Directory -Force
-    Write-Verbose "Module output folder: [$ModulesOutputFolderPath]"
-
-    $docsOutputFolder = New-Item -Path $DocsOutputFolderPath -Name $ModuleName -ItemType Directory -Force
-    Write-Verbose "Docs output folder:   [$DocsOutputFolderPath]"
-    Stop-LogGroup
 
     Build-PSModuleBase -ModuleName $ModuleName -ModuleSourceFolder $moduleSourceFolder -ModuleOutputFolder $moduleOutputFolder
     Build-PSModuleManifest -ModuleName $ModuleName -ModuleOutputFolder $moduleOutputFolder
@@ -49,7 +49,7 @@ function Build-PSModule {
     Build-PSModuleDocumentation -ModuleName $ModuleName -DocsOutputFolder $docsOutputFolder
 
     $outputManifestPath = Join-Path -Path $ModuleOutputFolder -ChildPath "$ModuleName.psd1"
-    Start-LogGroup 'Build manifest file - Final Result'
-    Show-FileContent -Path $outputManifestPath
-    Stop-LogGroup
+    LogGroup 'Build manifest file - Final Result' {
+        Show-FileContent -Path $outputManifestPath
+    }
 }
