@@ -13,6 +13,10 @@ function Build-PSModuleDocumentation {
         Build-PSModuleDocumentation -ModuleOutputFolder 'C:\MyModule\src\MyModule' -DocsOutputFolder 'C:\MyModule\build\MyModule'
     #>
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSReviewUnusedParameter', '', Scope = 'Function',
+        Justification = 'LogGroup - Scoping affects the variables line of sight.'
+    )]
     param(
         # Name of the module.
         [Parameter(Mandatory)]
@@ -23,42 +27,42 @@ function Build-PSModuleDocumentation {
         [System.IO.DirectoryInfo] $DocsOutputFolder
     )
 
-    Start-LogGroup 'Build docs - Generate markdown help'
-    $null = New-MarkdownHelp -Module $ModuleName -OutputFolder $DocsOutputFolder -Force -Verbose
-    Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
-        $content = Get-Content -Path $_.FullName
-        $fixedOpening = $false
-        $newContent = @()
-        foreach ($line in $content) {
-            if ($line -match '^```$' -and -not $fixedOpening) {
-                $line = $line -replace '^```$', '```powershell'
-                $fixedOpening = $true
-            } elseif ($line -match '^```.+$') {
-                $fixedOpening = $true
-            } elseif ($line -match '^```$') {
-                $fixedOpening = $false
+    LogGroup 'Build docs - Generate markdown help' {
+        $null = New-MarkdownHelp -Module $ModuleName -OutputFolder $DocsOutputFolder -Force -Verbose
+        Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+            $content = Get-Content -Path $_.FullName
+            $fixedOpening = $false
+            $newContent = @()
+            foreach ($line in $content) {
+                if ($line -match '^```$' -and -not $fixedOpening) {
+                    $line = $line -replace '^```$', '```powershell'
+                    $fixedOpening = $true
+                } elseif ($line -match '^```.+$') {
+                    $fixedOpening = $true
+                } elseif ($line -match '^```$') {
+                    $fixedOpening = $false
+                }
+                $newContent += $line
             }
-            $newContent += $line
+            $newContent | Set-Content -Path $_.FullName
         }
-        $newContent | Set-Content -Path $_.FullName
+        Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
+            $content = Get-Content -Path $_.FullName -Raw
+            $content = $content -replace '\\`', '`'
+            $content = $content -replace '\\\[', '['
+            $content = $content -replace '\\\]', ']'
+            $content = $content -replace '\\\<', '<'
+            $content = $content -replace '\\\>', '>'
+            $content = $content -replace '\\\\', '\'
+            $content | Set-Content -Path $_.FullName
+        }
     }
-    Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
-        $content = Get-Content -Path $_.FullName -Raw
-        $content = $content -replace '\\`', '`'
-        $content = $content -replace '\\\[', '['
-        $content = $content -replace '\\\]', ']'
-        $content = $content -replace '\\\<', '<'
-        $content = $content -replace '\\\>', '>'
-        $content = $content -replace '\\\\', '\'
-        $content | Set-Content -Path $_.FullName
-    }
-    Stop-LogGroup
 
     Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
         $fileName = $_.Name
         $hash = (Get-FileHash -Path $_.FullName -Algorithm SHA256).Hash
-        Start-LogGroup " - [$fileName] - [$hash]"
-        Show-FileContent -Path $_
-        Stop-LogGroup
+        LogGroup " - [$fileName] - [$hash]" {
+            Show-FileContent -Path $_
+        }
     }
 }

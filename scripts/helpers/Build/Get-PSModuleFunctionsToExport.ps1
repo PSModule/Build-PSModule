@@ -22,7 +22,7 @@
     Write-Verbose "[$manifestPropertyName]"
     Write-Verbose "[$manifestPropertyName] - Checking path for functions and filters"
 
-    $publicFolderPath = Join-Path $SourceFolderPath 'public'
+    $publicFolderPath = Join-Path -Path $SourceFolderPath -ChildPath 'functions/public'
     Write-Verbose "[$manifestPropertyName] - [$publicFolderPath]"
     $functionsToExport = [Collections.Generic.List[string]]::new()
     $scriptFiles = Get-ChildItem -Path $publicFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1'

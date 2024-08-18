@@ -13,6 +13,10 @@ function Build-PSModuleBase {
         Build-PSModuleBase -SourceFolderPath 'C:\MyModule\src\MyModule' -OutputFolderPath 'C:\MyModule\build\MyModule'
     #>
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSReviewUnusedParameter', '', Scope = 'Function',
+        Justification = 'LogGroup - Scoping affects the variables line of sight.'
+    )]
     param(
         # Name of the module.
         [Parameter(Mandatory)]
@@ -27,13 +31,13 @@ function Build-PSModuleBase {
         [System.IO.DirectoryInfo] $ModuleOutputFolder
     )
 
-    Start-LogGroup 'Build base'
-    Write-Verbose "Copying files from [$ModuleSourceFolder] to [$ModuleOutputFolder]"
-    Copy-Item -Path "$ModuleSourceFolder\*" -Destination $ModuleOutputFolder -Recurse -Force -Verbose -Exclude "$ModuleName.psm1"
-    New-Item -Path $ModuleOutputFolder -Name "$ModuleName.psm1" -ItemType File -Force -Verbose
-    Stop-LogGroup
+    LogGroup 'Build base' {
+        Write-Verbose "Copying files from [$ModuleSourceFolder] to [$ModuleOutputFolder]"
+        Copy-Item -Path "$ModuleSourceFolder\*" -Destination $ModuleOutputFolder -Recurse -Force -Verbose -Exclude "$ModuleName.psm1"
+        New-Item -Path $ModuleOutputFolder -Name "$ModuleName.psm1" -ItemType File -Force -Verbose
+    }
 
-    Start-LogGroup 'Build base - Result'
-    (Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force).FullName | Sort-Object
-    Stop-LogGroup
+    LogGroup 'Build base - Result' {
+        (Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force).FullName | Sort-Object
+    }
 }

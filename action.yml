@@ -26,12 +26,13 @@ runs:
   using: composite
   steps:
     - name: Run Build-PSModule
-      shell: pwsh
+      uses: PSModule/GitHub-Script@v1
       env:
         GITHUB_ACTION_INPUT_Name: ${{ inputs.Name }}
         GITHUB_ACTION_INPUT_Path: ${{ inputs.Path }}
         GITHUB_ACTION_INPUT_ModulesOutputPath: ${{ inputs.ModulesOutputPath }}
         GITHUB_ACTION_INPUT_DocsOutputPath: ${{ inputs.DocsOutputPath }}
-      run: |
-        # Build-PSModule
-        . "$env:GITHUB_ACTION_PATH\scripts\main.ps1" -Verbose
+      with:
+        Script: |
+          # Build-PSModule
+          . "${{ github.action_path }}\scripts\main.ps1" -Verbose

@@ -11,25 +11,31 @@ function Build-PSModuleRootModule {
         During compilation, the source files are added to the root module file in the following order:
 
         1. Module header from header.ps1 file. Usually to suppress code analysis warnings/errors and to add [CmdletBinding()] to the module.
-        2. Data files are added from source files. These are also tracked based on visibility/exportability based on folder location:
-            1. private
-            2. public
+        2. Data loader is added if data files are available.
         3. Combines *.ps1 files from the following folders in alphabetical order from each folder:
             1. init
-            2. classes
-            3. private
-            4. public
-            5. Any remaining *.ps1 on module root.
-        3. Export-ModuleMember by using the functions, cmdlets, variables and aliases found in the source files.
-            - `Functions` will only contain functions that are from the `public` folder.
-            - `Cmdlets` will only contain cmdlets that are from the `public` folder.
-            - `Variables` will only contain variables that are from the `public` folder.
-            - `Aliases` will only contain aliases that are from the functions from the `public` folder.
+            2. classes/private
+            3. classes/public
+            4. functions/private
+            5. functions/public
+            6. variables/private
+            7. variables/public
+            8. Any remaining *.ps1 on module root.
+        4. Adds a class loader for classes found in the classes/public folder.
+        5. Export-ModuleMember by using the functions, cmdlets, variables and aliases found in the source files.
+            - `Functions` will only contain functions that are from the `functions/public` folder.
+            - `Cmdlets` will only contain cmdlets that are from the `cmdlets/public` folder.
+            - `Variables` will only contain variables that are from the `variables/public` folder.
+            - `Aliases` will only contain aliases that are from the functions from the `functions/public` folder.
 
         .EXAMPLE
         Build-PSModuleRootModule -SourceFolderPath 'C:\MyModule\src\MyModule' -OutputFolderPath 'C:\MyModule\build\MyModule'
     #>
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSReviewUnusedParameter', '', Scope = 'Function',
+        Justification = 'LogGroup - Scoping affects the variables line of sight.'
+    )]
     param(
         # Name of the module.
         [Parameter(Mandatory)]
@@ -43,19 +49,18 @@ function Build-PSModuleRootModule {
     # Get the path separator for the current OS
     $pathSeparator = [System.IO.Path]::DirectorySeparatorChar
 
-    #region Build root module
-    Start-LogGroup 'Build root module'
-    $rootModuleFile = New-Item -Path $ModuleOutputFolder -Name "$ModuleName.psm1" -Force
+    LogGroup 'Build root module' {
+        $rootModuleFile = New-Item -Path $ModuleOutputFolder -Name "$ModuleName.psm1" -Force
 
-    #region - Analyze source files
+        #region - Analyze source files
 
-    #region - Export-Classes
-    $classesFolder = Join-Path -Path $ModuleOutputFolder -ChildPath 'classes'
-    $classExports = ''
-    if (Test-Path -Path $classesFolder) {
-        $classes = Get-PSModuleClassesToExport -SourceFolderPath $ModuleOutputFolder
-        if ($classes.count -gt 0) {
-            $classExports = @'
+        #region - Export-Classes
+        $classesFolder = Join-Path -Path $ModuleOutputFolder -ChildPath 'classes/public'
+        $classExports = ''
+        if (Test-Path -Path $classesFolder) {
+            $classes = Get-PSModuleClassesToExport -SourceFolderPath $classesFolder
+            if ($classes.count -gt 0) {
+                $classExports += @'
 # Get the internal TypeAccelerators class to use its static methods.
 $TypeAcceleratorsClass = [psobject].Assembly.GetType(
     'System.Management.Automation.TypeAccelerators'
@@ -67,11 +72,11 @@ $ExistingTypeAccelerators = $TypeAcceleratorsClass::Get
 $ExportableEnums = @(
 
 '@
-            $classes | Where-Object Type -EQ 'enum' | ForEach-Object {
-                $classExports += "    [$($_.Name)]`n"
-            }
+                $classes | Where-Object Type -EQ 'enum' | ForEach-Object {
+                    $classExports += "    [$($_.Name)]`n"
+                }
 
-            $classExports += @'
+                $classExports += @'
 )
 $ExportableEnums | Foreach-Object { Write-Verbose "Exporting enum '$($_.FullName)'." }
 foreach ($Type in $ExportableEnums) {
@@ -85,11 +90,11 @@ foreach ($Type in $ExportableEnums) {
 $ExportableClasses = @(
 
 '@
-            $classes | Where-Object Type -EQ 'class' | ForEach-Object {
-                $classExports += "    [$($_.Name)]`n"
-            }
+                $classes | Where-Object Type -EQ 'class' | ForEach-Object {
+                    $classExports += "    [$($_.Name)]`n"
+                }
 
-            $classExports += @'
+                $classExports += @'
 )
 $ExportableClasses | Foreach-Object { Write-Verbose "Exporting class '$($_.FullName)'." }
 foreach ($Type in $ExportableClasses) {
@@ -108,58 +113,44 @@ $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
     }
 }.GetNewClosure()
 '@
+            }
         }
-    }
-    #endregion - Export-Classes
+        #endregion - Export-Classes
 
-    $exports = [System.Collections.Specialized.OrderedDictionary]::new()
-    $exports.Add('Alias', (Get-PSModuleAliasesToExport -SourceFolderPath $ModuleOutputFolder))
-    $exports.Add('Cmdlet', (Get-PSModuleCmdletsToExport -SourceFolderPath $ModuleOutputFolder))
-    $exports.Add('Function', (Get-PSModuleFunctionsToExport -SourceFolderPath $ModuleOutputFolder))
-    $exports.Add('Variable', (Get-PSModuleVariablesToExport -SourceFolderPath $ModuleOutputFolder))
+        $exports = [System.Collections.Specialized.OrderedDictionary]::new()
+        $exports.Add('Alias', (Get-PSModuleAliasesToExport -SourceFolderPath $ModuleOutputFolder))
+        $exports.Add('Cmdlet', (Get-PSModuleCmdletsToExport -SourceFolderPath $ModuleOutputFolder))
+        $exports.Add('Function', (Get-PSModuleFunctionsToExport -SourceFolderPath $ModuleOutputFolder))
+        $exports.Add('Variable', (Get-PSModuleVariablesToExport -SourceFolderPath $ModuleOutputFolder))
 
-    Write-Verbose ($exports | Out-String)
-    #endregion - Analyze source files
+        Write-Verbose ($exports | Out-String)
+        #endregion - Analyze source files
 
-    #region - Module header
-    $headerFilePath = Join-Path -Path $ModuleOutputFolder -ChildPath 'header.ps1'
-    if (Test-Path -Path $headerFilePath) {
-        Get-Content -Path $headerFilePath -Raw | Add-Content -Path $rootModuleFile -Force
-        $headerFilePath | Remove-Item -Force
-    } else {
-        Add-Content -Path $rootModuleFile -Force -Value @'
+        #region - Module header
+        $headerFilePath = Join-Path -Path $ModuleOutputFolder -ChildPath 'header.ps1'
+        if (Test-Path -Path $headerFilePath) {
+            Get-Content -Path $headerFilePath -Raw | Add-Content -Path $rootModuleFile -Force
+            $headerFilePath | Remove-Item -Force
+        } else {
+            Add-Content -Path $rootModuleFile -Force -Value @'
 [CmdletBinding()]
 param()
 '@
-    }
-    #endregion - Module header
+        }
+        #endregion - Module header
 
-    #region - $IsWindows
-    Write-Verbose "Adding variable for `$IsWindows for compatibility with Windows PowerShell."
-    Add-Content -Path $rootModuleFile -Force -Value @'
-
-if ($PSVersionTable.PSVersion -lt '6.0') {
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
-        'PSAvoidAssignmentToAutomaticVariable', '', Justification = 'Compatibility with PowerShell 6.0 and newer.'
-    )]
-    $IsWindows = [System.Environment]::OSVersion.Platform -eq 'Win32NT'
-}
-
-'@
-    #endregion - $IsWindows
-
-    #region - Module post-header
-    Add-Content -Path $rootModuleFile -Force -Value @"
+        #region - Module post-header
+        Add-Content -Path $rootModuleFile -Force -Value @"
 `$scriptName = '$ModuleName'
 Write-Verbose "[`$scriptName] - Importing module"
 
 "@
-    #endregion - Module post-header
+        #endregion - Module post-header
 
-    #region - Data and variables
-    if (Test-Path -Path (Join-Path -Path $ModuleOutputFolder -ChildPath 'data')) {
+        #region - Data loader
+        if (Test-Path -Path (Join-Path -Path $ModuleOutputFolder -ChildPath 'data')) {
 
-        Add-Content -Path $rootModuleFile.FullName -Force -Value @'
+            Add-Content -Path $rootModuleFile.FullName -Force -Value @'
 #region - Data import
 Write-Verbose "[$scriptName] - [data] - Processing folder"
 $dataFolder = (Join-Path $PSScriptRoot 'data')
@@ -174,98 +165,96 @@ Write-Verbose "[$scriptName] - [data] - Done"
 #endregion - Data import
 
 '@
-    }
-    #endregion - Data and variables
-
-    #region - Add content from subfolders
-    $scriptFoldersToProcess = @(
-        'init',
-        'classes',
-        'private',
-        'public'
-    )
-
-    foreach ($scriptFolder in $scriptFoldersToProcess) {
-        $scriptFolder = Join-Path -Path $ModuleOutputFolder -ChildPath $scriptFolder
-        if (-not (Test-Path -Path $scriptFolder)) {
-            continue
         }
-        Add-ContentFromItem -Path $scriptFolder -RootModuleFilePath $rootModuleFile -RootPath $ModuleOutputFolder
-        Remove-Item -Path $scriptFolder -Force -Recurse
-    }
-    #endregion - Add content from subfolders
+        #endregion - Data loader
 
-    #region - Add content from *.ps1 files on module root
-    $files = $ModuleOutputFolder | Get-ChildItem -File -Force -Filter '*.ps1'
-    foreach ($file in $files) {
-        $relativePath = $file.FullName -Replace $ModuleOutputFolder, ''
-        $relativePath = $relativePath -Replace $file.Extension, ''
-        $relativePath = $relativePath.TrimStart($pathSeparator)
-        $relativePath = $relativePath -Split $pathSeparator | ForEach-Object { "[$_]" }
-        $relativePath = $relativePath -Join ' - '
+        #region - Add content from subfolders
+        $scriptFoldersToProcess = @(
+            'init',
+            'classes/private',
+            'classes/public',
+            'functions/private',
+            'functions/public',
+            'variables/private',
+            'variables/public'
+        )
 
-        Add-Content -Path $rootModuleFile -Force -Value @"
+        foreach ($scriptFolder in $scriptFoldersToProcess) {
+            $scriptFolder = Join-Path -Path $ModuleOutputFolder -ChildPath $scriptFolder
+            if (-not (Test-Path -Path $scriptFolder)) {
+                continue
+            }
+            Add-ContentFromItem -Path $scriptFolder -RootModuleFilePath $rootModuleFile -RootPath $ModuleOutputFolder
+            Remove-Item -Path $scriptFolder -Force -Recurse
+        }
+        #endregion - Add content from subfolders
+
+        #region - Add content from *.ps1 files on module root
+        $files = $ModuleOutputFolder | Get-ChildItem -File -Force -Filter '*.ps1'
+        foreach ($file in $files) {
+            $relativePath = $file.FullName -Replace $ModuleOutputFolder, ''
+            $relativePath = $relativePath -Replace $file.Extension, ''
+            $relativePath = $relativePath.TrimStart($pathSeparator)
+            $relativePath = $relativePath -Split $pathSeparator | ForEach-Object { "[$_]" }
+            $relativePath = $relativePath -Join ' - '
+
+            Add-Content -Path $rootModuleFile -Force -Value @"
 #region - From $relativePath
 Write-Verbose "[`$scriptName] - $relativePath - Importing"
 
 "@
-        Get-Content -Path $file.FullName | Add-Content -Path $rootModuleFile -Force
+            Get-Content -Path $file.FullName | Add-Content -Path $rootModuleFile -Force
 
-        Add-Content -Path $rootModuleFile -Force -Value @"
+            Add-Content -Path $rootModuleFile -Force -Value @"
 Write-Verbose "[`$scriptName] - $relativePath - Done"
 #endregion - From $relativePath
 
 "@
-        $file | Remove-Item -Force
-    }
-    #endregion - Add content from *.ps1 files on module root
+            $file | Remove-Item -Force
+        }
+        #endregion - Add content from *.ps1 files on module root
 
-    #region - Export-ModuleMember
-    Add-Content -Path $rootModuleFile -Force -Value $classExports
+        #region - Export-ModuleMember
+        Add-Content -Path $rootModuleFile -Force -Value $classExports
 
-    $exportsString = Convert-HashtableToString -Hashtable $exports
+        $exportsString = Convert-HashtableToString -Hashtable $exports
 
-    Write-Verbose ($exportsString | Out-String)
+        Write-Verbose ($exportsString | Out-String)
 
-    $params = @{
-        Path  = $rootModuleFile
-        Force = $true
-        Value = @"
+        $params = @{
+            Path  = $rootModuleFile
+            Force = $true
+            Value = @"
 `$exports = $exportsString
 Export-ModuleMember @exports
 "@
+        }
+        Add-Content @params
+        #endregion - Export-ModuleMember
+
     }
-    Add-Content @params
-    #endregion - Export-ModuleMember
 
-    Stop-LogGroup
-    #endregion Build root module
+    LogGroup 'Build root module - Result - Before format' {
+        Show-FileContent -Path $rootModuleFile
+    }
 
-    #region Format root module
-    Start-LogGroup 'Build root module - Result - Before format'
-    Show-FileContent -Path $rootModuleFile
-    Stop-LogGroup
+    LogGroup 'Build root module - Format' {
+        $AllContent = Get-Content -Path $rootModuleFile -Raw
+        $settings = Join-Path -Path $PSScriptRoot 'PSScriptAnalyzer.Tests.psd1'
+        Invoke-Formatter -ScriptDefinition $AllContent -Settings $settings |
+            Out-File -FilePath $rootModuleFile -Encoding utf8BOM -Force
+    }
 
-    Start-LogGroup 'Build root module - Format'
-    $AllContent = Get-Content -Path $rootModuleFile -Raw
-    $settings = Join-Path -Path $PSScriptRoot 'PSScriptAnalyzer.Tests.psd1'
-    Invoke-Formatter -ScriptDefinition $AllContent -Settings $settings |
-        Out-File -FilePath $rootModuleFile -Encoding utf8BOM -Force
-    Stop-LogGroup
+    LogGroup 'Build root module - Result - After format' {
+        Show-FileContent -Path $rootModuleFile
+    }
 
-    Start-LogGroup 'Build root module - Result - After format'
-    Show-FileContent -Path $rootModuleFile
-    Stop-LogGroup
-    #endregion Format root module
+    LogGroup 'Build root module - Validate - Import' {
+        Add-PSModulePath -Path (Split-Path -Path $ModuleOutputFolder -Parent)
+        Import-PSModule -Path $ModuleOutputFolder -ModuleName $ModuleName
+    }
 
-    #region Validate root module
-    Start-LogGroup 'Build root module - Validate - Import'
-    Add-PSModulePath -Path (Split-Path -Path $ModuleOutputFolder -Parent)
-    Import-PSModule -Path $ModuleOutputFolder -ModuleName $ModuleName
-    Stop-LogGroup
-
-    Start-LogGroup 'Build root module - Validate - File list'
-    (Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force).FullName | Sort-Object
-    Stop-LogGroup
-    #endregion Validate root module
+    LogGroup 'Build root module - Validate - File list' {
+        (Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force).FullName | Sort-Object
+    }
 }

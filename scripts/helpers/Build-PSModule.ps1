@@ -9,6 +9,10 @@ function Build-PSModule {
         Builds a module.
     #>
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSReviewUnusedParameter', '', Scope = 'Function',
+        Justification = 'LogGroup - Scoping affects the variables line of sight.'
+    )]
     param(
         # Name of the module.
         [Parameter(Mandatory)]
@@ -27,20 +31,21 @@ function Build-PSModule {
         [string] $DocsOutputFolderPath
     )
 
-    Start-LogGroup "Building module [$ModuleName]"
-    Write-Verbose "Source path:          [$ModuleSourceFolderPath]"
-    if (-not (Test-Path -Path $ModuleSourceFolderPath)) {
-        Write-Error "Source folder not found at [$ModuleSourceFolderPath]"
-        exit 1
+    LogGroup "Building module [$ModuleName]" {
+        Write-Verbose "Source path:          [$ModuleSourceFolderPath]"
+        if (-not (Test-Path -Path $ModuleSourceFolderPath)) {
+            Write-Error "Source folder not found at [$ModuleSourceFolderPath]"
+            exit 1
+        }
+        $moduleSourceFolder = Get-Item -Path $ModuleSourceFolderPath
+        Write-Verbose "Module source folder: [$moduleSourceFolder]"
+
+        $moduleOutputFolder = New-Item -Path $ModulesOutputFolderPath -Name $ModuleName -ItemType Directory -Force
+        Write-Verbose "Module output folder: [$moduleOutputFolder]"
+
+        $docsOutputFolder = New-Item -Path $DocsOutputFolderPath -Name $ModuleName -ItemType Directory -Force
+        Write-Verbose "Docs output folder:   [$docsOutputFolder]"
     }
-    $moduleSourceFolder = Get-Item -Path $ModuleSourceFolderPath
-
-    $moduleOutputFolder = New-Item -Path $ModulesOutputFolderPath -Name $ModuleName -ItemType Directory -Force
-    Write-Verbose "Module output folder: [$ModulesOutputFolderPath]"
-
-    $docsOutputFolder = New-Item -Path $DocsOutputFolderPath -Name $ModuleName -ItemType Directory -Force
-    Write-Verbose "Docs output folder:   [$DocsOutputFolderPath]"
-    Stop-LogGroup
 
     Build-PSModuleBase -ModuleName $ModuleName -ModuleSourceFolder $moduleSourceFolder -ModuleOutputFolder $moduleOutputFolder
     Build-PSModuleManifest -ModuleName $ModuleName -ModuleOutputFolder $moduleOutputFolder
@@ -48,8 +53,8 @@ function Build-PSModule {
     Update-PSModuleManifestAliasesToExport -ModuleName $ModuleName -ModuleOutputFolder $moduleOutputFolder
     Build-PSModuleDocumentation -ModuleName $ModuleName -DocsOutputFolder $docsOutputFolder
 
-    $outputManifestPath = Join-Path -Path $ModuleOutputFolder -ChildPath "$ModuleName.psd1"
-    Start-LogGroup 'Build manifest file - Final Result'
-    Show-FileContent -Path $outputManifestPath
-    Stop-LogGroup
+    LogGroup 'Build manifest file - Final Result' {
+        $outputManifestPath = Join-Path -Path $ModuleOutputFolder -ChildPath "$ModuleName.psd1"
+        Show-FileContent -Path $outputManifestPath
+    }
 }
