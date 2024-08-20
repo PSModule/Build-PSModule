@@ -22,7 +22,7 @@
     Write-Verbose "[$manifestPropertyName]"
 
     $variableFolderPath = Join-Path -Path $SourceFolderPath -ChildPath 'variables/public'
-    if (-not (Test-Path -Path $variablesFolderPath -PathType Container)) {
+    if (-not (Test-Path -Path $variableFolderPath -PathType Container)) {
         Write-Verbose "[$manifestPropertyName] - [Folder not found] - [$variableFolderPath]"
         return $variablesToExport
     }
