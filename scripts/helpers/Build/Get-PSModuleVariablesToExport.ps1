@@ -22,6 +22,10 @@
     Write-Verbose "[$manifestPropertyName]"
 
     $variableFolderPath = Join-Path -Path $SourceFolderPath -ChildPath 'variables/public'
+    if (-not (Test-Path -Path $variableFolderPath -PathType Container)) {
+        Write-Verbose "[$manifestPropertyName] - [Folder not found] - [$variableFolderPath]"
+        return $variablesToExport
+    }
     $scriptFilePaths = Get-ChildItem -Path $variableFolderPath -Recurse -File -Filter *.ps1 | Select-Object -ExpandProperty FullName
 
     $variablesToExport = [Collections.Generic.List[string]]::new()
