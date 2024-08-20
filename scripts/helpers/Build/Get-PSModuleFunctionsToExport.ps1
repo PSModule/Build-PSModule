@@ -23,6 +23,10 @@
     Write-Verbose "[$manifestPropertyName] - Checking path for functions and filters"
 
     $publicFolderPath = Join-Path -Path $SourceFolderPath -ChildPath 'functions/public'
+    if (-not (Test-Path -Path $publicFolderPath -PathType Container)) {
+        Write-Verbose "[$manifestPropertyName] - [Folder not found] - [$publicFolderPath]"
+        return $functionsToExport
+    }
     Write-Verbose "[$manifestPropertyName] - [$publicFolderPath]"
     $functionsToExport = [Collections.Generic.List[string]]::new()
     $scriptFiles = Get-ChildItem -Path $publicFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1'
