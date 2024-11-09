@@ -7,6 +7,10 @@ function Update-PSModuleManifestAliasesToExport {
         'PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function',
         Justification = 'Updates a file that is being built.'
     )]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSReviewUnusedParameter', '', Scope = 'Function',
+        Justification = 'LogGroup - Scoping affects the variables line of sight.'
+    )]
     [CmdletBinding()]
     param(
         # Name of the module.
