@@ -219,9 +219,9 @@ function Build-PSModuleManifest {
         $requiredModules = @()
         $capturedModules | ForEach-Object {
             if ($_ -is [string]) {
-                $requiredModules.Add($_)
+                $requiredModules += $_
             } else {
-                $requiredModules.Add(($_ | ConvertTo-Json -Depth 5 | ConvertFrom-Json -AsHashtable))
+                $requiredModules += ($_ | ConvertTo-Json -Depth 5 | ConvertFrom-Json -AsHashtable)
             }
         }
 
