@@ -215,6 +215,15 @@ function Build-PSModuleManifest {
 
         Write-Verbose '[RequiredModules] - Gathered'
         $capturedModules | ForEach-Object { Write-Verbose " - [$_]" }
+        $capturedModules | Sort-Object -Unique
+        $requiredModules = @()
+        $capturedModules | ForEach-Object {
+            if ($_ -is [string]) {
+                $requiredModules.Add($_)
+            } else {
+                $requiredModules.Add(($_ | ConvertTo-Json -Depth 5 | ConvertFrom-Json -AsHashtable))
+            }
+        }
 
         Write-Verbose '[RequiredModules] - Result'
         $manifest.RequiredModules = $capturedModules | Sort-Object -Unique
