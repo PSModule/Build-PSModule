@@ -192,7 +192,7 @@ function Build-PSModuleManifest {
                             $hashtable = '@\{[^}]*\}'
                             if ($_ -match $hashtable) {
                                 Write-Verbose " - [#Requires -Modules] - [$_] - Hashtable"
-                                $capturedModules.Add((ConvertTo-Hashtable -InputString $_))
+                                $capturedModules.Add([PSCustomObject](ConvertTo-Hashtable -InputString $_))
                             } else {
                                 Write-Verbose " - [#Requires -Modules] - [$_] - String"
                                 $capturedModules.Add($_)
@@ -213,13 +213,21 @@ function Build-PSModuleManifest {
             }
         }
 
-        Write-Verbose '[RequiredModules]'
-        $manifest.RequiredModules = $capturedModules
-        $manifest.RequiredModules | ForEach-Object { Write-Verbose "[RequiredModules] - [$_]" }
+        Write-Verbose '[RequiredModules] - Gathered'
+        $capturedModules | ForEach-Object { Write-Verbose " - [$_]" }
+        $capturedModules | Sort-Object -Unique
+        $requiredModules = @()
+        $capturedModules | ForEach-Object {
+            if ($_ -is [string]) {
+                $requiredModules += $_
+            } else {
+                $requiredModules += ($_ | ConvertTo-Json -Depth 5 | ConvertFrom-Json -AsHashtable)
+            }
+        }
 
-        Write-Verbose '[RequiredModulesUnique]'
-        $manifest.RequiredModules = $manifest.RequiredModules | Sort-Object -Unique
-        $manifest.RequiredModules | ForEach-Object { Write-Verbose "[RequiredModulesUnique] - [$_]" }
+        Write-Verbose '[RequiredModules] - Result'
+        $manifest.RequiredModules = $requiredModules
+        $manifest.RequiredModules | ForEach-Object { Write-Verbose "[RequiredModules] - [$_]" }
 
         Write-Verbose '[PowerShellVersion]'
         $capturedVersions = $capturedVersions | Sort-Object -Unique -Descending
