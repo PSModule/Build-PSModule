@@ -192,7 +192,7 @@ function Build-PSModuleManifest {
                             $hashtable = '@\{[^}]*\}'
                             if ($_ -match $hashtable) {
                                 Write-Verbose " - [#Requires -Modules] - [$_] - Hashtable"
-                                $capturedModules.Add((ConvertTo-Hashtable -InputString $_))
+                                $capturedModules.Add([PSCustomObject](ConvertTo-Hashtable -InputString $_))
                             } else {
                                 Write-Verbose " - [#Requires -Modules] - [$_] - String"
                                 $capturedModules.Add($_)
