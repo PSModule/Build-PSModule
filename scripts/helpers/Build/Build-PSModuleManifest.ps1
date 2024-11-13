@@ -218,7 +218,7 @@ function Build-PSModuleManifest {
         $manifest.RequiredModules | ForEach-Object { Write-Verbose "[RequiredModules] - [$_]" }
 
         Write-Verbose '[RequiredModulesUnique]'
-        $manifest.RequiredModules = $manifest.RequiredModules | Sort-Object -Unique
+        $manifest.RequiredModules = $manifest.RequiredModules
         $manifest.RequiredModules | ForEach-Object { Write-Verbose "[RequiredModulesUnique] - [$_]" }
 
         Write-Verbose '[PowerShellVersion]'
