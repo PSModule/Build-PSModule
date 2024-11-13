@@ -213,13 +213,12 @@ function Build-PSModuleManifest {
             }
         }
 
-        Write-Verbose '[RequiredModules]'
-        $manifest.RequiredModules = $capturedModules
-        $manifest.RequiredModules | ForEach-Object { Write-Verbose "[RequiredModules] - [$_]" }
+        Write-Verbose '[RequiredModules] - Gathered'
+        $capturedModules | ForEach-Object { Write-Verbose " - [$_]" }
 
-        Write-Verbose '[RequiredModulesUnique]'
-        $manifest.RequiredModules = $manifest.RequiredModules
-        $manifest.RequiredModules | ForEach-Object { Write-Verbose "[RequiredModulesUnique] - [$_]" }
+        Write-Verbose '[RequiredModules] - Result'
+        $manifest.RequiredModules = $capturedModules | Sort-Object -Unique
+        $manifest.RequiredModules | ForEach-Object { Write-Verbose "[RequiredModules] - [$_]" }
 
         Write-Verbose '[PowerShellVersion]'
         $capturedVersions = $capturedVersions | Sort-Object -Unique -Descending
