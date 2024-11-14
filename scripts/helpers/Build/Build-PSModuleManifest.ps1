@@ -192,11 +192,12 @@ function Build-PSModuleManifest {
                             $hashtable = '@\{[^}]*\}'
                             if ($_ -match $hashtable) {
                                 Write-Verbose " - [#Requires -Modules] - [$_] - Hashtable"
-                                $capturedModules.Add([PSCustomObject](ConvertTo-Hashtable -InputString $_))
                             } else {
                                 Write-Verbose " - [#Requires -Modules] - [$_] - String"
-                                $capturedModules.Add($_)
                             }
+                            $test = [Microsoft.PowerShell.Commands.ModuleSpecification]::new()
+                            [Microsoft.PowerShell.Commands.ModuleSpecification]::TryParse($_, [ref]$test)
+                            $capturedModules.Add($test)
                         }
                     }
                     # PowerShellVersion -> REQUIRES -Version <N>[.<n>], $null if not provided
@@ -213,20 +214,29 @@ function Build-PSModuleManifest {
             }
         }
 
+        <#
+            $test = [Microsoft.PowerShell.Commands.ModuleSpecification]::new()
+            [Microsoft.PowerShell.Commands.ModuleSpecification]::TryParse("@{ModuleName = 'Az'; RequiredVersion = '5.0.0' }", [ref]$test)
+            $test
+
+            $test.ToString()
+
+            $required = [Microsoft.PowerShell.Commands.ModuleSpecification]::new(@{ModuleName = 'Az'; RequiredVersion = '5.0.0' })
+            $required.ToString()
+        #>
+
         Write-Verbose '[RequiredModules] - Gathered'
         # Group the module specifications by ModuleName
-        $groupedModules = $capturedModules | ForEach-Object {
-            if ($_ -is [String]) {
-                [PSCustomObject]@{
-                    ModuleName      = $_
-                    RequiredVersion = $null
-                    ModuleVersion   = $null
-                    MaximumVersion  = $null
-                }
+        $capturedModules = $capturedModules | ForEach-Object {
+            $test = [Microsoft.PowerShell.Commands.ModuleSpecification]::new()
+            if ([Microsoft.PowerShell.Commands.ModuleSpecification]::TryParse($_, [ref]$test)) {
+                $test
             } else {
-                $_
+                [Microsoft.PowerShell.Commands.ModuleSpecification]::new($_)
             }
-        } | Group-Object -Property ModuleName
+        }
+
+        $groupedModules = $capturedModules | Group-Object -Property Name
 
         # Initialize a list to store unique module specifications
         $uniqueModules = [System.Collections.Generic.List[System.Object]]::new()
@@ -236,7 +246,7 @@ function Build-PSModuleManifest {
             $moduleName = $group.Name
             Write-Verbose "Processing required module [$moduleName]"
             $requiredVersion = $group.Group.RequiredVersion | ForEach-Object { [Version]$_ } | Sort-Object -Unique
-            $minimumVersion = $group.Group.ModuleVersion | ForEach-Object { [Version]$_ } | Sort-Object -Unique | Select-Object -Last 1
+            $minimumVersion = $group.Group.Version | ForEach-Object { [Version]$_ } | Sort-Object -Unique | Select-Object -Last 1
             $maximumVersion = $group.Group.MaximumVersion | ForEach-Object { [Version]$_ } | Sort-Object -Unique | Select-Object -First 1
             Write-Verbose "RequiredVersion: [$($requiredVersion -join ', ')]"
             Write-Verbose "ModuleVersion:   [$minimumVersion]"
@@ -286,7 +296,7 @@ function Build-PSModuleManifest {
                 Write-Verbose '[RequiredModules] - Simple string'
                 $uniqueModule = $moduleName
             }
-            $uniqueModules.Add($uniqueModule)
+            $uniqueModules.Add([Microsoft.PowerShell.Commands.ModuleSpecification]::new($uniqueModule))
         }
 
         Write-Verbose '[RequiredModules] - Result'
