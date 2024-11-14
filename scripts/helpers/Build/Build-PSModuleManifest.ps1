@@ -192,11 +192,10 @@ function Build-PSModuleManifest {
                             $hashtable = '@\{[^}]*\}'
                             if ($_ -match $hashtable) {
                                 Write-Verbose " - [#Requires -Modules] - [$_] - Hashtable"
-                                $capturedModules.Add([PSCustomObject](ConvertTo-Hashtable -InputString $_))
                             } else {
                                 Write-Verbose " - [#Requires -Modules] - [$_] - String"
-                                $capturedModules.Add($_)
                             }
+                            $capturedModules.Add($_)
                         }
                     }
                     # PowerShellVersion -> REQUIRES -Version <N>[.<n>], $null if not provided
@@ -213,21 +212,94 @@ function Build-PSModuleManifest {
             }
         }
 
+        <#
+            $test = [Microsoft.PowerShell.Commands.ModuleSpecification]::new()
+            [Microsoft.PowerShell.Commands.ModuleSpecification]::TryParse("@{ModuleName = 'Az'; RequiredVersion = '5.0.0' }", [ref]$test)
+            $test
+
+            $test.ToString()
+
+            $required = [Microsoft.PowerShell.Commands.ModuleSpecification]::new(@{ModuleName = 'Az'; RequiredVersion = '5.0.0' })
+            $required.ToString()
+        #>
+
         Write-Verbose '[RequiredModules] - Gathered'
-        $capturedModules | ForEach-Object { Write-Verbose " - [$_]" }
-        $capturedModules | Sort-Object -Unique
-        $requiredModules = @()
-        $capturedModules | ForEach-Object {
-            if ($_ -is [string]) {
-                $requiredModules += $_
+        # Group the module specifications by ModuleName
+        $capturedModules = $capturedModules | ForEach-Object {
+            $test = [Microsoft.PowerShell.Commands.ModuleSpecification]::new()
+            if ([Microsoft.PowerShell.Commands.ModuleSpecification]::TryParse($_, [ref]$test)) {
+                $test
             } else {
-                $requiredModules += ($_ | ConvertTo-Json -Depth 5 | ConvertFrom-Json -AsHashtable)
+                [Microsoft.PowerShell.Commands.ModuleSpecification]::new($_)
             }
         }
 
+        $groupedModules = $capturedModules | Group-Object -Property Name
+
+        # Initialize a list to store unique module specifications
+        $uniqueModules = [System.Collections.Generic.List[System.Object]]::new()
+
+        # Iterate through each group
+        foreach ($group in $groupedModules) {
+            $requiredModuleName = $group.Name
+            Write-Verbose "Processing required module [$requiredModuleName]"
+            $requiredVersion = $group.Group.RequiredVersion | ForEach-Object { [Version]$_ } | Sort-Object -Unique
+            $minimumVersion = $group.Group.Version | ForEach-Object { [Version]$_ } | Sort-Object -Unique | Select-Object -Last 1
+            $maximumVersion = $group.Group.MaximumVersion | ForEach-Object { [Version]$_ } | Sort-Object -Unique | Select-Object -First 1
+            Write-Verbose "RequiredVersion: [$($requiredVersion -join ', ')]"
+            Write-Verbose "ModuleVersion:   [$minimumVersion]"
+            Write-Verbose "MaximumVersion:  [$maximumVersion]"
+
+            if ($requiredVersion.Count -gt 1) {
+                throw 'Multiple RequiredVersions specified.'
+            }
+
+            if (-not $minimumVersion) {
+                $minimumVersion = [Version]'0.0.0'
+            }
+
+            if (-not $maximumVersion) {
+                $maximumVersion = [Version]'9999.9999.9999'
+            }
+
+            if ($requiredVersion -and ($minimumVersion -gt $requiredVersion)) {
+                throw 'ModuleVersion is higher than RequiredVersion.'
+            }
+
+            if ($minimumVersion -gt $maximumVersion) {
+                throw 'ModuleVersion is higher than MaximumVersion.'
+            }
+            if ($requiredVersion -and ($requiredVersion -gt $maximumVersion)) {
+                throw 'RequiredVersion is higher than MaximumVersion.'
+            }
+
+            if ($requiredVersion) {
+                Write-Verbose '[RequiredModules] - RequiredVersion'
+                $uniqueModule = @{
+                    ModuleName      = $requiredModuleName
+                    RequiredVersion = $requiredVersion
+                }
+            } elseif (($minimumVersion -ne [Version]'0.0.0') -or ($maximumVersion -ne [Version]'9999.9999.9999')) {
+                Write-Verbose '[RequiredModules] - ModuleVersion/MaximumVersion'
+                $uniqueModule = @{
+                    ModuleName = $requiredModuleName
+                }
+                if ($minimumVersion -ne [Version]'0.0.0') {
+                    $uniqueModule['ModuleVersion'] = $minimumVersion
+                }
+                if ($maximumVersion -ne [Version]'9999.9999.9999') {
+                    $uniqueModule['MaximumVersion'] = $maximumVersion
+                }
+            } else {
+                Write-Verbose '[RequiredModules] - Simple string'
+                $uniqueModule = $requiredModuleName
+            }
+            $uniqueModules.Add([Microsoft.PowerShell.Commands.ModuleSpecification]::new($uniqueModule))
+        }
+
         Write-Verbose '[RequiredModules] - Result'
-        $manifest.RequiredModules = $requiredModules
-        $manifest.RequiredModules | ForEach-Object { Write-Verbose "[RequiredModules] - [$_]" }
+        $manifest.RequiredModules = $uniqueModules
+        $manifest.RequiredModules | ForEach-Object { Write-Verbose " - [$($_ | Out-String)]" }
 
         Write-Verbose '[PowerShellVersion]'
         $capturedVersions = $capturedVersions | Sort-Object -Unique -Descending
