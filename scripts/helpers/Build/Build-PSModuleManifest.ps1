@@ -282,7 +282,6 @@ function Build-PSModuleManifest {
                 Write-Verbose '[RequiredModules] - Simple string'
                 $uniqueModule = $moduleName
             }
-            $uniqueModule
             $uniqueModules += $uniqueModule
         }
 
