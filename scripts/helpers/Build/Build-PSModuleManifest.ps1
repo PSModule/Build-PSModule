@@ -266,17 +266,20 @@ function Build-PSModuleManifest {
             }
 
             if ($requiredVersion) {
+                Write-Verbose '[RequiredModules] - RequiredVersion'
                 $uniqueModule = @{
                     ModuleName      = $moduleName
                     RequiredVersion = $requiredVersion
                 }
-            } elseif ($minimumVersion -or $maximumVersion) {
+            } elseif (($minimumVersion -ne [Version]'0.0.0') -or ($maximumVersion -ne [Version]'9999.9999.9999')) {
+                Write-Verbose '[RequiredModules] - ModuleVersion/MaximumVersion'
                 $uniqueModule = @{
                     ModuleName     = $moduleName
                     ModuleVersion  = $minimumVersion -eq [Version]'0.0.0' ? $null : $minimumVersion
                     MaximumVersion = $maximumVersion -eq [Version]'9999.9999.9999' ? $null : $maximumVersion
                 }
             } else {
+                Write-Verbose '[RequiredModules] - Simple string'
                 $uniqueModule = $moduleName
             }
             $uniqueModule
