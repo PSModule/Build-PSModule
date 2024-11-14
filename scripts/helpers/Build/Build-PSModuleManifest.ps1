@@ -195,9 +195,7 @@ function Build-PSModuleManifest {
                             } else {
                                 Write-Verbose " - [#Requires -Modules] - [$_] - String"
                             }
-                            $test = [Microsoft.PowerShell.Commands.ModuleSpecification]::new()
-                            [Microsoft.PowerShell.Commands.ModuleSpecification]::TryParse($_, [ref]$test)
-                            $capturedModules.Add($test)
+                            $capturedModules.Add($_)
                         }
                     }
                     # PowerShellVersion -> REQUIRES -Version <N>[.<n>], $null if not provided
