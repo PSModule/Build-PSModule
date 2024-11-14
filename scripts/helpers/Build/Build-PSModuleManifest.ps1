@@ -229,7 +229,7 @@ function Build-PSModuleManifest {
         } | Group-Object -Property ModuleName
 
         # Initialize a list to store unique module specifications
-        $uniqueModules = @()
+        $uniqueModules = [System.Collections.Generic.List[System.Object]]::new()
 
         # Iterate through each group
         foreach ($group in $groupedModules) {
@@ -274,15 +274,19 @@ function Build-PSModuleManifest {
             } elseif (($minimumVersion -ne [Version]'0.0.0') -or ($maximumVersion -ne [Version]'9999.9999.9999')) {
                 Write-Verbose '[RequiredModules] - ModuleVersion/MaximumVersion'
                 $uniqueModule = @{
-                    ModuleName     = $moduleName
-                    ModuleVersion  = $minimumVersion -eq [Version]'0.0.0' ? $null : $minimumVersion
-                    MaximumVersion = $maximumVersion -eq [Version]'9999.9999.9999' ? $null : $maximumVersion
+                    ModuleName = $moduleName
+                }
+                if ($minimumVersion -ne [Version]'0.0.0') {
+                    $uniqueModule['ModuleVersion'] = $minimumVersion
+                }
+                if ($maximumVersion -ne [Version]'9999.9999.9999') {
+                    $uniqueModule['MaximumVersion'] = $maximumVersion
                 }
             } else {
                 Write-Verbose '[RequiredModules] - Simple string'
                 $uniqueModule = $moduleName
             }
-            $uniqueModules += $uniqueModule
+            $uniqueModules.Add($uniqueModule)
         }
 
         Write-Verbose '[RequiredModules] - Result'
