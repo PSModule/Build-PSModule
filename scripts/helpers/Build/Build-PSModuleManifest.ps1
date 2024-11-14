@@ -241,8 +241,8 @@ function Build-PSModuleManifest {
 
         # Iterate through each group
         foreach ($group in $groupedModules) {
-            $moduleName = $group.Name
-            Write-Verbose "Processing required module [$moduleName]"
+            $requiredModuleName = $group.Name
+            Write-Verbose "Processing required module [$requiredModuleName]"
             $requiredVersion = $group.Group.RequiredVersion | ForEach-Object { [Version]$_ } | Sort-Object -Unique
             $minimumVersion = $group.Group.Version | ForEach-Object { [Version]$_ } | Sort-Object -Unique | Select-Object -Last 1
             $maximumVersion = $group.Group.MaximumVersion | ForEach-Object { [Version]$_ } | Sort-Object -Unique | Select-Object -First 1
@@ -276,13 +276,13 @@ function Build-PSModuleManifest {
             if ($requiredVersion) {
                 Write-Verbose '[RequiredModules] - RequiredVersion'
                 $uniqueModule = @{
-                    ModuleName      = $moduleName
+                    ModuleName      = $requiredModuleName
                     RequiredVersion = $requiredVersion
                 }
             } elseif (($minimumVersion -ne [Version]'0.0.0') -or ($maximumVersion -ne [Version]'9999.9999.9999')) {
                 Write-Verbose '[RequiredModules] - ModuleVersion/MaximumVersion'
                 $uniqueModule = @{
-                    ModuleName = $moduleName
+                    ModuleName = $requiredModuleName
                 }
                 if ($minimumVersion -ne [Version]'0.0.0') {
                     $uniqueModule['ModuleVersion'] = $minimumVersion
@@ -292,7 +292,7 @@ function Build-PSModuleManifest {
                 }
             } else {
                 Write-Verbose '[RequiredModules] - Simple string'
-                $uniqueModule = $moduleName
+                $uniqueModule = $requiredModuleName
             }
             $uniqueModules.Add([Microsoft.PowerShell.Commands.ModuleSpecification]::new($uniqueModule))
         }
