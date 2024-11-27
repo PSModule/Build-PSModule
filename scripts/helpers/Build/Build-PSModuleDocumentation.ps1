@@ -28,16 +28,10 @@ function Build-PSModuleDocumentation {
     )
 
     LogGroup 'Build docs - Generate markdown help' {
-        $moduleInfo = Get-Module -Name $ModuleName | Where-Object { $_.Version -eq '999.0.0' }
-        Write-Verbose ($moduleInfo | Out-String)
-        try {
-            New-MarkdownCommandHelp -ModuleInfo $moduleInfo -OutputFolder $DocsOutputFolder -Force -ErrorAction 'Continue'
-        } catch {
-            Get-Error | Select-Object *
-            Write-Error $_
-            throw "Failed to generate markdown help for module [$ModuleName]."
-        }
-        # $null = New-MarkdownHelp -Module $ModuleName -OutputFolder $DocsOutputFolder -Force -Verbose
+        $ModuleName | Remove-Module -Force
+        Import-Module -Name $ModuleName -Force -RequiredVersion '999.0.0'
+        Write-Verbose ($module | Get-Module)
+        $null = New-MarkdownHelp -Module $ModuleName -OutputFolder $DocsOutputFolder -Force -Verbose
         Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
             $content = Get-Content -Path $_.FullName
             $fixedOpening = $false
