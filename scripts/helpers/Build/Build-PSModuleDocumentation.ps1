@@ -28,6 +28,9 @@ function Build-PSModuleDocumentation {
     )
 
     LogGroup 'Build docs - Generate markdown help' {
+        $ModuleName | Remove-Module -Force
+        Import-Module -Name $ModuleName -Force -RequiredVersion '999.0.0'
+        Write-Verbose ($ModuleName | Get-Module)
         $null = New-MarkdownHelp -Module $ModuleName -OutputFolder $DocsOutputFolder -Force -Verbose
         Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
             $content = Get-Content -Path $_.FullName
