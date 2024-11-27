@@ -1,4 +1,4 @@
-﻿#Requires -Modules Microsoft.PowerShell.PlatyPS, Utilities
+﻿#Requires -Modules platyPS, Utilities
 
 function Build-PSModuleDocumentation {
     <#
