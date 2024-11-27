@@ -28,10 +28,8 @@ function Build-PSModuleDocumentation {
     )
 
     LogGroup 'Build docs - Generate markdown help' {
-        Get-Command -Module $ModuleName | Where-Object { $_.Version -eq '999.0.0' } | ForEach-Object {
-            $command = $_
-            $command | New-MarkdownCommandHelp -OutputFolder $DocsOutputFolder -Force -Verbose -WhatIf
-        }
+        $commands = Get-Command -Module $ModuleName | Where-Object { $_.Version -eq '999.0.0' }
+        New-MarkdownCommandHelp -CommandInfo $commands -OutputFolder $DocsOutputFolder -Force -Verbose
         Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
             $content = Get-Content -Path $_.FullName
             $fixedOpening = $false
