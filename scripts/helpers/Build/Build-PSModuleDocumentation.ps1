@@ -1,4 +1,4 @@
-﻿#Requires -Modules platyPS, Utilities
+﻿#Requires -Modules Microsoft.PowerShell.PlatyPS, Utilities
 
 function Build-PSModuleDocumentation {
     <#
@@ -28,7 +28,10 @@ function Build-PSModuleDocumentation {
     )
 
     LogGroup 'Build docs - Generate markdown help' {
-        $null = New-MarkdownHelp -Module $ModuleName -OutputFolder $DocsOutputFolder -Force -Verbose
+        Get-Command -Module $ModuleName | Where-Object { $_.Version -eq '999.0.0' } | ForEach-Object {
+            $command = $_
+            $command | New-MarkdownCommandHelp -OutputFolder $DocsOutputFolder -Force -Verbose -WhatIf
+        }
         Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
             $content = Get-Content -Path $_.FullName
             $fixedOpening = $false
