@@ -89,6 +89,16 @@ function Build-PSModuleDocumentation {
             New-Item -Path $docsFolderPath -ItemType Directory -Force
             Move-Item -Path $file.FullName -Destination $docsFilePath -Force
         }
+        # Get the MD files that are in the public functions folder and move them to the same place in the docs folder
+        Get-ChildItem -Path $PublicFunctions -Recurse -Force -Include '*.md' | ForEach-Object {
+            $file = $_
+            Write-Verbose "Processing:        $file"
+            $docsFilePath = ($file.FullName).Replace($PublicFunctions.FullName, $DocsOutputFolder.FullName)
+            Write-Verbose "Doc file path:     $docsFilePath"
+            $docsFolderPath = Split-Path -Path $docsFilePath -Parent
+            New-Item -Path $docsFolderPath -ItemType Directory -Force
+            Move-Item -Path $file.FullName -Destination $docsFilePath -Force
+        }
     }
 
     Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
