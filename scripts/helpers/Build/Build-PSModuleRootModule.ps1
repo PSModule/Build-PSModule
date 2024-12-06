@@ -81,7 +81,7 @@ $ExportableEnums = @(
 $ExportableEnums | Foreach-Object { Write-Verbose "Exporting enum '$($_.FullName)'." }
 foreach ($Type in $ExportableEnums) {
     if ($Type.FullName -in $ExistingTypeAccelerators.Keys) {
-        Write-Warning "Enum already exists [$($Type.FullName)]. Skipping."
+        Write-Verbose "Enum already exists [$($Type.FullName)]. Skipping."
     } else {
         Write-Verbose "Importing enum '$Type'."
         $TypeAcceleratorsClass::Add($Type.FullName, $Type)
@@ -99,7 +99,7 @@ $ExportableClasses = @(
 $ExportableClasses | Foreach-Object { Write-Verbose "Exporting class '$($_.FullName)'." }
 foreach ($Type in $ExportableClasses) {
     if ($Type.FullName -in $ExistingTypeAccelerators.Keys) {
-        Write-Warning "Class already exists [$($Type.FullName)]. Skipping."
+        Write-Verbose "Class already exists [$($Type.FullName)]. Skipping."
     } else {
         Write-Verbose "Importing class '$Type'."
         $TypeAcceleratorsClass::Add($Type.FullName, $Type)
@@ -142,7 +142,7 @@ param()
         #region - Module post-header
         Add-Content -Path $rootModuleFile -Force -Value @"
 `$scriptName = '$ModuleName'
-Write-Verbose "[`$scriptName] - Importing module"
+Write-Debug "[`$scriptName] - Importing module"
 
 "@
         #endregion - Module post-header
@@ -152,16 +152,16 @@ Write-Verbose "[`$scriptName] - Importing module"
 
             Add-Content -Path $rootModuleFile.FullName -Force -Value @'
 #region - Data import
-Write-Verbose "[$scriptName] - [data] - Processing folder"
+Write-Debug "[$scriptName] - [data] - Processing folder"
 $dataFolder = (Join-Path $PSScriptRoot 'data')
-Write-Verbose "[$scriptName] - [data] - [$dataFolder]"
+Write-Debug "[$scriptName] - [data] - [$dataFolder]"
 Get-ChildItem -Path "$dataFolder" -Recurse -Force -Include '*.psd1' -ErrorAction SilentlyContinue | ForEach-Object {
-    Write-Verbose "[$scriptName] - [data] - [$($_.BaseName)] - Importing"
+    Write-Debug "[$scriptName] - [data] - [$($_.BaseName)] - Importing"
     New-Variable -Name $_.BaseName -Value (Import-PowerShellDataFile -Path $_.FullName) -Force
-    Write-Verbose "[$scriptName] - [data] - [$($_.BaseName)] - Done"
+    Write-Debug "[$scriptName] - [data] - [$($_.BaseName)] - Done"
 }
 
-Write-Verbose "[$scriptName] - [data] - Done"
+Write-Debug "[$scriptName] - [data] - Done"
 #endregion - Data import
 
 '@
@@ -200,13 +200,13 @@ Write-Verbose "[$scriptName] - [data] - Done"
 
             Add-Content -Path $rootModuleFile -Force -Value @"
 #region - From $relativePath
-Write-Verbose "[`$scriptName] - $relativePath - Importing"
+Write-Debug "[`$scriptName] - $relativePath - Importing"
 
 "@
             Get-Content -Path $file.FullName | Add-Content -Path $rootModuleFile -Force
 
             Add-Content -Path $rootModuleFile -Force -Value @"
-Write-Verbose "[`$scriptName] - $relativePath - Done"
+Write-Debug "[`$scriptName] - $relativePath - Done"
 #endregion - From $relativePath
 
 "@
