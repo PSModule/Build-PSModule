@@ -30,6 +30,8 @@ During the build process the following steps are performed:
 | `Path` | Path to the folder where the modules are located. | `false` | `src` |
 | `ModulesOutputPath` | Path to the folder where the built modules are outputted. | `false` | `outputs/modules` |
 | `DocsOutputPath` | Path to the folder where the built docs are outputted. | `false` | `outputs/docs` |
+| `ModuleArtifactName` | Name of the module artifact to upload. | `false` | `module` |
+| `DocsArtifactName` | Name of the docs artifact to upload. | `false` | `docs` |
 
 ## Root module
 
