@@ -36,6 +36,10 @@ function Build-PSModuleRootModule {
         'PSReviewUnusedParameter', '', Scope = 'Function',
         Justification = 'LogGroup - Scoping affects the variables line of sight.'
     )]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSAvoidUsingWriteHost', '', Scope = 'Function',
+        Justification = 'Want to just write to the console, not the pipeline.'
+    )]
     param(
         # Name of the module.
         [Parameter(Mandatory)]
@@ -241,9 +245,9 @@ Export-ModuleMember @exports
 
     }
 
-    # LogGroup 'Build root module - Result - Before format' {
-    #     Show-FileContent -Path $rootModuleFile
-    # }
+    LogGroup 'Build root module - Result - Before format' {
+        Write-Host (Show-FileContent -Path $rootModuleFile)
+    }
 
     LogGroup 'Build root module - Format' {
         $AllContent = Get-Content -Path $rootModuleFile -Raw
@@ -252,9 +256,9 @@ Export-ModuleMember @exports
             Out-File -FilePath $rootModuleFile -Encoding utf8BOM -Force
     }
 
-    # LogGroup 'Build root module - Result - After format' {
-    #     Show-FileContent -Path $rootModuleFile
-    # }
+    LogGroup 'Build root module - Result - After format' {
+        Write-Host (Show-FileContent -Path $rootModuleFile)
+    }
 
     LogGroup 'Build root module - Validate - Import' {
         Add-PSModulePath -Path (Split-Path -Path $ModuleOutputFolder -Parent)
