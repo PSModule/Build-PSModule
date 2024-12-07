@@ -135,12 +135,15 @@ $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
             Add-Content -Path $rootModuleFile -Force -Value @'
 [CmdletBinding()]
 param()
+'@
+        }
 
+        # Add a variable $script:PSModuleInfo to the root module, which contains the module manifest information.
+        Add-Content -Path $rootModuleFile -Force -Value @'
 $baseName = [System.IO.Path]::GetFileNameWithoutExtension($PSCommandPath)
 $script:PSModuleInfo = Test-ModuleManifest -Path "$PSScriptRoot\$baseName.psd1"
 $script:PSModuleInfo | Format-List | Out-String -Stream | ForEach-Object { Write-Debug $_ }
 '@
-        }
         #endregion - Module header
 
         #region - Module post-header
