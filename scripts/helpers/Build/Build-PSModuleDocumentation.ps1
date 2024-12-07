@@ -72,8 +72,8 @@ function Build-PSModuleDocumentation {
     }
 
     LogGroup 'Build docs - Structure markdown files to match source files' {
-        $tmpDocsFolderPath = Join-Path -Path $DocsOutputFolder -ChildPath $ModuleName
-        Move-Item -Path $tmpDocsFolderPath -Destination $DocsOutputFolder -Force
+        $tmpDocsFolderPath = Split-Path -Path $DocsOutputFolder.FullName -Parent
+        Move-Item -Path $tmpDocsFolderPath -Destination $tmpDocsFolderPath -Force
         $PublicFunctionsFolder = Join-Path $ModuleSourceFolder.FullName 'functions\public' | Get-Item
         Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
             $file = $_
