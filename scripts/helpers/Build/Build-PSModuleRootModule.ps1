@@ -241,9 +241,9 @@ Export-ModuleMember @exports
 
     }
 
-    LogGroup 'Build root module - Result - Before format' {
-        Show-FileContent -Path $rootModuleFile
-    }
+    # LogGroup 'Build root module - Result - Before format' {
+    #     Show-FileContent -Path $rootModuleFile
+    # }
 
     LogGroup 'Build root module - Format' {
         $AllContent = Get-Content -Path $rootModuleFile -Raw
@@ -252,9 +252,9 @@ Export-ModuleMember @exports
             Out-File -FilePath $rootModuleFile -Encoding utf8BOM -Force
     }
 
-    LogGroup 'Build root module - Result - After format' {
-        Show-FileContent -Path $rootModuleFile
-    }
+    # LogGroup 'Build root module - Result - After format' {
+    #     Show-FileContent -Path $rootModuleFile
+    # }
 
     LogGroup 'Build root module - Validate - Import' {
         Add-PSModulePath -Path (Split-Path -Path $ModuleOutputFolder -Parent)
