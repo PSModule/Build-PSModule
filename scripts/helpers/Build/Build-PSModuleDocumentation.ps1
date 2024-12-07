@@ -71,29 +71,26 @@ function Build-PSModuleDocumentation {
         }
     }
 
-    # Markdown files are called the same as the source files, but with a .md extension.
-    # They are all located flat in the docsoutputfolder.
-    # I want the markdown files to be moved in the same folder structure as the source files.
     LogGroup 'Build docs - Structure markdown files to match source files' {
-        $PublicFunctions = Join-Path $ModuleSourceFolder.FullName 'functions\public' | Get-Item
+        $PublicFunctionsFolder = Join-Path $ModuleSourceFolder.FullName 'functions\public' | Get-Item
         Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
             $file = $_
             Write-Verbose "Processing:        $file"
 
             # find the source code file that matches the markdown file
-            $scriptPath = Get-ChildItem -Path $PublicFunctions -Recurse -Force | Where-Object { $_.Name -eq ($file.BaseName + '.ps1') }
+            $scriptPath = Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force | Where-Object { $_.Name -eq ($file.BaseName + '.ps1') }
             Write-Verbose "Found script path: $scriptPath"
-            $docsFilePath = ($scriptPath.FullName).Replace($PublicFunctions.FullName, $DocsOutputFolder.FullName).Replace('.ps1', '.md')
+            $docsFilePath = ($scriptPath.FullName).Replace($PublicFunctionsFolder.FullName, $DocsOutputFolder.FullName).Replace('.ps1', '.md')
             Write-Verbose "Doc file path:     $docsFilePath"
             $docsFolderPath = Split-Path -Path $docsFilePath -Parent
             New-Item -Path $docsFolderPath -ItemType Directory -Force
             Move-Item -Path $file.FullName -Destination $docsFilePath -Force
         }
         # Get the MD files that are in the public functions folder and move them to the same place in the docs folder
-        Get-ChildItem -Path $PublicFunctions -Recurse -Force -Include '*.md' | ForEach-Object {
+        Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force -Include '*.md' | ForEach-Object {
             $file = $_
             Write-Verbose "Processing:        $file"
-            $docsFilePath = ($file.FullName).Replace($PublicFunctions.FullName, $DocsOutputFolder.FullName)
+            $docsFilePath = ($file.FullName).Replace($PublicFunctionsFolder.FullName, $DocsOutputFolder.FullName)
             Write-Verbose "Doc file path:     $docsFilePath"
             $docsFolderPath = Split-Path -Path $docsFilePath -Parent
             New-Item -Path $docsFolderPath -ItemType Directory -Force

@@ -43,7 +43,7 @@ function Build-PSModule {
         $moduleOutputFolder = New-Item -Path $ModulesOutputFolderPath -Name $ModuleName -ItemType Directory -Force
         Write-Verbose "Module output folder: [$moduleOutputFolder]"
 
-        $docsOutputFolder = New-Item -Path $DocsOutputFolderPath -Name $ModuleName -ItemType Directory -Force
+        $docsOutputFolder = New-Item -Path $DocsOutputFolderPath -ItemType Directory -Force
         Write-Verbose "Docs output folder:   [$docsOutputFolder]"
     }
 
