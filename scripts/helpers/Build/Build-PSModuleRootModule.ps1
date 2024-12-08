@@ -65,6 +65,7 @@ function Build-PSModuleRootModule {
             $classes = Get-PSModuleClassesToExport -SourceFolderPath $classesFolder
             if ($classes.count -gt 0) {
                 $classExports += @'
+#region    - Export classes
 # Get the internal TypeAccelerators class to use its static methods.
 $TypeAcceleratorsClass = [psobject].Assembly.GetType(
     'System.Management.Automation.TypeAccelerators'
@@ -116,6 +117,7 @@ $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
         $TypeAcceleratorsClass::Remove($Type.FullName)
     }
 }.GetNewClosure()
+#endregion - Export classes
 '@
             }
         }
@@ -151,17 +153,17 @@ $script:PSModuleInfo | Format-List | Out-String -Stream | ForEach-Object { Write
         #endregion - Module header
 
         #region - Module post-header
-        Add-Content -Path $rootModuleFile -Force -Value @"
-`$scriptName = '$ModuleName'
-Write-Debug "[`$scriptName] - Importing module"
-"@
+        Add-Content -Path $rootModuleFile -Force -Value @'
+$scriptName = $script:PSModuleInfo.Name
+Write-Debug "[$scriptName] - Importing module"
+'@
         #endregion - Module post-header
 
         #region - Data loader
         if (Test-Path -Path (Join-Path -Path $ModuleOutputFolder -ChildPath 'data')) {
 
             Add-Content -Path $rootModuleFile.FullName -Force -Value @'
-#region - Data import
+#region    - Data import
 Write-Debug "[$scriptName] - [data] - Processing folder"
 $dataFolder = (Join-Path $PSScriptRoot 'data')
 Write-Debug "[$scriptName] - [data] - [$dataFolder]"
@@ -207,14 +209,14 @@ Write-Debug "[$scriptName] - [data] - Done"
             $relativePath = $relativePath -Join ' - '
 
             Add-Content -Path $rootModuleFile -Force -Value @"
-#region    - From $relativePath
+#region    $relativePath
 Write-Debug "[`$scriptName] - $relativePath - Importing"
 "@
             Get-Content -Path $file.FullName | Add-Content -Path $rootModuleFile -Force
 
             Add-Content -Path $rootModuleFile -Force -Value @"
 Write-Debug "[`$scriptName] - $relativePath - Done"
-#endregion - From $relativePath
+#endregion $relativePath
 "@
             $file | Remove-Item -Force
         }
