@@ -65,7 +65,7 @@ function Build-PSModuleRootModule {
             $classes = Get-PSModuleClassesToExport -SourceFolderPath $classesFolder
             if ($classes.count -gt 0) {
                 $classExports += @'
-#region    - Export classes
+#region    Class exporter
 # Get the internal TypeAccelerators class to use its static methods.
 $TypeAcceleratorsClass = [psobject].Assembly.GetType(
     'System.Management.Automation.TypeAccelerators'
@@ -117,7 +117,7 @@ $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
         $TypeAcceleratorsClass::Remove($Type.FullName)
     }
 }.GetNewClosure()
-#endregion - Export classes
+#endregion Class exporter
 '@
             }
         }
@@ -143,17 +143,13 @@ $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
 param()
 '@
         }
-
-        # Add a variable $script:PSModuleInfo to the root module, which contains the module manifest information.
-        Add-Content -Path $rootModuleFile -Force -Value @'
-$baseName = [System.IO.Path]::GetFileNameWithoutExtension($PSCommandPath)
-$script:PSModuleInfo = Test-ModuleManifest -Path "$PSScriptRoot\$baseName.psd1"
-$script:PSModuleInfo | Format-List | Out-String -Stream | ForEach-Object { Write-Debug $_ }
-'@
         #endregion - Module header
 
         #region - Module post-header
         Add-Content -Path $rootModuleFile -Force -Value @'
+$baseName = [System.IO.Path]::GetFileNameWithoutExtension($PSCommandPath)
+$script:PSModuleInfo = Test-ModuleManifest -Path "$PSScriptRoot\$baseName.psd1"
+$script:PSModuleInfo | Format-List | Out-String -Stream | ForEach-Object { Write-Debug $_ }
 $scriptName = $script:PSModuleInfo.Name
 Write-Debug "[$scriptName] - Importing module"
 '@
@@ -163,7 +159,7 @@ Write-Debug "[$scriptName] - Importing module"
         if (Test-Path -Path (Join-Path -Path $ModuleOutputFolder -ChildPath 'data')) {
 
             Add-Content -Path $rootModuleFile.FullName -Force -Value @'
-#region    - Data import
+#region    Data importer
 Write-Debug "[$scriptName] - [data] - Processing folder"
 $dataFolder = (Join-Path $PSScriptRoot 'data')
 Write-Debug "[$scriptName] - [data] - [$dataFolder]"
@@ -173,7 +169,7 @@ Get-ChildItem -Path "$dataFolder" -Recurse -Force -Include '*.psd1' -ErrorAction
     Write-Debug "[$scriptName] - [data] - [$($_.BaseName)] - Done"
 }
 Write-Debug "[$scriptName] - [data] - Done"
-#endregion - Data import
+#endregion Data importer
 '@
         }
         #endregion - Data loader
@@ -233,8 +229,10 @@ Write-Debug "[`$scriptName] - $relativePath - Done"
             Path  = $rootModuleFile
             Force = $true
             Value = @"
+#region    Member exporter
 `$exports = $exportsString
 Export-ModuleMember @exports
+#endregion Member exporter
 "@
         }
         Add-Content @params
