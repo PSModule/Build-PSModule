@@ -32,7 +32,7 @@
     $relativeFolderPath = $relativeFolderPath -Join ' - '
 
     Add-Content -Path $RootModuleFilePath -Force -Value @"
-#region - From $relativeFolderPath
+#region    - From $relativeFolderPath
 Write-Debug "[`$scriptName] - $relativeFolderPath - Processing folder"
 "@
 
@@ -45,7 +45,7 @@ Write-Debug "[`$scriptName] - $relativeFolderPath - Processing folder"
         $relativeFilePath = $relativeFilePath -Join ' - '
 
         Add-Content -Path $RootModuleFilePath -Force -Value @"
-#region - From $relativeFilePath
+#region    - From $relativeFilePath
 Write-Debug "[`$scriptName] - $relativeFilePath - Importing"
 "@
         Get-Content -Path $file.FullName | Add-Content -Path $RootModuleFilePath -Force
