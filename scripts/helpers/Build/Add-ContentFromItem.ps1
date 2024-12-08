@@ -34,7 +34,6 @@
     Add-Content -Path $RootModuleFilePath -Force -Value @"
 #region - From $relativeFolderPath
 Write-Debug "[`$scriptName] - $relativeFolderPath - Processing folder"
-
 "@
 
     $files = $Path | Get-ChildItem -File -Force -Filter '*.ps1' | Sort-Object -Property FullName
@@ -48,11 +47,9 @@ Write-Debug "[`$scriptName] - $relativeFolderPath - Processing folder"
         Add-Content -Path $RootModuleFilePath -Force -Value @"
 #region - From $relativeFilePath
 Write-Debug "[`$scriptName] - $relativeFilePath - Importing"
-
 "@
         Get-Content -Path $file.FullName | Add-Content -Path $RootModuleFilePath -Force
         Add-Content -Path $RootModuleFilePath -Value @"
-
 Write-Debug "[`$scriptName] - $relativeFilePath - Done"
 #endregion - From $relativeFilePath
 "@
@@ -63,9 +60,7 @@ Write-Debug "[`$scriptName] - $relativeFilePath - Done"
         Add-ContentFromItem -Path $subFolder.FullName -RootModuleFilePath $RootModuleFilePath -RootPath $RootPath
     }
     Add-Content -Path $RootModuleFilePath -Force -Value @"
-
 Write-Debug "[`$scriptName] - $relativeFolderPath - Done"
 #endregion - From $relativeFolderPath
-
 "@
 }
