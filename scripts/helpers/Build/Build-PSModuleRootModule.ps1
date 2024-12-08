@@ -154,7 +154,6 @@ $script:PSModuleInfo | Format-List | Out-String -Stream | ForEach-Object { Write
         Add-Content -Path $rootModuleFile -Force -Value @"
 `$scriptName = '$ModuleName'
 Write-Debug "[`$scriptName] - Importing module"
-
 "@
         #endregion - Module post-header
 
@@ -171,10 +170,8 @@ Get-ChildItem -Path "$dataFolder" -Recurse -Force -Include '*.psd1' -ErrorAction
     New-Variable -Name $_.BaseName -Value (Import-PowerShellDataFile -Path $_.FullName) -Force
     Write-Debug "[$scriptName] - [data] - [$($_.BaseName)] - Done"
 }
-
 Write-Debug "[$scriptName] - [data] - Done"
 #endregion - Data import
-
 '@
         }
         #endregion - Data loader
@@ -210,7 +207,7 @@ Write-Debug "[$scriptName] - [data] - Done"
             $relativePath = $relativePath -Join ' - '
 
             Add-Content -Path $rootModuleFile -Force -Value @"
-#region - From $relativePath
+#region    - From $relativePath
 Write-Debug "[`$scriptName] - $relativePath - Importing"
 "@
             Get-Content -Path $file.FullName | Add-Content -Path $rootModuleFile -Force
