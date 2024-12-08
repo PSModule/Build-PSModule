@@ -32,15 +32,9 @@
     $relativeFolderPath = $relativeFolderPath -Join ' - '
 
     Add-Content -Path $RootModuleFilePath -Force -Value @"
-#region - From $relativeFolderPath
+#region    $relativeFolderPath
 Write-Debug "[`$scriptName] - $relativeFolderPath - Processing folder"
-
 "@
-
-    $subFolders = $Path | Get-ChildItem -Directory -Force | Sort-Object -Property Name
-    foreach ($subFolder in $subFolders) {
-        Add-ContentFromItem -Path $subFolder.FullName -RootModuleFilePath $RootModuleFilePath -RootPath $RootPath
-    }
 
     $files = $Path | Get-ChildItem -File -Force -Filter '*.ps1' | Sort-Object -Property FullName
     foreach ($file in $files) {
@@ -51,21 +45,22 @@ Write-Debug "[`$scriptName] - $relativeFolderPath - Processing folder"
         $relativeFilePath = $relativeFilePath -Join ' - '
 
         Add-Content -Path $RootModuleFilePath -Force -Value @"
-#region - From $relativeFilePath
+#region    $relativeFilePath
 Write-Debug "[`$scriptName] - $relativeFilePath - Importing"
-
 "@
         Get-Content -Path $file.FullName | Add-Content -Path $RootModuleFilePath -Force
         Add-Content -Path $RootModuleFilePath -Value @"
-
 Write-Debug "[`$scriptName] - $relativeFilePath - Done"
-#endregion - From $relativeFilePath
+#endregion $relativeFilePath
 "@
     }
+
+    $subFolders = $Path | Get-ChildItem -Directory -Force | Sort-Object -Property Name
+    foreach ($subFolder in $subFolders) {
+        Add-ContentFromItem -Path $subFolder.FullName -RootModuleFilePath $RootModuleFilePath -RootPath $RootPath
+    }
     Add-Content -Path $RootModuleFilePath -Force -Value @"
-
 Write-Debug "[`$scriptName] - $relativeFolderPath - Done"
-#endregion - From $relativeFolderPath
-
+#endregion $relativeFolderPath
 "@
 }

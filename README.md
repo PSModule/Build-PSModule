@@ -44,15 +44,16 @@ following order:
 1. Adds a module header from `header.ps1` if it exists and removes the file from the module folder.
 1. Adds a data loader that loads files from the `data` folder as variables in the module scope, if the folder exists. The variables are available
 using the `$script:<filename>` syntax.
-1. Adds content from subfolders into the root module file and removes them from the module folder in the following order:
-   - `init`
-   - `classes/private`
-   - `classes/public`
-   - `functions/private`
-   - `functions/public`
-   - `variables/private`
-   - `variables/public`
-   - `*.ps1` on module root
+1. Adds content from the following folders into the root module file. The files on the root of a folder is added before recursivelfy going to the next
+   folder in alphabetical order. Once the file is processed, it is removed from the module folder.
+   1. `init`
+   1. `classes/private`
+   1. `classes/public`
+   1. `functions/private`
+   1. `functions/public`
+   1. `variables/private`
+   1. `variables/public`
+   1. `*.ps1` on module root
 1. Adds a `class` and `enum` exporter that exports the ones from `classes/public` folder to the caller session, using [TypeAccelerators](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_classes?view=powershell-7.4#exporting-classes-with-type-accelerators).
 1. Adds the `Export-ModuleMember` function to the end of the file, to make sure that only the functions, cmdlets, variables and aliases that are
 defined in the `public` folders are exported.

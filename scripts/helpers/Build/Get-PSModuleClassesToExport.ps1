@@ -25,7 +25,7 @@
         [string] $SourceFolderPath
     )
 
-    $files = Get-ChildItem -Path $SourceFolderPath -Recurse -Include '*.ps1'
+    $files = Get-ChildItem -Path $SourceFolderPath -Recurse -Include '*.ps1' | Sort-Object -Property FullName
 
     foreach ($file in $files) {
         $content = Get-Content -Path $file.FullName -Raw
