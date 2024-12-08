@@ -212,14 +212,12 @@ Write-Debug "[$scriptName] - [data] - Done"
             Add-Content -Path $rootModuleFile -Force -Value @"
 #region - From $relativePath
 Write-Debug "[`$scriptName] - $relativePath - Importing"
-
 "@
             Get-Content -Path $file.FullName | Add-Content -Path $rootModuleFile -Force
 
             Add-Content -Path $rootModuleFile -Force -Value @"
 Write-Debug "[`$scriptName] - $relativePath - Done"
 #endregion - From $relativePath
-
 "@
             $file | Remove-Item -Force
         }
