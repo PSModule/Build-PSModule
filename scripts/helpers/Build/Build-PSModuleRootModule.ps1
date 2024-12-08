@@ -196,7 +196,7 @@ Write-Debug "[$scriptName] - [data] - Done"
         #endregion - Add content from subfolders
 
         #region - Add content from *.ps1 files on module root
-        $files = $ModuleOutputFolder | Get-ChildItem -File -Force -Filter '*.ps1'
+        $files = $ModuleOutputFolder | Get-ChildItem -File -Force -Filter '*.ps1' | Sort-Object -Property FullName
         foreach ($file in $files) {
             $relativePath = $file.FullName -Replace $ModuleOutputFolder, ''
             $relativePath = $relativePath -Replace $file.Extension, ''
