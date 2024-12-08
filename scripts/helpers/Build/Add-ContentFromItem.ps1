@@ -37,11 +37,6 @@ Write-Debug "[`$scriptName] - $relativeFolderPath - Processing folder"
 
 "@
 
-    $subFolders = $Path | Get-ChildItem -Directory -Force | Sort-Object -Property Name
-    foreach ($subFolder in $subFolders) {
-        Add-ContentFromItem -Path $subFolder.FullName -RootModuleFilePath $RootModuleFilePath -RootPath $RootPath
-    }
-
     $files = $Path | Get-ChildItem -File -Force -Filter '*.ps1' | Sort-Object -Property FullName
     foreach ($file in $files) {
         $relativeFilePath = $file.FullName -Replace $RootPath, ''
@@ -61,6 +56,11 @@ Write-Debug "[`$scriptName] - $relativeFilePath - Importing"
 Write-Debug "[`$scriptName] - $relativeFilePath - Done"
 #endregion - From $relativeFilePath
 "@
+    }
+
+    $subFolders = $Path | Get-ChildItem -Directory -Force | Sort-Object -Property Name
+    foreach ($subFolder in $subFolders) {
+        Add-ContentFromItem -Path $subFolder.FullName -RootModuleFilePath $RootModuleFilePath -RootPath $RootPath
     }
     Add-Content -Path $RootModuleFilePath -Force -Value @"
 
