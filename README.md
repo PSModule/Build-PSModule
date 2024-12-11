@@ -32,6 +32,10 @@ During the build process the following steps are performed:
 | `DocsOutputPath` | Path to the folder where the built docs are outputted. | `false` | `outputs/docs` |
 | `ModuleArtifactName` | Name of the module artifact to upload. | `false` | `module` |
 | `DocsArtifactName` | Name of the docs artifact to upload. | `false` | `docs` |
+| `Debug` | Enable debug output. | `false` | `'false'` |
+| `Verbose` | Enable verbose output. | `false` | `'false'` |
+| `Version` | Specifies the version of the GitHub module to be installed. The value must be an exact version. | `false` | |
+| `Prerelease` | Allow prerelease versions if available. | `false` | `'false'` |
 
 ## Root module
 

@@ -56,8 +56,10 @@ runs:
         GITHUB_ACTION_INPUT_ModulesOutputPath: ${{ inputs.ModulesOutputPath }}
         GITHUB_ACTION_INPUT_DocsOutputPath: ${{ inputs.DocsOutputPath }}
       with:
-        Verbose: ${{ inputs.Verbose }}
         Debug: ${{ inputs.Debug }}
+        Prerelease: ${{ inputs.Prerelease }}
+        Verbose: ${{ inputs.Verbose }}
+        Version: ${{ inputs.Version }}
         Script: |
           # Build-PSModule
           . "${{ github.action_path }}\scripts\main.ps1"
