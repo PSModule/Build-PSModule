@@ -2,7 +2,11 @@ name: Action-Test
 
 run-name: "Action-Test - [${{ github.event.pull_request.title }} #${{ github.event.pull_request.number }}] by @${{ github.actor }}"
 
-on: [pull_request]
+on:
+  workflow_dispatch:
+  pull_request:
+  schedule:
+    - cron: '0 0 * * *'
 
 env:
   GH_TOKEN: ${{ github.token }}
