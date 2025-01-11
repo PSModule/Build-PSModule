@@ -1,4 +1,6 @@
-﻿function Resolve-PSModuleDependency {
+﻿#Requires -Modules Retry
+
+function Resolve-PSModuleDependency {
     <#
         .SYNOPSIS
         Resolve dependencies for a module based on the manifest file.
@@ -47,7 +49,9 @@
         Write-Verbose "[$($installParams.Name)] - Installing module"
         $VerbosePreferenceOriginal = $VerbosePreference
         $VerbosePreference = 'SilentlyContinue'
-        Install-Module @installParams -AllowPrerelease:$false
+        Retry -Count 5 -Delay 10 {
+            Install-Module @installParams -AllowPrerelease:$false
+        }
         $VerbosePreference = $VerbosePreferenceOriginal
         Write-Verbose "[$($installParams.Name)] - Importing module"
         $VerbosePreferenceOriginal = $VerbosePreference

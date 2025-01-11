@@ -1,4 +1,4 @@
-﻿#REQUIRES -Modules Utilities
+﻿#Requires -Modules Utilities
 
 [CmdletBinding()]
 param()
