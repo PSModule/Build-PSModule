@@ -5,8 +5,14 @@
     #>
     param(
         [Parameter(Mandatory)]
+        [AllowEmptyString()]
+        [AllowNull()]
         [object] $Value
     )
+
+    if (-not $Value) {
+        return $Value
+    }
 
     if ($Value -is [string]) {
         # Escape single quotes in strings
