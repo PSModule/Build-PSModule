@@ -431,7 +431,7 @@ function Build-PSModuleManifest {
         Write-Verbose 'Creating new manifest file in outputs folder'
         $outputManifestPath = Join-Path -Path $ModuleOutputFolder -ChildPath "$ModuleName.psd1"
         Write-Verbose "OutputManifestPath - [$outputManifestPath]"
-        $manifest | Invoke-RecurseEscapeFix
+        ConvertTo-EscapedHashtableString -Hashtable $manifest
         New-ModuleManifest -Path $outputManifestPath @manifest
     }
 
