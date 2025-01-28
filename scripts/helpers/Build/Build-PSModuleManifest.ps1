@@ -70,6 +70,7 @@ function Build-PSModuleManifest {
 
         $repoDescription = gh repo view --json description | ConvertFrom-Json | Select-Object -ExpandProperty description
         $manifest.Description = $manifest.Keys -contains 'Description' ? ($manifest.Description | IsNotNullOrEmpty) ? $manifest.Description : $repoDescription : $repoDescription
+        $manifest.Description = $manifest.Description -replace "'", "`'"
         Write-Host "[Description] - [$($manifest.Description)]"
 
         $manifest.PowerShellHostName = $manifest.Keys -contains 'PowerShellHostName' ? -not [string]::IsNullOrEmpty($manifest.PowerShellHostName) ? $manifest.PowerShellHostName : $null : $null
