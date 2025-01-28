@@ -32,7 +32,7 @@ function Build-PSModuleBase {
     )
 
     LogGroup 'Build base' {
-        Write-Host "Copying files from [$ModuleSourceFolder] to [$ModuleOutputFolder]"
+        Write-Verbose "Copying files from [$ModuleSourceFolder] to [$ModuleOutputFolder]"
         Copy-Item -Path "$ModuleSourceFolder\*" -Destination $ModuleOutputFolder -Recurse -Force -Verbose -Exclude "$ModuleName.psm1"
         New-Item -Path $ModuleOutputFolder -Name "$ModuleName.psm1" -ItemType File -Force -Verbose
     }

@@ -21,17 +21,17 @@ function Update-PSModuleManifestAliasesToExport {
         [Parameter(Mandatory)]
         [System.IO.DirectoryInfo] $ModuleOutputFolder
     )
-    LogGroup 'Updating aliases to export in module manifest' {
-        Write-Host "Module name: [$ModuleName]"
-        Write-Host "Module output folder: [$ModuleOutputFolder]"
+    LogGroup "Updating aliases to export in module manifest" {
+        Write-Verbose "Module name: [$ModuleName]"
+        Write-Verbose "Module output folder: [$ModuleOutputFolder]"
         $aliases = Get-Command -Module $ModuleName -CommandType Alias
-        Write-Host "Found aliases: [$($aliases.Count)]"
+        Write-Verbose "Found aliases: [$($aliases.Count)]"
         foreach ($alias in $aliases) {
-            Write-Host "Alias: [$($alias.Name)]"
+            Write-Verbose "Alias: [$($alias.Name)]"
         }
         $outputManifestPath = Join-Path -Path $ModuleOutputFolder -ChildPath "$ModuleName.psd1"
-        Write-Host "Output manifest path: [$outputManifestPath]"
-        Write-Host 'Setting module manifest with AliasesToExport'
-        Set-ModuleManifest -Path $outputManifestPath -AliasesToExport $aliases.Name -Verbose
+        Write-Verbose "Output manifest path: [$outputManifestPath]"
+        Write-Verbose "Setting module manifest with AliasesToExport"
+        Set-ModuleManifest -Path $outputManifestPath -AliasesToExport $aliases.Name
     }
 }
