@@ -32,6 +32,6 @@ function Update-PSModuleManifestAliasesToExport {
         $outputManifestPath = Join-Path -Path $ModuleOutputFolder -ChildPath "$ModuleName.psd1"
         Write-Verbose "Output manifest path: [$outputManifestPath]"
         Write-Verbose "Setting module manifest with AliasesToExport"
-        Set-ModuleManifest -Path $outputManifestPath -AliasesToExport $aliases.Name
+        Set-ModuleManifest -Path $outputManifestPath -AliasesToExport $aliases.Name -Verbose
     }
 }
