@@ -63,10 +63,10 @@ function Build-PSModuleManifest {
         Write-Verbose "[CompanyName] - [$($manifest.CompanyName)]"
 
         $year = Get-Date -Format 'yyyy'
-        $copyRightOwner = $manifest.CompanyName -eq $manifest.Author ? $manifest.Author : "$($manifest.Author) | $($manifest.CompanyName)"
-        $copyRight = "(c) $year $copyRightOwner. All rights reserved."
-        $manifest.CopyRight = $manifest.Keys -contains 'CopyRight' ? -not [string]::IsNullOrEmpty($manifest.CopyRight) ? $manifest.CopyRight : $copyRight : $copyRight
-        Write-Verbose "[CopyRight] - [$($manifest.CopyRight)]"
+        $copyrightOwner = $manifest.CompanyName -eq $manifest.Author ? $manifest.Author : "$($manifest.Author) | $($manifest.CompanyName)"
+        $copyright = "(c) $year $copyrightOwner. All rights reserved."
+        $manifest.Copyright = $manifest.Keys -contains 'Copyright' ? -not [string]::IsNullOrEmpty($manifest.Copyright) ? $manifest.Copyright : $copyright : $copyright
+        Write-Verbose "[Copyright] - [$($manifest.Copyright)]"
 
         $repoDescription = gh repo view --json description | ConvertFrom-Json | Select-Object -ExpandProperty description
         $manifest.Description = $manifest.Keys -contains 'Description' ? ($manifest.Description | IsNotNullOrEmpty) ? $manifest.Description : $repoDescription : $repoDescription
