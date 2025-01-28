@@ -93,8 +93,7 @@
                 $lines += "$indent    )"
             }
         } else {
-            $value = $value -replace "'", "''"
-            Write-Verbose "Escaped value: $value"
+            $value = $value -replace "'", "''''"
             $lines += "$indent    $key = '$value'"
         }
     }

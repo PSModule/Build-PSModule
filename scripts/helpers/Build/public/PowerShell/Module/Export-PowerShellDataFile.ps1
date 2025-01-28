@@ -27,4 +27,5 @@
     $content = Convert-HashtableToString -Hashtable $Hashtable
     $content | Out-File -FilePath $Path -Force:$Force
     Format-ModuleManifest -Path $Path
+
 }
