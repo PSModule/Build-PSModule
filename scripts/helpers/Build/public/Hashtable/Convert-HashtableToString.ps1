@@ -93,7 +93,7 @@
                 $lines += "$indent    )"
             }
         } else {
-            $value = $value -replace "'", "'''"
+            $value = $value -replace "'", "''"
             $lines += "$indent    $key = '$value'"
         }
     }
