@@ -34,7 +34,7 @@ function Build-PSModuleDocumentation {
     LogGroup 'Build docs - Generate markdown help' {
         $ModuleName | Remove-Module -Force
         Import-Module -Name $ModuleName -Force -RequiredVersion '999.0.0'
-        Write-Verbose ($ModuleName | Get-Module)
+        Write-Host ($ModuleName | Get-Module)
         $null = New-MarkdownHelp -Module $ModuleName -OutputFolder $DocsOutputFolder -Force -Verbose
     }
 
@@ -75,13 +75,13 @@ function Build-PSModuleDocumentation {
         $PublicFunctionsFolder = Join-Path $ModuleSourceFolder.FullName 'functions\public' | Get-Item
         Get-ChildItem -Path $DocsOutputFolder -Recurse -Force -Include '*.md' | ForEach-Object {
             $file = $_
-            Write-Verbose "Processing:        $file"
+            Write-Host "Processing:        $file"
 
             # find the source code file that matches the markdown file
             $scriptPath = Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force | Where-Object { $_.Name -eq ($file.BaseName + '.ps1') }
-            Write-Verbose "Found script path: $scriptPath"
+            Write-Host "Found script path: $scriptPath"
             $docsFilePath = ($scriptPath.FullName).Replace($PublicFunctionsFolder.FullName, $DocsOutputFolder.FullName).Replace('.ps1', '.md')
-            Write-Verbose "Doc file path:     $docsFilePath"
+            Write-Host "Doc file path:     $docsFilePath"
             $docsFolderPath = Split-Path -Path $docsFilePath -Parent
             New-Item -Path $docsFolderPath -ItemType Directory -Force
             Move-Item -Path $file.FullName -Destination $docsFilePath -Force
@@ -89,9 +89,9 @@ function Build-PSModuleDocumentation {
         # Get the MD files that are in the public functions folder and move them to the same place in the docs folder
         Get-ChildItem -Path $PublicFunctionsFolder -Recurse -Force -Include '*.md' | ForEach-Object {
             $file = $_
-            Write-Verbose "Processing:        $file"
+            Write-Host "Processing:        $file"
             $docsFilePath = ($file.FullName).Replace($PublicFunctionsFolder.FullName, $DocsOutputFolder.FullName)
-            Write-Verbose "Doc file path:     $docsFilePath"
+            Write-Host "Doc file path:     $docsFilePath"
             $docsFolderPath = Split-Path -Path $docsFilePath -Parent
             New-Item -Path $docsFolderPath -ItemType Directory -Force
             Move-Item -Path $file.FullName -Destination $docsFilePath -Force
