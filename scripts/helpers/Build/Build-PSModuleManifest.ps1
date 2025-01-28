@@ -439,7 +439,7 @@ function Build-PSModuleManifest {
     }
 
     LogGroup 'Build manifest file - Format' {
-        Set-ModuleManifest -Path $outputManifestPath
+        Set-ModuleManifest -Path $outputManifestPath -Verbose
     }
 
     LogGroup 'Build manifest file - Result - After format' {
