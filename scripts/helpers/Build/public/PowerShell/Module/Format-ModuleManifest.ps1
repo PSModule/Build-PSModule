@@ -25,7 +25,7 @@
     $manifestContent = $manifestContent | Where-Object { $_ | IsNotNullOrEmpty }
     [System.IO.File]::WriteAllLines($Path, $manifestContent, $Utf8BomEncoding)
     $manifestContent = Get-Content -Path $Path -Raw
-
+    Write-Verbose $manifestContent
     $content = Invoke-Formatter -ScriptDefinition $manifestContent
     [System.IO.File]::WriteAllLines($Path, $content, $Utf8BomEncoding)
 
