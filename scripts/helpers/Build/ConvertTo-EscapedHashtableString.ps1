@@ -35,8 +35,12 @@ filter ConvertTo-EscapedHashtableString {
 
     # Loop through the hashtable and process each value
     $keys = @($Hashtable.Keys) # Make a copy of the keys
+    Write-Verbose "Processing hashtable keys: $keys"
     foreach ($key in $keys) {
+        Write-Verbose "Processing key: $key"
+        Write-Verbose "Value: [$($Hashtable[$key])]"
         $Hashtable[$key] = Invoke-RecurseEscapeFix -Value $Hashtable[$key]
+        Write-Verbose "Escaped value: [$($Hashtable[$key])]"
     }
 
     return $Hashtable
