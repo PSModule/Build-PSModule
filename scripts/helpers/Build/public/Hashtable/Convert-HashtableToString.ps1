@@ -94,6 +94,7 @@
             }
         } else {
             $value = $value -replace "'", "''"
+            Write-Verbose "Escaped value: $value"
             $lines += "$indent    $key = '$value'"
         }
     }
