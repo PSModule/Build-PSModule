@@ -32,19 +32,19 @@ function Build-PSModule {
     )
 
     LogGroup "Building module [$ModuleName]" {
-        Write-Verbose "Source path:          [$ModuleSourceFolderPath]"
+        Write-Host "Source path:          [$ModuleSourceFolderPath]"
         if (-not (Test-Path -Path $ModuleSourceFolderPath)) {
             Write-Error "Source folder not found at [$ModuleSourceFolderPath]"
             exit 1
         }
         $moduleSourceFolder = Get-Item -Path $ModuleSourceFolderPath
-        Write-Verbose "Module source folder: [$moduleSourceFolder]"
+        Write-Host "Module source folder: [$moduleSourceFolder]"
 
         $moduleOutputFolder = New-Item -Path $ModulesOutputFolderPath -Name $ModuleName -ItemType Directory -Force
-        Write-Verbose "Module output folder: [$moduleOutputFolder]"
+        Write-Host "Module output folder: [$moduleOutputFolder]"
 
         $docsOutputFolder = New-Item -Path $DocsOutputFolderPath -ItemType Directory -Force
-        Write-Verbose "Docs output folder:   [$docsOutputFolder]"
+        Write-Host "Docs output folder:   [$docsOutputFolder]"
     }
 
     Build-PSModuleBase -ModuleName $ModuleName -ModuleSourceFolder $moduleSourceFolder -ModuleOutputFolder $moduleOutputFolder
