@@ -27,6 +27,6 @@
     $manifestContent = Get-Content -Path $Path -Raw
     Write-Verbose $manifestContent
     $content = Invoke-Formatter -ScriptDefinition $manifestContent
+    Write-Verbose $content
     [System.IO.File]::WriteAllLines($Path, $content, $Utf8BomEncoding)
-
 }
