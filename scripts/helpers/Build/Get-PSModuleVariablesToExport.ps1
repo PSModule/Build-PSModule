@@ -19,11 +19,11 @@
 
     $manifestPropertyName = 'VariablesToExport'
 
-    Write-Verbose "[$manifestPropertyName]"
+    Write-Host "[$manifestPropertyName]"
 
     $variableFolderPath = Join-Path -Path $SourceFolderPath -ChildPath 'variables/public'
     if (-not (Test-Path -Path $variableFolderPath -PathType Container)) {
-        Write-Verbose "[$manifestPropertyName] - [Folder not found] - [$variableFolderPath]"
+        Write-Host "[$manifestPropertyName] - [Folder not found] - [$variableFolderPath]"
         return $variablesToExport
     }
     $scriptFilePaths = Get-ChildItem -Path $variableFolderPath -Recurse -File -Filter *.ps1 | Select-Object -ExpandProperty FullName
@@ -38,7 +38,7 @@
     }
 
     $variablesToExport | ForEach-Object {
-        Write-Verbose "[$manifestPropertyName] - [$_]"
+        Write-Host "[$manifestPropertyName] - [$_]"
     }
 
     $variablesToExport

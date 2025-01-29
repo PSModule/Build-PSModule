@@ -129,7 +129,7 @@ $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
         $exports.Add('Function', (Get-PSModuleFunctionsToExport -SourceFolderPath $ModuleOutputFolder))
         $exports.Add('Variable', (Get-PSModuleVariablesToExport -SourceFolderPath $ModuleOutputFolder))
 
-        Write-Verbose ($exports | Out-String)
+        Write-Host ($exports | Out-String)
         #endregion - Analyze source files
 
         #region - Module header
@@ -223,7 +223,7 @@ Write-Debug "[`$scriptName] - $relativePath - Done"
 
         $exportsString = Convert-HashtableToString -Hashtable $exports
 
-        Write-Verbose ($exportsString | Out-String)
+        Write-Host ($exportsString | Out-String)
 
         $params = @{
             Path  = $rootModuleFile

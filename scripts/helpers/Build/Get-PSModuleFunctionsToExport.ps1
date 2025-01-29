@@ -19,22 +19,22 @@
 
     $manifestPropertyName = 'FunctionsToExport'
 
-    Write-Verbose "[$manifestPropertyName]"
-    Write-Verbose "[$manifestPropertyName] - Checking path for functions and filters"
+    Write-Host "[$manifestPropertyName]"
+    Write-Host "[$manifestPropertyName] - Checking path for functions and filters"
 
     $publicFolderPath = Join-Path -Path $SourceFolderPath -ChildPath 'functions/public'
     if (-not (Test-Path -Path $publicFolderPath -PathType Container)) {
-        Write-Verbose "[$manifestPropertyName] - [Folder not found] - [$publicFolderPath]"
+        Write-Host "[$manifestPropertyName] - [Folder not found] - [$publicFolderPath]"
         return $functionsToExport
     }
-    Write-Verbose "[$manifestPropertyName] - [$publicFolderPath]"
+    Write-Host "[$manifestPropertyName] - [$publicFolderPath]"
     $functionsToExport = [Collections.Generic.List[string]]::new()
     $scriptFiles = Get-ChildItem -Path $publicFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1'
-    Write-Verbose "[$manifestPropertyName] - [$($scriptFiles.Count)]"
+    Write-Host "[$manifestPropertyName] - [$($scriptFiles.Count)]"
     foreach ($file in $scriptFiles) {
         $fileContent = Get-Content -Path $file.FullName -Raw
         $containsFunction = ($fileContent -match 'function ') -or ($fileContent -match 'filter ')
-        Write-Verbose "[$manifestPropertyName] - [$($file.BaseName)] - [$containsFunction]"
+        Write-Host "[$manifestPropertyName] - [$($file.BaseName)] - [$containsFunction]"
         if ($containsFunction) {
             $functionsToExport.Add($file.BaseName)
         }
