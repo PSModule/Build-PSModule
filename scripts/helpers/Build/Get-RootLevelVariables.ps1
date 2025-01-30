@@ -1,4 +1,4 @@
-function Get-RootLevelVariable {
+﻿function Get-RootLevelVariable {
     <#
         .SYNOPSIS
         Get the root-level variables in a ast.

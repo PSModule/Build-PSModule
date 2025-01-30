@@ -1,4 +1,4 @@
-﻿#Requires -Modules Utilities
+﻿#Requires -Modules @{ ModuleName = 'GitHub'; ModuleVersion = '0.13.2' }
 
 function Build-PSModuleBase {
     <#

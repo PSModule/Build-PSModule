@@ -1,4 +1,6 @@
-﻿function Get-PSModuleAliasesToExport {
+﻿#Requires -Modules @{ ModuleName = 'Utilities'; ModuleVersion = '0.3.0' }
+
+function Get-PSModuleAliasesToExport {
     <#
         .SYNOPSIS
         Gets the aliases to export from the module manifest.
