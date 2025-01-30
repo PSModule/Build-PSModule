@@ -1,7 +1,7 @@
 function Set-ScriptFileRequirement {
     <#
         .SYNOPSIS
-        Adds or updates #Requires statements in PowerShell scripts based on discovered commands and installed modules.
+        Sets the correct module requirements for PowerShell scripts based on used commands/functions.
 
         .DESCRIPTION
         This function scans all .ps1 files within a specified path (recursively). It parses each script's AST to discover:
@@ -9,18 +9,22 @@ function Set-ScriptFileRequirement {
         - Which locally defined functions exist (to avoid marking them as unresolved)
         - Which modules (from Get-InstalledPSResource) provide those commands
 
-        Then, it removes any existing #Requires -Module lines at the top, injects new #Requires lines (sorted alphabetically),
+        It removes any existing #Requires -Module lines at the top, injects new #Requires lines (sorted alphabetically),
         and flags any commands not found locally or in installed modules with #FIX comments. For unresolved commands, it
-        uses Find-Command to provide potential module suggestions inline.
+        uses Find-Command to provide potential module suggestions inline, sorted by their published date (newest first).
 
         It also inserts a single blank line after the #Requires statements, removes extra leading/trailing blank lines,
         and prevents duplication or misalignment of #FIX comments.
 
         .EXAMPLE
-        PS> Add-ModuleRequiresUpdat -Path "C:\MyScripts" -Verbose
+        PS> Set-ScriptFileRequirement -Path "C:\MyScripts" -Verbose
 
-        This scans the C:\MyScripts folder recursively, updating #Requires lines in each .ps1 file while providing
-        informational messages.
+        Scans C:\MyScripts, updates #Requires lines in each .ps1 file, and provides verbose output.
+
+        .EXAMPLE
+        PS> Set-ScriptFileRequirement -Path "./Scripts" -Debug
+
+        Scans ./Scripts, displaying debug messages with internal processing details.
     #>
     [CmdletBinding()]
     param(
@@ -38,7 +42,6 @@ function Set-ScriptFileRequirement {
     $ps1Files = Get-ChildItem -Path $Path -Filter *.ps1 -File -Recurse
 
     Write-Verbose 'Gathering local function names from all scripts...'
-    # Build a case-insensitive set of all local (user-defined) function names
     $localFunctions = New-Object System.Collections.Generic.HashSet[string] ([System.StringComparer]::OrdinalIgnoreCase)
 
     foreach ($file in $ps1Files) {
@@ -81,7 +84,7 @@ function Set-ScriptFileRequirement {
 
     Write-Debug ('Installed modules found: {0}' -f ($installedModuleLookup.Keys -join ', '))
 
-    Write-Verbose 'Processing each .ps1 file to update #Requires statements and flag unresolved commands...'
+    Write-Verbose 'Processing each .ps1 file to set #Requires statements and flag unresolved commands...'
 
     foreach ($file in $ps1Files) {
         Write-Verbose "Processing file: $($file.FullName)"
@@ -142,9 +145,28 @@ function Set-ScriptFileRequirement {
                 if (-not $localFunctions.Contains($commandName)) {
                     # Truly unresolved, find suggestions
                     $foundSuggestions = Find-Command -Name $commandName -ErrorAction SilentlyContinue
+
                     if ($foundSuggestions) {
-                        $moduleNames = $foundSuggestions | Select-Object -ExpandProperty ModuleName -Unique | Sort-Object
-                        $suggestText = 'Possible module(s): ' + ($moduleNames -join ', ')
+                        # Sort suggestions by PublishedDate (descending)
+                        $sortedSuggestions = $foundSuggestions | Sort-Object {
+                            # If PSGetModuleInfo or PublishedDate doesn't exist, fallback
+                            if ($_ -and $_.PSGetModuleInfo -and $_.PSGetModuleInfo.PublishedDate) {
+                                return $_.PSGetModuleInfo.PublishedDate
+                            } else {
+                                # If missing date, treat as earliest possible => 1/1/1900 or [datetime]::MinValue
+                                return [datetime]::MinValue
+                            }
+                        } -Descending
+
+                        # Extract unique module names in that order
+                        # We can do a manual approach to keep ordering but remove duplicates:
+                        $moduleNamesOrdered = New-Object System.Collections.Generic.List[string]
+                        foreach ($suggestion in $sortedSuggestions) {
+                            if (-not $moduleNamesOrdered.Contains($suggestion.ModuleName)) {
+                                [void]$moduleNamesOrdered.Add($suggestion.ModuleName)
+                            }
+                        }
+                        $suggestText = 'Possible module(s), newest first: ' + ($moduleNamesOrdered -join ', ')
                     } else {
                         $suggestText = 'No module found via Find-Command'
                     }
