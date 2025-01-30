@@ -5,16 +5,15 @@ function Add-ModuleRequires {
         [string]$Path
     )
 
-    # 0) Validate path
+    # Validate path
     if (-not (Test-Path -Path $Path)) {
         Throw "Path '$Path' does not exist."
     }
 
-    # 1) Collect all .ps1 files recursively
+    # Collect all .ps1 files recursively
     $ps1Files = Get-ChildItem -Path $Path -Filter *.ps1 -File -Recurse
 
-    # 2) Gather local function names from all scripts in one pass.
-    #    We'll store them in a case-insensitive set.
+    # Gather local function names from all scripts in one pass.
     $localFunctions = New-Object System.Collections.Generic.HashSet[string] ([System.StringComparer]::OrdinalIgnoreCase)
 
     foreach ($file in $ps1Files) {
@@ -24,27 +23,24 @@ function Add-ModuleRequires {
         $ast = [System.Management.Automation.Language.Parser]::ParseFile($file.FullName, [ref]$tokens, [ref]$parseErrors)
 
         if ($parseErrors) {
-            # If you prefer to handle partial AST results, you could skip only the errors.
-            # For simplicity, we skip collecting function definitions from this file.
             Write-Verbose "Skipping function collection from '$($file.FullName)' due to parse errors."
             continue
         }
 
-        # Find all function definitions in this file
+        # Find all function definitions
         $funcDefs = $ast.FindAll({
                 param($node)
                 $node -is [System.Management.Automation.Language.FunctionDefinitionAst]
             }, $true)
 
         foreach ($fd in $funcDefs) {
-            # $fd.Name is the function name
             if (-not [string]::IsNullOrWhiteSpace($fd.Name)) {
                 $localFunctions.Add($fd.Name) | Out-Null
             }
         }
     }
 
-    # 3) Collect all installed modules via Get-InstalledPSResource
+    # Collect installed modules via Get-InstalledPSResource
     $installedResources = Get-InstalledPSResource
 
     # Build a lookup: moduleName -> all installed versions
@@ -56,11 +52,11 @@ function Add-ModuleRequires {
         $installedModuleLookup[$resource.Name] += $resource
     }
 
-    # 4) Process each file to inject #Requires
+    # Process each file
     foreach ($file in $ps1Files) {
         Write-Verbose "Processing file: $($file.FullName)"
 
-        # --- 4a) Read original content (raw), parse AST again
+        # Read original content and parse AST
         $rawFileContent = Get-Content -Path $file.FullName -Raw
         $originalLines = $rawFileContent -split "`r?`n"
 
@@ -74,26 +70,23 @@ function Add-ModuleRequires {
             continue
         }
 
-        # --- 4b) Gather command usage from CommandAsts
+        # Gather command usage
         $commandAsts = $ast.FindAll({
                 param($node)
                 $node -is [System.Management.Automation.Language.CommandAst] -and
                 $node.CommandElements.Count -gt 0
             }, $true)
 
-        # We map moduleName -> highest version
-        $requiredModules = @{}
-        # Lines that need a #FIX comment
+        $requiredModules = @{}  # moduleName -> highest version
         $linesNeedingFix = New-Object System.Collections.Generic.List[Int32]
 
         foreach ($commandAst in $commandAsts) {
             $commandName = $commandAst.CommandElements[0].Extent.Text
 
-            # Attempt to resolve the command
+            # Resolve the command
             $foundCommands = Get-Command $commandName -ErrorAction SilentlyContinue
 
             if ($foundCommands) {
-                # If found in the session, see if it belongs to an installed module
                 foreach ($fc in $foundCommands) {
                     if ($fc.ModuleName -and $installedModuleLookup.ContainsKey($fc.ModuleName)) {
                         # Among all installed versions, pick the highest
@@ -103,7 +96,6 @@ function Add-ModuleRequires {
                         if (-not $requiredModules.ContainsKey($fc.ModuleName)) {
                             $requiredModules[$fc.ModuleName] = $highestVersion
                         } else {
-                            # If we already have a version, keep the higher one
                             $existingVersion = [Version]$requiredModules[$fc.ModuleName]
                             $newVersion = [Version]$highestVersion
                             if ($newVersion -gt $existingVersion) {
@@ -113,20 +105,19 @@ function Add-ModuleRequires {
                     }
                 }
             } else {
-                # If not found in any module, check if it's a local function
+                # If not found in any installed module, check if it's a local function
                 if (-not $localFunctions.Contains($commandName)) {
-                    # It's truly unresolved
+                    # It's truly unresolved => #FIX
                     $linesNeedingFix.Add($commandAst.Extent.StartLineNumber)
                 }
             }
         }
 
-        # --- 4c) Prepare the final lines
+        # Build final lines
         $finalLines = [System.Collections.ArrayList]@($originalLines)
 
-        # 4c (i): Remove #Requires -Module lines at the top, and leading blank lines
+        # Remove top #Requires -Module lines and leading blanks
         $topRemoved = 0
-
         while ($finalLines.Count -gt 0 -and $finalLines[0] -match '^\s*#Requires\s+-Module') {
             $finalLines.RemoveAt(0)
             $topRemoved++
@@ -136,7 +127,7 @@ function Add-ModuleRequires {
             $topRemoved++
         }
 
-        # 4c (ii): Insert #FIX comments where needed (adjusting for removed top lines)
+        # Insert #FIX on correct lines (accounting for removed lines)
         foreach ($lineNum in $linesNeedingFix) {
             $newIndex = ($lineNum - 1) - $topRemoved
             if (($newIndex -ge 0) -and ($newIndex -lt $finalLines.Count)) {
@@ -146,31 +137,28 @@ function Add-ModuleRequires {
             }
         }
 
-        # 4c (iii): Build new #Requires lines
-        $requiresToAdd = foreach ($moduleName in $requiredModules.Keys) {
+        # Build the new #Requires lines, sorted alphabetically by module name
+        $requiresToAdd = foreach ($moduleName in ($requiredModules.Keys | Sort-Object)) {
             $modVersion = $requiredModules[$moduleName]
             "#Requires -Modules @{ ModuleName = '$moduleName'; ModuleVersion = '$modVersion' }"
         }
-        $requiresToAdd = @($requiresToAdd)  # Ensure array
+        $requiresToAdd = @($requiresToAdd)  # ensure array
 
-        # 4c (iv): Prepend the #Requires lines (if any) + ONE blank line
+        # Prepend them, plus one blank line
         if ($requiresToAdd.Count -gt 0) {
             $mergedList = [System.Collections.ArrayList]::new()
             $mergedList.AddRange($requiresToAdd)
-
-            # Add exactly one blank line separating #Requires from the rest of the script
-            $mergedList.Add('')
-
+            $mergedList.Add('')  # single blank line
             $mergedList.AddRange($finalLines)
             $finalLines = $mergedList
         }
 
-        # 4c (v): Remove trailing blank lines
+        # Remove trailing blank lines
         while ($finalLines.Count -gt 0 -and [string]::IsNullOrWhiteSpace($finalLines[$finalLines.Count - 1])) {
             $finalLines.RemoveAt($finalLines.Count - 1)
         }
 
-        # --- 4d) Write updated content
+        # Write updated content
         Set-Content -LiteralPath $file.FullName -Value $finalLines
     }
 }
