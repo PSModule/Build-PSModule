@@ -1,4 +1,4 @@
-﻿function Add-ContentFromItem {
+function Add-ContentFromItem {
     <#
         .SYNOPSIS
         Add the content of a folder or file to the root module file.
