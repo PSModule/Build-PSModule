@@ -54,7 +54,7 @@ function Get-RequiredModulesFromFile {
     }
 
     # Display results in a table format
-    $results | Sort-Object Module, Command | Format-Table -AutoSize
+    # $results | Sort-Object Module, Command | Format-Table -AutoSize
 
     # # Generate a summary of unique modules
     # Write-Host '\nSummary of Unique Modules:'
