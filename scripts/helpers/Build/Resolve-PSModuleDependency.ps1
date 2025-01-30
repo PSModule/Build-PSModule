@@ -1,4 +1,4 @@
-#Requires -Modules @{ ModuleName = 'Retry'; ModuleVersion = '0.1.3' }
+﻿#Requires -Modules @{ ModuleName = 'Retry'; ModuleVersion = '0.1.3' }
 
 function Resolve-PSModuleDependency {
     <#

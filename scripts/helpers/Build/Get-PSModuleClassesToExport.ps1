@@ -1,4 +1,4 @@
-function Get-PSModuleClassesToExport {
+﻿function Get-PSModuleClassesToExport {
     <#
         .SYNOPSIS
         Gets the classes to export from the module source code.

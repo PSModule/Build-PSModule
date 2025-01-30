@@ -1,4 +1,4 @@
-function Set-ScriptFileRequirement {
+﻿function Set-ScriptFileRequirement {
     <#
         .SYNOPSIS
         Sets the correct module requirements for PowerShell scripts based on used commands/functions.
@@ -240,7 +240,7 @@ function Set-ScriptFileRequirement {
 
         # Write updates to file
         Write-Verbose "Updating file: $($file.FullName)"
-        Set-Content -LiteralPath $file.FullName -Value $finalLines
+        $finalLines | Out-File -LiteralPath $file.FullName -Encoding utf8BOM
     }
 
     Write-Verbose 'All .ps1 files processed.'

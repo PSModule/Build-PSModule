@@ -1,4 +1,4 @@
-#Requires -Modules @{ ModuleName = 'Utilities'; ModuleVersion = '0.3.0' }
+﻿#Requires -Modules @{ ModuleName = 'Utilities'; ModuleVersion = '0.3.0' }
 
 function Import-PSModule {
     <#
@@ -35,7 +35,7 @@ function Import-PSModule {
     $existingModule.RequiredModules | ForEach-Object { $_ | Remove-Module -Force -Verbose -ErrorAction SilentlyContinue }
     $existingModule.NestedModules | ForEach-Object { $_ | Remove-Module -Force -Verbose -ErrorAction SilentlyContinue }
     # Get-InstalledPSResource | Where-Object Name -EQ $ModuleName | Uninstall-PSResource -SkipDependencyCheck -Verbose:$false
-    Resolve-PSModuleDependencies -ManifestFilePath $manifestFile #FIX: Unresolved module dependency (No module found via Find-Command)
+    Resolve-PSModuleDependency -ManifestFilePath $manifestFile
     Import-Module -Name $ModuleName -RequiredVersion '999.0.0'
 
     Write-Host 'List loaded modules'
