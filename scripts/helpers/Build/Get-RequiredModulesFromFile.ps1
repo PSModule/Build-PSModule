@@ -106,6 +106,9 @@ function Add-RequiresStatementsToFile {
     # Add #Requires statements at the top with one blank line following the last statement
     $newScriptContent = ($moduleRequirements -join "`n") + "`n" + $scriptContent
 
+    # Ensure that there is only one blank line at the end
+    $newScriptContent = $newScriptContent -replace "`n{3,}", "`n`n"
+
     # Write updated script back to file
     Set-Content -Path $Path -Value $newScriptContent
 
