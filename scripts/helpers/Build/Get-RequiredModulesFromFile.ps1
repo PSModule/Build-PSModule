@@ -101,7 +101,7 @@ function Add-RequiresStatementsToFile {
     $scriptContent = Get-Content -Path $Path -Raw
 
     # Remove any previous statements starting with '#Requires -Modules'
-    $scriptContent = $scriptContent -replace '#Requires -Modules.*', ''
+    $scriptContent = $scriptContent -replace '^#Requires -Modules.*', ''
 
     # Add #Requires statements at the top with one blank line following the last statement
     $newScriptContent = ($moduleRequirements -join "`n") + "`n" + $scriptContent
