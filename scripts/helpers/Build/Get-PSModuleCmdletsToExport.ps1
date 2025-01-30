@@ -1,6 +1,4 @@
-#Requires -Modules @{ ModuleName = 'Utilities'; ModuleVersion = '0.3.0' }
-
-function Get-PSModuleCmdletsToExport {
+﻿function Get-PSModuleCmdletsToExport {
     <#
         .SYNOPSIS
         Gets the cmdlets to export from the module manifest.

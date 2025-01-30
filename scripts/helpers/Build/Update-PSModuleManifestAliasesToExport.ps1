@@ -1,6 +1,3 @@
-#Requires -Modules @{ ModuleName = 'GitHub'; ModuleVersion = '0.13.2' }
-#Requires -Modules @{ ModuleName = 'Utilities'; ModuleVersion = '0.3.0' }
-
 function Update-PSModuleManifestAliasesToExport {
     <#
         .SYNOPSIS
