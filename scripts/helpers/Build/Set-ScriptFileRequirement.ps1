@@ -1,23 +1,48 @@
-function Add-ModuleRequires {
+function Set-ScriptFileRequirement {
+    <#
+        .SYNOPSIS
+        Adds or updates #Requires statements in PowerShell scripts based on discovered commands and installed modules.
+
+        .DESCRIPTION
+        This function scans all .ps1 files within a specified path (recursively). It parses each script's AST to discover:
+        - Which commands are used
+        - Which locally defined functions exist (to avoid marking them as unresolved)
+        - Which modules (from Get-InstalledPSResource) provide those commands
+
+        Then, it removes any existing #Requires -Module lines at the top, injects new #Requires lines (sorted alphabetically),
+        and flags any commands not found locally or in installed modules with #FIX comments. For unresolved commands, it
+        uses Find-Command to provide potential module suggestions inline.
+
+        It also inserts a single blank line after the #Requires statements, removes extra leading/trailing blank lines,
+        and prevents duplication or misalignment of #FIX comments.
+
+        .EXAMPLE
+        PS> Add-ModuleRequiresUpdat -Path "C:\MyScripts" -Verbose
+
+        This scans the C:\MyScripts folder recursively, updating #Requires lines in each .ps1 file while providing
+        informational messages.
+    #>
     [CmdletBinding()]
     param(
+        # Specifies the root directory to be scanned recursively for PowerShell .ps1 files.
         [Parameter(Mandatory)]
         [string]$Path
     )
 
-    # Validate path
+    # Validate the given path
     if (-not (Test-Path -Path $Path)) {
         Throw "Path '$Path' does not exist."
     }
 
-    # Collect all .ps1 files recursively
+    Write-Verbose "Collecting all *.ps1 files from '$Path' recursively..."
     $ps1Files = Get-ChildItem -Path $Path -Filter *.ps1 -File -Recurse
 
-    # Gather local function names from all scripts in one pass.
+    Write-Verbose 'Gathering local function names from all scripts...'
+    # Build a case-insensitive set of all local (user-defined) function names
     $localFunctions = New-Object System.Collections.Generic.HashSet[string] ([System.StringComparer]::OrdinalIgnoreCase)
 
     foreach ($file in $ps1Files) {
-        # Parse the file
+        # Parse the file to locate function definitions
         $parseErrors = $null
         $tokens = $null
         $ast = [System.Management.Automation.Language.Parser]::ParseFile($file.FullName, [ref]$tokens, [ref]$parseErrors)
@@ -27,7 +52,7 @@ function Add-ModuleRequires {
             continue
         }
 
-        # Find all function definitions
+        # Find all function definitions (FunctionDefinitionAst)
         $funcDefs = $ast.FindAll({
                 param($node)
                 $node -is [System.Management.Automation.Language.FunctionDefinitionAst]
@@ -35,12 +60,14 @@ function Add-ModuleRequires {
 
         foreach ($fd in $funcDefs) {
             if (-not [string]::IsNullOrWhiteSpace($fd.Name)) {
-                $localFunctions.Add($fd.Name) | Out-Null
+                [void]$localFunctions.Add($fd.Name)
             }
         }
+
+        Write-Debug ("File '{0}' has '{1}' local function definitions." -f $file.FullName, $funcDefs.Count)
     }
 
-    # Collect installed modules via Get-InstalledPSResource
+    Write-Verbose 'Gathering installed modules via Get-InstalledPSResource...'
     $installedResources = Get-InstalledPSResource
 
     # Build a lookup: moduleName -> all installed versions
@@ -52,49 +79,49 @@ function Add-ModuleRequires {
         $installedModuleLookup[$resource.Name] += $resource
     }
 
-    # Process each file
+    Write-Debug ('Installed modules found: {0}' -f ($installedModuleLookup.Keys -join ', '))
+
+    Write-Verbose 'Processing each .ps1 file to update #Requires statements and flag unresolved commands...'
+
     foreach ($file in $ps1Files) {
         Write-Verbose "Processing file: $($file.FullName)"
 
-        # Read original content and parse AST
+        # Read original content
         $rawFileContent = Get-Content -Path $file.FullName -Raw
         $originalLines = $rawFileContent -split "`r?`n"
 
+        # Parse AST for this script
         $parseErrors = $null
         $tokens = $null
         $ast = [System.Management.Automation.Language.Parser]::ParseFile($file.FullName, [ref]$tokens, [ref]$parseErrors)
 
         if ($parseErrors) {
-            Write-Warning "Skipping file '$($file.FullName)' due to parse errors:"
+            Write-Warning "Skipping file '$($file.FullName)' due to parse errors."
             $parseErrors | ForEach-Object { Write-Warning $_.Message }
             continue
         }
 
-        # Gather command usage
+        # Gather all CommandAst nodes
         $commandAsts = $ast.FindAll({
                 param($node)
                 $node -is [System.Management.Automation.Language.CommandAst] -and
                 $node.CommandElements.Count -gt 0
             }, $true)
 
-        # We'll store unresolved commands with line + suggestions
-        #   Each entry = [PSCustomObject]@{ LineNumber = x; CommandName = y; Suggestion = z }
+        # Store unresolved commands with line+suggestions
         $unresolvedCommands = New-Object System.Collections.Generic.List[object]
-
-        # We map moduleName -> highest version
+        # Map moduleName -> highest version needed
         $requiredModules = @{}
 
         foreach ($commandAst in $commandAsts) {
             $commandName = $commandAst.CommandElements[0].Extent.Text
-
-            # Resolve the command from the current session
+            # Attempt to find the command in the current session
             $foundCommands = Get-Command $commandName -ErrorAction SilentlyContinue
 
             if ($foundCommands) {
-                # If found, see if it belongs to an installed module
+                # If found, see if it's from an installed module
                 foreach ($fc in $foundCommands) {
                     if ($fc.ModuleName -and $installedModuleLookup.ContainsKey($fc.ModuleName)) {
-                        # Among all installed versions, pick the highest
                         $possibleVersions = $installedModuleLookup[$fc.ModuleName] | Sort-Object Version -Descending
                         $highestVersion = $possibleVersions[0].Version.ToString()
 
@@ -110,16 +137,13 @@ function Add-ModuleRequires {
                     }
                 }
             } else {
-                # If not found in the session:
+                # Not found by Get-Command in this session
                 # Check if it's a local function
                 if (-not $localFunctions.Contains($commandName)) {
-                    # => truly unresolved, let's see if we can find suggestions from a repository
+                    # Truly unresolved, find suggestions
                     $foundSuggestions = Find-Command -Name $commandName -ErrorAction SilentlyContinue
                     if ($foundSuggestions) {
-                        # Collect unique module names
-                        $moduleNames = $foundSuggestions |
-                            Select-Object -ExpandProperty ModuleName -Unique |
-                            Sort-Object
+                        $moduleNames = $foundSuggestions | Select-Object -ExpandProperty ModuleName -Unique | Sort-Object
                         $suggestText = 'Possible module(s): ' + ($moduleNames -join ', ')
                     } else {
                         $suggestText = 'No module found via Find-Command'
@@ -134,10 +158,15 @@ function Add-ModuleRequires {
             }
         }
 
-        # Build final lines
+        Write-Debug ("File '{0}' requires '{1}' modules; has '{2}' unresolved commands." -f
+            $file.FullName,
+            $requiredModules.Keys.Count,
+            $unresolvedCommands.Count)
+
+        # Create a modifiable array list of lines
         $finalLines = [System.Collections.ArrayList]@($originalLines)
 
-        # Remove top #Requires -Module lines and leading blanks
+        # Remove top #Requires -Module lines, then leading blank lines
         $topRemoved = 0
         while ($finalLines.Count -gt 0 -and $finalLines[0] -match '^\s*#Requires\s+-Module') {
             $finalLines.RemoveAt(0)
@@ -148,37 +177,35 @@ function Add-ModuleRequires {
             $topRemoved++
         }
 
-        # Insert #FIX + suggestions on correct lines (accounting for removed lines)
+        # Insert #FIX comments for unresolved commands, adjusting for removed lines
         foreach ($unresolved in $unresolvedCommands) {
             $newIndex = ($unresolved.LineNumber - 1) - $topRemoved
             if (($newIndex -ge 0) -and ($newIndex -lt $finalLines.Count)) {
-                # Build the #FIX comment with suggestions
-                # e.g.  "#FIX: Unresolved module dependency (Possible module(s): AzureAD, Az.Accounts )"
-                if ($unresolved.Suggestion) {
-                    $comment = " #FIX: Unresolved module dependency ($($unresolved.Suggestion))"
-                } else {
-                    $comment = ' #FIX: Unresolved module dependency'
-                }
-
-                # Append only if not already present
+                $comment = " #FIX: Unresolved module dependency ($($unresolved.Suggestion))"
                 if ($finalLines[$newIndex] -notmatch '#FIX:\s+Unresolved module dependency') {
                     $finalLines[$newIndex] += $comment
                 }
+            } else {
+                Write-Debug ("Unresolved command '{0}' at line '{1}' was removed or out-of-range." -f
+                    $unresolved.CommandName,
+                    $unresolved.LineNumber)
             }
         }
 
-        # Build the new #Requires lines, sorted alphabetically by module name
+        # Build #Requires lines (alphabetically by module name)
         $requiresToAdd = foreach ($moduleName in ($requiredModules.Keys | Sort-Object)) {
             $modVersion = $requiredModules[$moduleName]
             "#Requires -Modules @{ ModuleName = '$moduleName'; ModuleVersion = '$modVersion' }"
         }
         $requiresToAdd = @($requiresToAdd)  # ensure array
 
-        # Prepend them, plus one blank line
         if ($requiresToAdd.Count -gt 0) {
+            Write-Debug ("Adding {0} #Requires lines to file '{1}'." -f $requiresToAdd.Count, $file.FullName)
+
+            # Prepend them plus one blank line
             $mergedList = [System.Collections.ArrayList]::new()
             $mergedList.AddRange($requiresToAdd)
-            $mergedList.Add('')  # single blank line
+            $mergedList.Add('')
             $mergedList.AddRange($finalLines)
             $finalLines = $mergedList
         }
@@ -188,7 +215,10 @@ function Add-ModuleRequires {
             $finalLines.RemoveAt($finalLines.Count - 1)
         }
 
-        # Write updated content
+        # Write updates to file
+        Write-Verbose "Updating file: $($file.FullName)"
         Set-Content -LiteralPath $file.FullName -Value $finalLines
     }
+
+    Write-Verbose 'All .ps1 files processed.'
 }
