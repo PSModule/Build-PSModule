@@ -1,15 +1,17 @@
-﻿function Get-RequiredModulesFromFile {
+#Requires -Modules @{ ModuleName = 'Microsoft.PowerShell.Management'; ModuleVersion = '7.0.0.0' }
+
+function Get-RequiredModulesFromFile {
     param (
-        [string]$FilePath
+        [string]$Path
     )
 
-    if (!(Test-Path $FilePath)) {
-        Write-Error "File not found: $FilePath"
+    if (!(Test-Path $Path)) {
+        Write-Error "File not found: $Path"
         return
     }
 
     # Parse the script using the PowerShell Abstract Syntax Tree (AST)
-    $scriptAst = [System.Management.Automation.Language.Parser]::ParseFile($FilePath, [ref]$null, [ref]$null)
+    $scriptAst = [System.Management.Automation.Language.Parser]::ParseFile($Path, [ref]$null, [ref]$null)
 
     # Extract command names from the AST
     $commandNames = $scriptAst.FindAll({ $args[0] -is [System.Management.Automation.Language.CommandAst] }, $true) |
@@ -79,7 +81,7 @@ function Add-RequiresStatementsToFile {
     }
 
     # Get module dependencies from the file
-    $moduleDependencies = Get-RequiredModulesFromFile -FilePath $FilePath | Where-Object { $_.Module -ne 'Unknown' -and $_.Module -ne 'Not Found' }
+    $moduleDependencies = Get-RequiredModulesFromFile -Path $Path | Where-Object { $_.Module -ne 'Unknown' -and $_.Module -ne 'Not Found' }
 
     # Group by module and select the lowest version
     $moduleRequirements = $moduleDependencies | Group-Object Module | ForEach-Object {
@@ -91,12 +93,12 @@ function Add-RequiresStatementsToFile {
     }
 
     if ($moduleRequirements.Count -eq 0) {
-        Write-Host "No module dependencies found in $FilePath"
+        Write-Host "No module dependencies found in $Path"
         return
     }
 
     # Read existing script content
-    $scriptContent = Get-Content -Path $FilePath -Raw
+    $scriptContent = Get-Content -Path $Path -Raw
 
     # Remove any previous statements starting with '#Requires -Modules'
     $scriptContent = $scriptContent -replace '#Requires -Modules.*', ''
@@ -105,7 +107,7 @@ function Add-RequiresStatementsToFile {
     $newScriptContent = $moduleRequirements -join "`n" + "`n" + $scriptContent
 
     # Write updated script back to file
-    Set-Content -Path $FilePath -Value $newScriptContent
+    Set-Content -Path $Path -Value $newScriptContent
 
-    Write-Host "#Requires statements added to $FilePath"
+    Write-Host "#Requires statements added to $Path"
 }
