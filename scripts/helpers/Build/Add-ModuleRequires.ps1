@@ -77,16 +77,21 @@ function Add-ModuleRequires {
                 $node.CommandElements.Count -gt 0
             }, $true)
 
-        $requiredModules = @{}  # moduleName -> highest version
-        $linesNeedingFix = New-Object System.Collections.Generic.List[Int32]
+        # We'll store unresolved commands with line + suggestions
+        #   Each entry = [PSCustomObject]@{ LineNumber = x; CommandName = y; Suggestion = z }
+        $unresolvedCommands = New-Object System.Collections.Generic.List[object]
+
+        # We map moduleName -> highest version
+        $requiredModules = @{}
 
         foreach ($commandAst in $commandAsts) {
             $commandName = $commandAst.CommandElements[0].Extent.Text
 
-            # Resolve the command
+            # Resolve the command from the current session
             $foundCommands = Get-Command $commandName -ErrorAction SilentlyContinue
 
             if ($foundCommands) {
+                # If found, see if it belongs to an installed module
                 foreach ($fc in $foundCommands) {
                     if ($fc.ModuleName -and $installedModuleLookup.ContainsKey($fc.ModuleName)) {
                         # Among all installed versions, pick the highest
@@ -105,10 +110,26 @@ function Add-ModuleRequires {
                     }
                 }
             } else {
-                # If not found in any installed module, check if it's a local function
+                # If not found in the session:
+                # Check if it's a local function
                 if (-not $localFunctions.Contains($commandName)) {
-                    # It's truly unresolved => #FIX
-                    $linesNeedingFix.Add($commandAst.Extent.StartLineNumber)
+                    # => truly unresolved, let's see if we can find suggestions from a repository
+                    $foundSuggestions = Find-Command -Name $commandName -ErrorAction SilentlyContinue
+                    if ($foundSuggestions) {
+                        # Collect unique module names
+                        $moduleNames = $foundSuggestions |
+                            Select-Object -ExpandProperty ModuleName -Unique |
+                            Sort-Object
+                        $suggestText = 'Possible module(s): ' + ($moduleNames -join ', ')
+                    } else {
+                        $suggestText = 'No module found via Find-Command'
+                    }
+
+                    $unresolvedCommands.Add([PSCustomObject]@{
+                            LineNumber  = $commandAst.Extent.StartLineNumber
+                            CommandName = $commandName
+                            Suggestion  = $suggestText
+                        })
                 }
             }
         }
@@ -127,12 +148,21 @@ function Add-ModuleRequires {
             $topRemoved++
         }
 
-        # Insert #FIX on correct lines (accounting for removed lines)
-        foreach ($lineNum in $linesNeedingFix) {
-            $newIndex = ($lineNum - 1) - $topRemoved
+        # Insert #FIX + suggestions on correct lines (accounting for removed lines)
+        foreach ($unresolved in $unresolvedCommands) {
+            $newIndex = ($unresolved.LineNumber - 1) - $topRemoved
             if (($newIndex -ge 0) -and ($newIndex -lt $finalLines.Count)) {
+                # Build the #FIX comment with suggestions
+                # e.g.  "#FIX: Unresolved module dependency (Possible module(s): AzureAD, Az.Accounts )"
+                if ($unresolved.Suggestion) {
+                    $comment = " #FIX: Unresolved module dependency ($($unresolved.Suggestion))"
+                } else {
+                    $comment = ' #FIX: Unresolved module dependency'
+                }
+
+                # Append only if not already present
                 if ($finalLines[$newIndex] -notmatch '#FIX:\s+Unresolved module dependency') {
-                    $finalLines[$newIndex] += ' #FIX: Unresolved module dependency'
+                    $finalLines[$newIndex] += $comment
                 }
             }
         }
