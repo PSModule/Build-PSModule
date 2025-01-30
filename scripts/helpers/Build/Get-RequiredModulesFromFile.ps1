@@ -1,4 +1,6 @@
 #Requires -Modules @{ ModuleName = 'Microsoft.PowerShell.Management'; ModuleVersion = '7.0.0.0' }
+#Requires -Modules @{ ModuleName = 'Microsoft.PowerShell.Utility'; ModuleVersion = '7.0.0.0' }
+
 
 function Get-RequiredModulesFromFile {
     param (
@@ -34,14 +36,19 @@ function Get-RequiredModulesFromFile {
                 Module  = $moduleName
             }
 
-            # Store module details if not already retrieved
+            # Use Get-InstalledPSResource instead of Get-Module
             if ($moduleName -ne 'Unknown' -and -not $moduleInfo.ContainsKey($moduleName)) {
-                $module = Get-Module -Name $moduleName -ListAvailable | Select-Object Name, Version, Repository, PrivateData
-                $moduleInfo[$moduleName] = [PSCustomObject]@{
-                    Module     = $module.Name
-                    Version    = $module.Version
-                    Repository = $module.Repository
-                    Prerelease = $module.PrivateData.PSData.Prerelease
+                $module = Get-InstalledPSResource -Name $moduleName -ErrorAction SilentlyContinue |
+                    Select-Object Name, Version, Repository, Prerelease
+
+                # If a matching installed resource is found, store info
+                if ($module) {
+                    $moduleInfo[$moduleName] = [PSCustomObject]@{
+                        Module     = $module.Name
+                        Version    = $module.Version
+                        Repository = $module.Repository
+                        Prerelease = $module.Prerelease
+                    }
                 }
             }
         } catch {
@@ -53,12 +60,11 @@ function Get-RequiredModulesFromFile {
         }
     }
 
-    # Display results in a table format
+    # Display results in a table format if desired
     # $results | Sort-Object Module, Command | Format-Table -AutoSize
 
-    # # Generate a summary of unique modules
-    # Write-Host '\nSummary of Unique Modules:'
-    $moduleInfo.Values # | Sort-Object Module | Format-Table -AutoSize
+    # Return a list of unique module info. Adjust as needed.
+    $moduleInfo.Values
 }
 
 function Add-RequiresStatementsToFile {
@@ -71,7 +77,7 @@ function Add-RequiresStatementsToFile {
         return
     }
 
-    #if folder, loop through all files in the folder
+    # If folder, loop through all .ps1 files in the folder
     if (Test-Path -Path $Path -PathType Container) {
         $files = Get-ChildItem -Path $Path -Recurse -File -Include *.ps1
         foreach ($file in $files) {
@@ -81,7 +87,8 @@ function Add-RequiresStatementsToFile {
     }
 
     # Get module dependencies from the file
-    $moduleDependencies = Get-RequiredModulesFromFile -Path $Path | Where-Object { $_.Module -ne 'Unknown' -and $_.Module -ne 'Not Found' }
+    $moduleDependencies = Get-RequiredModulesFromFile -Path $Path |
+        Where-Object { $_.Module -ne 'Unknown' -and $_.Module -ne 'Not Found' }
 
     # Group by module and select the lowest version
     $moduleRequirements = $moduleDependencies | Group-Object Module | ForEach-Object {
@@ -106,8 +113,8 @@ function Add-RequiresStatementsToFile {
     # Add #Requires statements at the top with one blank line following the last statement
     $newScriptContent = ($moduleRequirements -join "`n") + "`n" + $scriptContent
 
-    # Ensure that there is only one blank line at the end
-    $newScriptContent = $newScriptContent -replace "`n{3,}", "`n`n"
+    # Ensure there is only one blank line at the end
+    $newScriptContent = $newScriptContent -replace "`n{3,}", "`n"
 
     # Write updated script back to file
     Set-Content -Path $Path -Value $newScriptContent
