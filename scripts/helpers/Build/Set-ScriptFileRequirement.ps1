@@ -26,7 +26,7 @@
 
         Scans ./Scripts, displaying debug messages with internal processing details.
     #>
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param(
         # Specifies the root directory to be scanned recursively for PowerShell .ps1 files.
         [Parameter(Mandatory)]
@@ -240,7 +240,9 @@
 
         # Write updates to file
         Write-Verbose "Updating file: $($file.FullName)"
-        $finalLines | Out-File -LiteralPath $file.FullName -Encoding utf8BOM
+        if ($PSCmdlet.ShouldProcess("file [$($file.FullName)]", 'Write changes')) {
+            $finalLines | Out-File -LiteralPath $file.FullName -Encoding utf8BOM
+        }
     }
 
     Write-Verbose 'All .ps1 files processed.'
