@@ -1,4 +1,4 @@
-﻿function Get-PSModuleVariablesToExport {
+function Get-PSModuleVariablesToExport {
     <#
         .SYNOPSIS
         Gets the variables to export from the module manifest.
@@ -43,4 +43,3 @@
 
     $variablesToExport
 }
-

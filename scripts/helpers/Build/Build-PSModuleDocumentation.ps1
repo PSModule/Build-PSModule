@@ -1,4 +1,6 @@
-﻿#Requires -Modules platyPS, Utilities
+#Requires -Modules @{ ModuleName = 'GitHub'; ModuleVersion = '0.13.2' }
+#Requires -Modules @{ ModuleName = 'platyPS'; ModuleVersion = '0.14.2' }
+#Requires -Modules @{ ModuleName = 'Utilities'; ModuleVersion = '0.3.0' }
 
 function Build-PSModuleDocumentation {
     <#

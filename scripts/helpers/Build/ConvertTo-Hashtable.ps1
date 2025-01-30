@@ -1,4 +1,4 @@
-﻿function ConvertTo-Hashtable {
+function ConvertTo-Hashtable {
     <#
         .SYNOPSIS
         Converts a string to a hashtable.

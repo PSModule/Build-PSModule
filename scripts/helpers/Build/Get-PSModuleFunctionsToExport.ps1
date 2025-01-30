@@ -1,4 +1,4 @@
-﻿function Get-PSModuleFunctionsToExport {
+function Get-PSModuleFunctionsToExport {
     <#
         .SYNOPSIS
         Gets the functions to export from the module manifest.
