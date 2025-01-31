@@ -116,7 +116,7 @@ function Build-PSModuleManifest {
         $requiredAssemblies = Get-ChildItem -Path $requiredAssembliesFolderPath -Recurse -File -ErrorAction SilentlyContinue -Filter '*.dll' |
             Select-Object -ExpandProperty FullName |
             ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart([System.IO.Path]::DirectorySeparatorChar) }
-        $requiredAssemblies += Get-ChildItem -Path $nestedModulesFolderPath -Recurse -Depth 2 -File -ErrorAction SilentlyContinue -Filter '*.dll' |
+        $requiredAssemblies += Get-ChildItem -Path $nestedModulesFolderPath -Recurse -Depth 1 -File -ErrorAction SilentlyContinue -Filter '*.dll' |
             Select-Object -ExpandProperty FullName |
             ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart([System.IO.Path]::DirectorySeparatorChar) }
         $manifest.RequiredAssemblies = if ($existingRequiredAssemblies) { $existingRequiredAssemblies } elseif ($requiredAssemblies.Count -gt 0) { @($requiredAssemblies) } else { @() }
@@ -124,7 +124,7 @@ function Build-PSModuleManifest {
 
         Write-Host '[NestedModules]'
         $existingNestedModules = $manifest.NestedModules
-        $nestedModules = Get-ChildItem -Path $nestedModulesFolderPath -Recurse -Depth 2 -File -ErrorAction SilentlyContinue -Include '*.psm1', '*.ps1', '*.dll' |
+        $nestedModules = Get-ChildItem -Path $nestedModulesFolderPath -Recurse -Depth 1 -File -ErrorAction SilentlyContinue -Include '*.psm1', '*.ps1', '*.dll' |
             Select-Object -ExpandProperty FullName |
             ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart([System.IO.Path]::DirectorySeparatorChar) }
         $manifest.NestedModules = if ($existingNestedModules) { $existingNestedModules } elseif ($nestedModules.Count -gt 0) { @($nestedModules) } else { @() }
