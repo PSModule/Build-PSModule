@@ -108,10 +108,15 @@ function Build-PSModuleManifest {
         $manifest.FileList = $files.count -eq 0 ? @() : @($files)
         $manifest.FileList | ForEach-Object { Write-Host "[FileList] - [$_]" }
 
+        $requiredAssembliesFolderPath = Join-Path $ModuleOutputFolder 'assemblies'
+        $nestedModulesFolderPath = Join-Path $ModuleOutputFolder 'modules'
+
         Write-Host '[RequiredAssemblies]'
         $existingRequiredAssemblies = $manifest.RequiredAssemblies
-        $requiredAssembliesFolderPath = Join-Path $ModuleOutputFolder 'assemblies'
         $requiredAssemblies = Get-ChildItem -Path $requiredAssembliesFolderPath -Recurse -File -ErrorAction SilentlyContinue -Filter '*.dll' |
+            Select-Object -ExpandProperty FullName |
+            ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart([System.IO.Path]::DirectorySeparatorChar) }
+        $requiredAssemblies += Get-ChildItem -Path $nestedModulesFolderPath -Recurse -Depth 2 -File -ErrorAction SilentlyContinue -Filter '*.dll' |
             Select-Object -ExpandProperty FullName |
             ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart([System.IO.Path]::DirectorySeparatorChar) }
         $manifest.RequiredAssemblies = if ($existingRequiredAssemblies) { $existingRequiredAssemblies } elseif ($requiredAssemblies.Count -gt 0) { @($requiredAssemblies) } else { @() }
@@ -119,8 +124,7 @@ function Build-PSModuleManifest {
 
         Write-Host '[NestedModules]'
         $existingNestedModules = $manifest.NestedModules
-        $nestedModulesFolderPath = Join-Path $ModuleOutputFolder 'modules'
-        $nestedModules = Get-ChildItem -Path $nestedModulesFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.psm1', '*.ps1' |
+        $nestedModules = Get-ChildItem -Path $nestedModulesFolderPath -Recurse -Depth 2 -File -ErrorAction SilentlyContinue -Include '*.psm1', '*.ps1', '*.dll' |
             Select-Object -ExpandProperty FullName |
             ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart([System.IO.Path]::DirectorySeparatorChar) }
         $manifest.NestedModules = if ($existingNestedModules) { $existingNestedModules } elseif ($nestedModules.Count -gt 0) { @($nestedModules) } else { @() }
