@@ -108,38 +108,43 @@ function Build-PSModuleManifest {
         $manifest.FileList = $files.count -eq 0 ? @() : @($files)
         $manifest.FileList | ForEach-Object { Write-Host "[FileList] - [$_]" }
 
-        Write-Host '[RequiredAssemblies]'
         $requiredAssembliesFolderPath = Join-Path $ModuleOutputFolder 'assemblies'
-        $requiredAssemblies = Get-ChildItem -Path $RequiredAssembliesFolderPath -Recurse -File -ErrorAction SilentlyContinue -Filter '*.dll' |
+        $nestedModulesFolderPath = Join-Path $ModuleOutputFolder 'modules'
+
+        Write-Host '[RequiredAssemblies]'
+        $existingRequiredAssemblies = $manifest.RequiredAssemblies
+        $requiredAssemblies = Get-ChildItem -Path $requiredAssembliesFolderPath -Recurse -File -ErrorAction SilentlyContinue -Filter '*.dll' |
             Select-Object -ExpandProperty FullName |
-            ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart($pathSeparator) }
-        $manifest.RequiredAssemblies = $requiredAssemblies.count -eq 0 ? @() : @($requiredAssemblies)
+            ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart([System.IO.Path]::DirectorySeparatorChar) }
+        $requiredAssemblies += Get-ChildItem -Path $nestedModulesFolderPath -Recurse -Depth 1 -File -ErrorAction SilentlyContinue -Filter '*.dll' |
+            Select-Object -ExpandProperty FullName |
+            ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart([System.IO.Path]::DirectorySeparatorChar) }
+        $manifest.RequiredAssemblies = if ($existingRequiredAssemblies) { $existingRequiredAssemblies } elseif ($requiredAssemblies.Count -gt 0) { @($requiredAssemblies) } else { @() }
         $manifest.RequiredAssemblies | ForEach-Object { Write-Host "[RequiredAssemblies] - [$_]" }
 
         Write-Host '[NestedModules]'
-        $nestedModulesFolderPath = Join-Path $ModuleOutputFolder 'modules'
-        $nestedModules = Get-ChildItem -Path $nestedModulesFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.psm1', '*.ps1' |
+        $existingNestedModules = $manifest.NestedModules
+        $nestedModules = Get-ChildItem -Path $nestedModulesFolderPath -Recurse -Depth 1 -File -ErrorAction SilentlyContinue -Include '*.psm1', '*.ps1', '*.dll' |
             Select-Object -ExpandProperty FullName |
-            ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart($pathSeparator) }
-        $manifest.NestedModules = $nestedModules.count -eq 0 ? @() : @($nestedModules)
+            ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart([System.IO.Path]::DirectorySeparatorChar) }
+        $manifest.NestedModules = if ($existingNestedModules) { $existingNestedModules } elseif ($nestedModules.Count -gt 0) { @($nestedModules) } else { @() }
         $manifest.NestedModules | ForEach-Object { Write-Host "[NestedModules] - [$_]" }
 
         Write-Host '[ScriptsToProcess]'
+        $existingScriptsToProcess = $manifest.ScriptsToProcess
         $allScriptsToProcess = @('scripts') | ForEach-Object {
             Write-Host "[ScriptsToProcess] - Processing [$_]"
             $scriptsFolderPath = Join-Path $ModuleOutputFolder $_
-            $scriptsToProcess = Get-ChildItem -Path $scriptsFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1' |
-                Select-Object -ExpandProperty FullName |
-                ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart($pathSeparator) }
-                $scriptsToProcess
-            }
-            $manifest.ScriptsToProcess = $allScriptsToProcess.count -eq 0 ? @() : @($allScriptsToProcess)
-            $manifest.ScriptsToProcess | ForEach-Object { Write-Host "[ScriptsToProcess] - [$_]" }
+            Get-ChildItem -Path $scriptsFolderPath -Recurse -File -ErrorAction SilentlyContinue -Include '*.ps1' | Select-Object -ExpandProperty FullName | ForEach-Object {
+                $_.Replace($ModuleOutputFolder, '').TrimStart([System.IO.Path]::DirectorySeparatorChar) }
+        }
+        $manifest.ScriptsToProcess = if ($existingScriptsToProcess) { $existingScriptsToProcess } elseif ($allScriptsToProcess.Count -gt 0) { @($allScriptsToProcess) } else { @() }
+        $manifest.ScriptsToProcess | ForEach-Object { Write-Host "[ScriptsToProcess] - [$_]" }
 
-            Write-Host '[TypesToProcess]'
-            $typesToProcess = Get-ChildItem -Path $ModuleOutputFolder -Recurse -File -ErrorAction SilentlyContinue -Include '*.Types.ps1xml' |
-                Select-Object -ExpandProperty FullName |
-                ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart($pathSeparator) }
+        Write-Host '[TypesToProcess]'
+        $typesToProcess = Get-ChildItem -Path $ModuleOutputFolder -Recurse -File -ErrorAction SilentlyContinue -Include '*.Types.ps1xml' |
+            Select-Object -ExpandProperty FullName |
+            ForEach-Object { $_.Replace($ModuleOutputFolder, '').TrimStart($pathSeparator) }
         $manifest.TypesToProcess = $typesToProcess.count -eq 0 ? @() : @($typesToProcess)
         $manifest.TypesToProcess | ForEach-Object { Write-Host "[TypesToProcess] - [$_]" }
 
