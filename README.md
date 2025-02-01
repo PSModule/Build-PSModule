@@ -79,8 +79,8 @@ During the module manifest build process the following steps are performed:
 1. Set the `Description` based on the GitHub repository description. If a value exists in the source manifest file, this value is used.
 1. Set various properties in the manifest such as `PowerShellHostName`, `PowerShellHostVersion`, `DotNetFrameworkVersion`, `ClrVersion`, and `ProcessorArchitecture`. There is currently no automation for these properties. If a value exists in the source manifest file, this value is used.
 1. Get the list of files in the module source folder and set the `FileList` property in the manifest.
-1. Get the list of required assemblies (`*.dll` files) from the `assemblies` folder and set the `RequiredAssemblies` property in the manifest.
-1. Get the list of nested modules (`*.psm1` files) from the `modules` folder and set the `NestedModules` property in the manifest.
+1. Get the list of required assemblies (`*.dll` files) from the `assemblies` and `modules` (depth = 1) folder and set the `RequiredAssemblies` property in the manifest.
+1. Get the list of nested modules (`*.psm1`, `*.ps1` and `*.dll` files one level down) from the `modules` folder and set the `NestedModules` property in the manifest.
 1. Get the list of scripts to process (`*.ps1` files) from the `scripts` folders and set the `ScriptsToProcess` property in the manifest. This ensures that the scripts are loaded to the caller session (parent of module session).
 1. Get the list of types to process by searching for `*.Types.ps1xml` files in the entire module source folder and set the `TypesToProcess` property in the manifest.
 1. Get the list of formats to process by searching for `*.Format.ps1xml` files in the entire module source folder and set the `FormatsToProcess` property in the manifest.
@@ -120,11 +120,11 @@ Linking the description to the module manifest file might show more how this wor
     ClrVersion             = '' # Get from manifest file, null if not provided.
     ProcessorArchitecture  = '' # Get from manifest file, null if not provided.
     RequiredModules        = @() # Get from source files, REQUIRES -Modules <Module-Name> | <Hashtable> -> Need to be installed and loaded on build time. Will be installed in global session state during installtion.
-    RequiredAssemblies     = @() # Get from assemblies\*.dll.
+    RequiredAssemblies     = @() # Get from assemblies\*.dll + modules\*.dll.
     ScriptsToProcess       = @() # Get from scripts\*.ps1 and classes\*.ps1 ordered by name. These are loaded to the caller session (parent of module session).
     TypesToProcess         = @() # Get from *.Types.ps1xml anywhere in the source module folder.
     FormatsToProcess       = @() # Get from *.Format.ps1xml anywhere in the source module folder.
-    NestedModules          = @() # Get from modules\*.psm1.
+    NestedModules          = @() # Get from modules\*.psm1 + modules\*.ps1 + modules\*.dll.
     FunctionsToExport      = @() # Get from public\*.ps1.
     CmdletsToExport        = @() # Get from manifest file, @() if not provided.
     VariablesToExport      = @() # Get from variables\public\*.ps1.
