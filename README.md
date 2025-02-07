@@ -17,7 +17,7 @@ This GitHub Action is a part of the [PSModule framework](https://github.com/PSMo
 
 During the build process the following steps are performed:
 
-1. **Runs local build scripts:** Searches for any `*build.ps1` files anywhere in the repository. These scripts are executed in **alphabetical order by file name** (irrespective of their path).
+1. **Runs local build scripts:** Searches for any `*build.ps1` files anywhere in the repository. These scripts are executed in **alphabetical order by filename** (irrespective of their path).
 This step lets you add custom build logic to process or modify the module contents before further build steps are performed.
 1. **Copies the source code** of the module to an output folder.
 1. **Builds the module manifest file** based on information from the GitHub repository and the source code. For more information, please read the [Module Manifest](#module-manifest) section.
