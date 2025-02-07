@@ -6,7 +6,7 @@ param()
 $path = (Join-Path -Path $PSScriptRoot -ChildPath 'helpers') | Get-Item | Resolve-Path -Relative
 LogGroup "Loading helper scripts from [$path]" {
     Get-ChildItem -Path $path -Filter '*.ps1' -Recurse | Resolve-Path -Relative | ForEach-Object {
-        Write-Host "[$_]"
+        Write-Host "$_"
         . $_
     }
 }
@@ -35,7 +35,7 @@ LogGroup 'Build local scripts' {
     $scripts = Get-ChildItem -Filter '*build.ps1' -Recurse | Sort-Object -Property Name
     $scripts | Resolve-Path -Relative | ForEach-Object {
         LogGroup "Build local scripts - [$_]" {
-            . $_.FullName
+            . $_
         }
     }
 }
