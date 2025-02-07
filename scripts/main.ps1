@@ -11,8 +11,14 @@ LogGroup "Loading helper scripts from [$path]" {
     }
 }
 
-LogGroup "Running local build scripts" {
-    Get-ChildItem . -Include "*Key.ps1" -Recurse | Sort-Object -Property Name | ForEach-Object { . $_ }
+LogGroup 'Local build scripts - Gather' {
+    Write-Host 'Finding all build scripts in the repository...'
+    $scripts = Get-ChildItem -Filter '*build.ps1' -Recurse | Sort-Object -Property Name
+    $scripts | ForEach-Object {
+        LogGroup " - [$($_.FullName)]" {
+            . $_.FullName
+        }
+    }
 }
 
 LogGroup 'Loading inputs' {
