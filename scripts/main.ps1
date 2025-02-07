@@ -34,7 +34,7 @@ LogGroup 'Build local scripts' {
     Write-Host 'Finding all build scripts in the repository...'
     $scripts = Get-ChildItem -Filter '*build.ps1' -Recurse | Sort-Object -Property Name
     $scripts | Resolve-Path -Relative | ForEach-Object {
-        LogGroup "Build local scripts - [$($_.FullName)]" {
+        LogGroup "Build local scripts - [$_]" {
             . $_.FullName
         }
     }
