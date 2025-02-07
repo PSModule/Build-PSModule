@@ -24,9 +24,9 @@ LogGroup 'Loading inputs' {
         throw "Module path [$moduleSourceFolderPath] does not exist."
     }
 
-    $modulesOutputFolderPath = Join-Path $env:GITHUB_WORKSPACE/$env:GITHUB_ACTION_INPUT_ModulesOutputPath
+    $modulesOutputFolderPath = Join-Path $env:GITHUB_WORKSPACE $env:GITHUB_ACTION_INPUT_ModulesOutputPath
     Write-Host "Modules output path: [$modulesOutputFolderPath]"
-    $docsOutputFolderPath = Join-Path $env:GITHUB_WORKSPACE/$env:GITHUB_ACTION_INPUT_DocsOutputPath
+    $docsOutputFolderPath = Join-Path $env:GITHUB_WORKSPACE $env:GITHUB_ACTION_INPUT_DocsOutputPath
     Write-Host "Docs output path:    [$docsOutputFolderPath]"
 }
 
