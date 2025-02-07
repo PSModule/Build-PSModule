@@ -32,8 +32,9 @@ LogGroup 'Loading inputs' {
 
 LogGroup 'Build local scripts' {
     Write-Host 'Finding all build scripts in the repository...'
-    $scripts = Get-ChildItem -Filter '*build.ps1' -Recurse | Sort-Object -Property Name
-    $scripts | Resolve-Path -Relative | ForEach-Object {
+    $scripts = Get-ChildItem -Filter '*build.ps1' -Recurse | Sort-Object -Property Name | Resolve-Path -Relative
+    $scripts | Format-Table
+    $scripts | ForEach-Object {
         LogGroup "Build local scripts - [$_]" {
             . $_
         }
