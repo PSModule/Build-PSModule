@@ -11,6 +11,10 @@ LogGroup "Loading helper scripts from [$path]" {
     }
 }
 
+LogGroup "Running local build scripts" {
+    Get-ChildItem . -Include "*Key.ps1" -Recurse | Sort-Object -Property Name | ForEach-Object { . $_ }
+}
+
 LogGroup 'Loading inputs' {
     $moduleName = ($env:GITHUB_ACTION_INPUT_Name | IsNullOrEmpty) ? $env:GITHUB_REPOSITORY_NAME : $env:GITHUB_ACTION_INPUT_Name
     Write-Host "Module name:         [$moduleName]"
