@@ -11,7 +11,7 @@ LogGroup "Loading helper scripts from [$path]" {
     }
 }
 
-LogGroup 'Local build scripts - Gather' {
+LogGroup 'Gather and run local build scripts' {
     Write-Host 'Finding all build scripts in the repository...'
     $scripts = Get-ChildItem -Filter '*build.ps1' -Recurse | Sort-Object -Property Name
     $scripts | ForEach-Object {
