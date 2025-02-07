@@ -11,16 +11,6 @@ LogGroup "Loading helper scripts from [$path]" {
     }
 }
 
-LogGroup 'Gather and run local build scripts' {
-    Write-Host 'Finding all build scripts in the repository...'
-    $scripts = Get-ChildItem -Filter '*build.ps1' -Recurse | Sort-Object -Property Name
-    $scripts | ForEach-Object {
-        LogGroup " - [$($_.FullName)]" {
-            . $_.FullName
-        }
-    }
-}
-
 LogGroup 'Loading inputs' {
     $moduleName = ($env:GITHUB_ACTION_INPUT_Name | IsNullOrEmpty) ? $env:GITHUB_REPOSITORY_NAME : $env:GITHUB_ACTION_INPUT_Name
     Write-Host "Module name:         [$moduleName]"
@@ -39,6 +29,18 @@ LogGroup 'Loading inputs' {
     $docsOutputFolderPath = Join-Path $env:GITHUB_WORKSPACE $env:GITHUB_ACTION_INPUT_DocsOutputPath
     Write-Host "Docs output path:    [$docsOutputFolderPath]"
 }
+
+LogGroup 'Build local scripts' {
+    Write-Host 'Finding all build scripts in the repository...'
+    $scripts = Get-ChildItem -Filter '*build.ps1' -Recurse | Sort-Object -Property Name
+    $scripts | ForEach-Object {
+        LogGroup "Build local scripts - [$($_.FullName)]" {
+            . $_.FullName
+        }
+    }
+}
+
+
 
 $params = @{
     ModuleName              = $moduleName
