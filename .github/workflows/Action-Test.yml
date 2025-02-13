@@ -34,7 +34,6 @@ jobs:
           Name: PSModuleTest
           Path: tests/src
           ModulesOutputPath: tests/outputs/modules
-          DocsOutputPath: tests/outputs/docs
 
   ActionTestWithManifest:
     name: Action-Test - [DefaultWithManifest]
@@ -52,6 +51,4 @@ jobs:
           Name: PSModuleTest
           Path: tests/srcWithManifest
           ModulesOutputPath: tests/outputs/modules
-          DocsOutputPath: tests/outputs/docs
           ModuleArtifactName: moduleWithManifest
-          DocsArtifactName: docsWithManifest

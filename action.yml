@@ -17,18 +17,10 @@ inputs:
     description: Path to the folder where the built modules are outputted.
     required: false
     default: outputs/modules
-  DocsOutputPath:
-    description: Path to the folder where the built docs are outputted.
-    required: false
-    default: outputs/docs
   ModuleArtifactName:
     description: Name of the module artifact to upload.
     required: false
     default: module
-  DocsArtifactName:
-    description: Name of the docs artifact to upload.
-    required: false
-    default: docs
   Debug:
     description: Enable debug output.
     required: false
@@ -54,7 +46,6 @@ runs:
         GITHUB_ACTION_INPUT_Name: ${{ inputs.Name }}
         GITHUB_ACTION_INPUT_Path: ${{ inputs.Path }}
         GITHUB_ACTION_INPUT_ModulesOutputPath: ${{ inputs.ModulesOutputPath }}
-        GITHUB_ACTION_INPUT_DocsOutputPath: ${{ inputs.DocsOutputPath }}
       with:
         Debug: ${{ inputs.Debug }}
         Prerelease: ${{ inputs.Prerelease }}
@@ -62,7 +53,7 @@ runs:
         Version: ${{ inputs.Version }}
         Script: |
           # Build-PSModule
-          . "${{ github.action_path }}\scripts\main.ps1"
+          ${{ github.action_path }}\scripts\main.ps1
 
     - name: Upload module artifact
       uses: actions/upload-artifact@v4

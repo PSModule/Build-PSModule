@@ -25,11 +25,7 @@ function Build-PSModule {
 
         # Path to the folder where the built modules are outputted.
         [Parameter(Mandatory)]
-        [string] $ModulesOutputFolderPath,
-
-        # Path to the folder where the documentation is outputted.
-        [Parameter(Mandatory)]
-        [string] $DocsOutputFolderPath
+        [string] $ModulesOutputFolderPath
     )
 
     LogGroup "Building module [$ModuleName]" {
@@ -43,9 +39,6 @@ function Build-PSModule {
 
         $moduleOutputFolder = New-Item -Path $ModulesOutputFolderPath -Name $ModuleName -ItemType Directory -Force
         Write-Host "Module output folder: [$moduleOutputFolder]"
-
-        $docsOutputFolder = New-Item -Path $DocsOutputFolderPath -ItemType Directory -Force
-        Write-Host "Docs output folder:   [$docsOutputFolder]"
     }
 
     Build-PSModuleBase -ModuleName $ModuleName -ModuleSourceFolder $moduleSourceFolder -ModuleOutputFolder $moduleOutputFolder

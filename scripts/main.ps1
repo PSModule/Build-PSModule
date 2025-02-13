@@ -26,8 +26,6 @@ LogGroup 'Loading inputs' {
 
     $modulesOutputFolderPath = Join-Path $env:GITHUB_WORKSPACE $env:GITHUB_ACTION_INPUT_ModulesOutputPath
     Write-Host "Modules output path: [$modulesOutputFolderPath]"
-    $docsOutputFolderPath = Join-Path $env:GITHUB_WORKSPACE $env:GITHUB_ACTION_INPUT_DocsOutputPath
-    Write-Host "Docs output path:    [$docsOutputFolderPath]"
 }
 
 LogGroup 'Build local scripts' {
@@ -47,7 +45,6 @@ $params = @{
     ModuleName              = $moduleName
     ModuleSourceFolderPath  = $moduleSourceFolderPath
     ModulesOutputFolderPath = $modulesOutputFolderPath
-    DocsOutputFolderPath    = $docsOutputFolderPath
 }
 
 Build-PSModule @params

@@ -22,7 +22,6 @@ This step lets you add custom build logic to process or modify the module conten
 1. **Copies the source code** of the module to an output folder.
 1. **Builds the module manifest file** based on information from the GitHub repository and the source code. For more information, please read the [Module Manifest](#module-manifest) section.
 1. **Builds the root module (.psm1) file** by combining source code and adding automation into the root module file. For more information, please read the [Root module](#root-module) section.
-1. **Builds the module documentation** using platyPS and comment-based help in the source code. For more information, please read the [Module documentation](#module-documentation) section.
 
 ## Usage
 
@@ -31,9 +30,7 @@ This step lets you add custom build logic to process or modify the module conten
 | `Name`                 | Name of the module to process.                                                                                                                      | `false`  |                   |
 | `Path`                 | Path to the folder where the modules are located.                                                                                                   | `false`  | `src`             |
 | `ModulesOutputPath`    | Path to the folder where the built modules are outputted.                                                                                           | `false`  | `outputs/modules` |
-| `DocsOutputPath`       | Path to the folder where the built docs are outputted.                                                                                              | `false`  | `outputs/docs`    |
 | `ModuleArtifactName`   | Name of the module artifact to upload.                                                                                                              | `false`  | `module`          |
-| `DocsArtifactName`     | Name of the docs artifact to upload.                                                                                                                | `false`  | `docs`            |
 | `Debug`                | Enable debug output.                                                                                                                                | `false`  | `'false'`         |
 | `Verbose`              | Enable verbose output.                                                                                                                              | `false`  | `'false'`         |
 | `Version`              | Specifies the version of the GitHub module to be installed. The value must be an exact version.                                                     | `false`  |                   |
@@ -150,10 +147,6 @@ Linking the description to the module manifest file might show more how this wor
 }
 ```
 
-## Module documentation
-
-The module documentation is built using `platyPS` and comment-based help in the source code. The documentation is currently not published anywhere but is expected to be published to GitHub Pages in a future release.
-
 ## Permissions
 
 This action does not require any special permissions.
@@ -173,10 +166,3 @@ This action does not require any special permissions.
 
 - [PowerShell scripting performance considerations](https://learn.microsoft.com/powershell/scripting/dev-cross-plat/performance/script-authoring-considerations)
 - [PowerShell module authoring considerations](https://learn.microsoft.com/powershell/scripting/dev-cross-plat/performance/module-authoring-considerations)
-
-**Documentation:**
-
-- [platyPS reference](https://learn.microsoft.com/powershell/module/platyps/?source=recommendations)
-- [PlatyPS overview](https://learn.microsoft.com/powershell/utility-modules/platyps/overview?view=ps-modules)
-- [about_Comment_Based_Help](https://go.microsoft.com/fwlink/?LinkID=123415)
-- [Supporting Updatable Help](https://learn.microsoft.com/powershell/scripting/developer/help/supporting-updatable-help)
