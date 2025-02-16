@@ -1,6 +1,4 @@
-﻿#Requires -Modules @{ ModuleName = 'Utilities'; ModuleVersion = '0.3.0' }
-
-function Get-PSModuleAliasesToExport {
+﻿function Get-PSModuleAliasesToExport {
     <#
         .SYNOPSIS
         Gets the aliases to export from the module manifest.
@@ -12,6 +10,11 @@ function Get-PSModuleAliasesToExport {
         Get-PSModuleAliasesToExport -SourceFolderPath 'C:\MyModule\src\MyModule'
     #>
     [CmdletBinding()]
+    #Requires -Modules @{ ModuleName = 'Utilities'; ModuleVersion = '0.3.0' }
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSAvoidUsingWriteHost', '', Scope = 'Function',
+        Justification = 'Want to just write to the console, not the pipeline.'
+    )]
     param(
         # Path to the folder where the module source code is located.
         [Parameter(Mandatory)]
