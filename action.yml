@@ -53,7 +53,7 @@ runs:
         Version: ${{ inputs.Version }}
         Script: |
           # Build-PSModule
-          ${{ github.action_path }}\scripts\main.ps1
+          '${{ github.action_path }}\scripts\main.ps1'
 
     - name: Upload module artifact
       uses: actions/upload-artifact@v4
