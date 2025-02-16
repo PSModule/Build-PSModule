@@ -4,7 +4,8 @@
         "consoleFull"
     ],
     "ignore": [
-        "**/tests/*"
+        "**/tests/*",
+        ".github/workflows/Action-Test.yml"
     ],
     "absolute": true
 }
