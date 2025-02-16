@@ -1,5 +1,5 @@
 ﻿[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
-    'PSAvoidUsingWriteHost', '', Scope = 'Function',
+    'PSAvoidUsingWriteHost', '',
     Justification = 'Want to just write to the console, not the pipeline.'
 )]
 [CmdletBinding()]
