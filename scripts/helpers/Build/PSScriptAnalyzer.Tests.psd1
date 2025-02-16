@@ -50,7 +50,6 @@
         }
     }
     ExcludeRules = @(
-        'PSAvoidUsingCmdletAliases',
         'PSUseToExportFieldsInManifest'
     )
 }
