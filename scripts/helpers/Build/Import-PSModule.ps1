@@ -1,6 +1,4 @@
-﻿#Requires -Modules @{ ModuleName = 'Utilities'; ModuleVersion = '0.3.0' }
-
-function Import-PSModule {
+﻿function Import-PSModule {
     <#
         .SYNOPSIS
         Imports a build PS module.
@@ -14,6 +12,11 @@ function Import-PSModule {
         Imports a module located at $ModuleFolderPath with the name $ModuleName.
     #>
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSAvoidUsingWriteHost', '', Scope = 'Function',
+        Justification = 'Want to just write to the console, not the pipeline.'
+    )]
+    #Requires -Modules @{ ModuleName = 'Utilities'; ModuleVersion = '0.3.0' }
     param(
         # Path to the folder where the module source code is located.
         [Parameter(Mandatory)]

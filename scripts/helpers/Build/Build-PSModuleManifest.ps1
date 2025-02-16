@@ -1,19 +1,18 @@
-﻿#Requires -Modules @{ ModuleName = 'GitHub'; ModuleVersion = '0.13.2' }
-#Requires -Modules @{ ModuleName = 'Utilities'; ModuleVersion = '0.3.0' }
-
-function Build-PSModuleManifest {
+﻿function Build-PSModuleManifest {
     <#
-        .SYNOPSIS
-        Compiles the module manifest.
+    .SYNOPSIS
+    Compiles the module manifest.
 
-        .DESCRIPTION
-        This function will compile the module manifest.
-        It will generate the module manifest file and copy it to the output folder.
+    .DESCRIPTION
+    This function will compile the module manifest.
+    It will generate the module manifest file and copy it to the output folder.
 
-        .EXAMPLE
-        Build-PSModuleManifest -SourceFolderPath 'C:\MyModule\src\MyModule' -OutputFolderPath 'C:\MyModule\build\MyModule'
+    .EXAMPLE
+    Build-PSModuleManifest -SourceFolderPath 'C:\MyModule\src\MyModule' -OutputFolderPath 'C:\MyModule\build\MyModule'
     #>
     [CmdletBinding()]
+    #Requires -Modules @{ ModuleName = 'GitHub'; ModuleVersion = '0.13.2' }
+    #Requires -Modules @{ ModuleName = 'Utilities'; ModuleVersion = '0.3.0' }
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
         'PSAvoidLongLines', '', Scope = 'Function',
         Justification = 'Easier to read the multi ternery operators in a single line.'
@@ -21,6 +20,10 @@ function Build-PSModuleManifest {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
         'PSReviewUnusedParameter', '', Scope = 'Function',
         Justification = 'LogGroup - Scoping affects the variables line of sight.'
+    )]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSAvoidUsingWriteHost', '', Scope = 'Function',
+        Justification = 'Want to just write to the console, not the pipeline.'
     )]
     param(
         # Name of the module.

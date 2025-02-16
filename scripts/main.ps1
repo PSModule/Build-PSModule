@@ -1,7 +1,11 @@
-﻿#Requires -Modules Utilities
-
+﻿[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    'PSAvoidUsingWriteHost', '',
+    Justification = 'Want to just write to the console, not the pipeline.'
+)]
 [CmdletBinding()]
 param()
+
+#Requires -Modules Utilities
 
 $path = (Join-Path -Path $PSScriptRoot -ChildPath 'helpers') | Get-Item | Resolve-Path -Relative
 LogGroup "Loading helper scripts from [$path]" {

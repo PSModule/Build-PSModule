@@ -1,25 +1,28 @@
-﻿#Requires -Modules @{ ModuleName = 'Retry'; ModuleVersion = '0.1.3' }
-
-function Resolve-PSModuleDependency {
+﻿function Resolve-PSModuleDependency {
     <#
-        .SYNOPSIS
-        Resolve dependencies for a module based on the manifest file.
+    .SYNOPSIS
+    Resolve dependencies for a module based on the manifest file.
 
-        .DESCRIPTION
-        Resolve dependencies for a module based on the manifest file, following PSModuleInfo structure
+    .DESCRIPTION
+    Resolve dependencies for a module based on the manifest file, following PSModuleInfo structure
 
-        .EXAMPLE
-        Resolve-PSModuleDependency -Path 'C:\MyModule\MyModule.psd1'
+    .EXAMPLE
+    Resolve-PSModuleDependency -Path 'C:\MyModule\MyModule.psd1'
 
-        Installs all modules defined in the manifest file, following PSModuleInfo structure.
+    Installs all modules defined in the manifest file, following PSModuleInfo structure.
 
-        .NOTES
-        Should later be adapted to support both pre-reqs, and dependencies.
-        Should later be adapted to take 4 parameters sets: specific version ("requiredVersion" | "GUID"), latest version ModuleVersion,
-        and latest version within a range MinimumVersion - MaximumVersion.
+    .NOTES
+    Should later be adapted to support both pre-reqs, and dependencies.
+    Should later be adapted to take 4 parameters sets: specific version ("requiredVersion" | "GUID"), latest version ModuleVersion,
+    and latest version within a range MinimumVersion - MaximumVersion.
     #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSAvoidUsingWriteHost', '', Scope = 'Function',
+        Justification = 'Want to just write to the console, not the pipeline.'
+    )]
     [Alias('Resolve-PSModuleDependencies')]
     [CmdletBinding()]
+    #Requires -Modules @{ ModuleName = 'Retry'; ModuleVersion = '0.1.3' }
     param(
         # The path to the manifest file.
         [Parameter(Mandatory)]

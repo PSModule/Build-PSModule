@@ -1,7 +1,4 @@
-﻿#Requires -Modules @{ ModuleName = 'GitHub'; ModuleVersion = '0.13.2' }
-#Requires -Modules @{ ModuleName = 'Utilities'; ModuleVersion = '0.3.0' }
-
-function Build-PSModule {
+﻿function Build-PSModule {
     <#
         .SYNOPSIS
         Builds a module.
@@ -10,9 +7,15 @@ function Build-PSModule {
         Builds a module.
     #>
     [CmdletBinding()]
+    #Requires -Modules @{ ModuleName = 'GitHub'; ModuleVersion = '0.13.2' }
+    #Requires -Modules @{ ModuleName = 'Utilities'; ModuleVersion = '0.3.0' }
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
         'PSReviewUnusedParameter', '', Scope = 'Function',
         Justification = 'LogGroup - Scoping affects the variables line of sight.'
+    )]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSAvoidUsingWriteHost', '', Scope = 'Function',
+        Justification = 'Want to just write to the console, not the pipeline.'
     )]
     param(
         # Name of the module.

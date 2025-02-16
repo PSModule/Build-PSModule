@@ -1,10 +1,7 @@
-﻿#Requires -Modules @{ ModuleName = 'GitHub'; ModuleVersion = '0.13.2' }
-#Requires -Modules @{ ModuleName = 'Utilities'; ModuleVersion = '0.3.0' }
-
-function Update-PSModuleManifestAliasesToExport {
+﻿function Update-PSModuleManifestAliasesToExport {
     <#
-        .SYNOPSIS
-        Updates the aliases to export in the module manifest.
+    .SYNOPSIS
+    Updates the aliases to export in the module manifest.
     #>
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
         'PSUseShouldProcessForStateChangingFunctions', '', Scope = 'Function',
@@ -14,6 +11,12 @@ function Update-PSModuleManifestAliasesToExport {
         'PSReviewUnusedParameter', '', Scope = 'Function',
         Justification = 'LogGroup - Scoping affects the variables line of sight.'
     )]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSAvoidUsingWriteHost', '', Scope = 'Function',
+        Justification = 'Want to just write to the console, not the pipeline.'
+    )]
+    #Requires -Modules @{ ModuleName = 'GitHub'; ModuleVersion = '0.13.2' }
+    #Requires -Modules @{ ModuleName = 'Utilities'; ModuleVersion = '0.3.0' }
     [CmdletBinding()]
     param(
         # Name of the module.
