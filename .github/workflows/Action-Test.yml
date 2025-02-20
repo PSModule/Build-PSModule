@@ -35,6 +35,24 @@ jobs:
           Path: tests/src
           ModulesOutputPath: tests/outputs/modules
 
+  ActionTestMinimal:
+    name: Action-Test - [Minimal]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Initialize environment
+        uses: PSModule/Initialize-PSModule@main
+
+      - name: Action-Test
+        uses: ./
+        with:
+          Name: PSModuleTest
+          Path: tests/srcMinimal
+          ModulesOutputPath: tests/outputs/modules
+          ModuleArtifactName: moduleMinimal
+
   ActionTestWithManifest:
     name: Action-Test - [DefaultWithManifest]
     runs-on: ubuntu-24.04
