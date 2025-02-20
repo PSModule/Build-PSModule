@@ -25,6 +25,7 @@
 
     Write-Host "[$manifestPropertyName]"
 
+    $variablesToExport = [Collections.Generic.List[string]]::new()
     $variableFolderPath = Join-Path -Path $SourceFolderPath -ChildPath 'variables/public'
     if (-not (Test-Path -Path $variableFolderPath -PathType Container)) {
         Write-Host "[$manifestPropertyName] - [Folder not found] - [$variableFolderPath]"
@@ -32,7 +33,6 @@
     }
     $scriptFilePaths = Get-ChildItem -Path $variableFolderPath -Recurse -File -Filter *.ps1 | Select-Object -ExpandProperty FullName
 
-    $variablesToExport = [Collections.Generic.List[string]]::new()
     $scriptFilePaths | ForEach-Object {
         $ast = [System.Management.Automation.Language.Parser]::ParseFile($_, [ref]$null, [ref]$null)
         $variables = Get-RootLevelVariable -Ast $ast
