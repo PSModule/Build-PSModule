@@ -14,6 +14,7 @@
         'PSAvoidUsingWriteHost', '', Scope = 'Function',
         Justification = 'Want to just write to the console, not the pipeline.'
     )]
+    [OutputType([string[]])]
     [CmdletBinding()]
     param(
         # Path to the folder where the module source code is located.
@@ -29,7 +30,7 @@
     $variableFolderPath = Join-Path -Path $SourceFolderPath -ChildPath 'variables/public'
     if (-not (Test-Path -Path $variableFolderPath -PathType Container)) {
         Write-Host "[$manifestPropertyName] - [Folder not found] - [$variableFolderPath]"
-        return $variablesToExport
+        return ''
     }
     $scriptFilePaths = Get-ChildItem -Path $variableFolderPath -Recurse -File -Filter *.ps1 | Select-Object -ExpandProperty FullName
 
