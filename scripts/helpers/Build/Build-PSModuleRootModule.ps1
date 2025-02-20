@@ -1,5 +1,5 @@
 ﻿#Requires -Modules @{ ModuleName = 'GitHub'; ModuleVersion = '0.13.2' }
-#Requires -Modules @{ ModuleName = 'Utilities'; ModuleVersion = '0.3.0' }
+#Requires -Modules @{ ModuleName = 'Hashtable'; ModuleVersion = '1.1.1' }
 
 function Build-PSModuleRootModule {
     <#
@@ -222,7 +222,7 @@ Write-Debug "[`$scriptName] - $relativePath - Done"
         #region - Export-ModuleMember
         Add-Content -Path $rootModuleFile -Force -Value $classExports
 
-        $exportsString = Convert-HashtableToString -Hashtable $exports
+        $exportsString = $exports | Format-Hashtable
 
         Write-Host ($exportsString | Out-String)
 
