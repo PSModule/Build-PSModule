@@ -32,14 +32,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Initialize environment
-      uses: PSModule/Initialize-PSModule@v1
-      with:
-        Debug: ${{ inputs.Debug }}
-        Prerelease: ${{ inputs.Prerelease }}
-        Verbose: ${{ inputs.Verbose }}
-        Version: ${{ inputs.Version }}
-
     - name: Run Build-PSModule
       uses: PSModule/GitHub-Script@v1
       env:

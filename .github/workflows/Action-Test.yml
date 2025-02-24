@@ -33,7 +33,6 @@ jobs:
         with:
           Name: PSModuleTest
           Path: tests/src
-          ModulesOutputPath: tests/outputs/modules
 
   ActionTestMinimal:
     name: Action-Test - [Minimal]
@@ -50,8 +49,6 @@ jobs:
         with:
           Name: PSModuleTest
           Path: tests/srcMinimal
-          ModulesOutputPath: tests/outputs/modules
-          ModuleArtifactName: moduleMinimal
 
   ActionTestWithManifest:
     name: Action-Test - [DefaultWithManifest]
@@ -68,4 +65,3 @@ jobs:
         with:
           Name: PSModuleTest
           Path: tests/srcWithManifest
-          ModulesOutputPath: tests/outputs/modules
