@@ -55,6 +55,6 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.ArtifactName }}
-        path: ${{ inputs.Path }}/outputs/module/${{ fromJson(steps.build.outputs.result).ModuleName }}
+        path: ${{ inputs.Path }}/outputs/module
         if-no-files-found: error
         retention-days: 1
