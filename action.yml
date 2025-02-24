@@ -34,6 +34,7 @@ runs:
   steps:
     - name: Run Build-PSModule
       uses: PSModule/GitHub-Script@v1
+      id: build
       env:
         PSMODULE_BUILD_PSMODULE_INPUT_Name: ${{ inputs.Name }}
         PSMODULE_BUILD_PSMODULE_INPUT_Path: ${{ inputs.Path }}
@@ -45,3 +46,11 @@ runs:
         Script: |
           # Build-PSModule
           ${{ github.action_path }}/scripts/main.ps1
+
+    - name: Upload module artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: module
+        path: outputs/module/${{ fromJson(steps.build.outputs.result).ModuleName }}
+        if-no-files-found: error
+        retention-days: 1

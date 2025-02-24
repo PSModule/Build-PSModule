@@ -22,6 +22,7 @@ LogGroup 'Loading inputs' {
         $env:PSMODULE_BUILD_PSMODULE_INPUT_Name
     }
     Write-Host "Module name:         [$moduleName]"
+    Set-GitHubOutput -Name ModuleName -Value $moduleName
 
     $sourceFolderPath = Join-Path -Path $env:PSMODULE_BUILD_PSMODULE_INPUT_Path -ChildPath 'src'
     if (-not (Test-Path -Path $sourceFolderPath)) {
