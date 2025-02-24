@@ -12,11 +12,7 @@ inputs:
   Path:
     description: Path to the folder where the modules are located.
     required: false
-    default: src
-  ModulesOutputPath:
-    description: Path to the folder where the built modules are outputted.
-    required: false
-    default: outputs/modules
+    default: ${{ github.workspace }}
   Debug:
     description: Enable debug output.
     required: false
@@ -36,12 +32,19 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Initialize environment
+      uses: PSModule/Initialize-PSModule@v1
+      with:
+        Debug: ${{ inputs.Debug }}
+        Prerelease: ${{ inputs.Prerelease }}
+        Verbose: ${{ inputs.Verbose }}
+        Version: ${{ inputs.Version }}
+
     - name: Run Build-PSModule
       uses: PSModule/GitHub-Script@v1
       env:
-        GITHUB_ACTION_INPUT_Name: ${{ inputs.Name }}
-        GITHUB_ACTION_INPUT_Path: ${{ inputs.Path }}
-        GITHUB_ACTION_INPUT_ModulesOutputPath: ${{ inputs.ModulesOutputPath }}
+        PSMODULE_BUILD_PSMODULE_INPUT_Name: ${{ inputs.Name }}
+        PSMODULE_BUILD_PSMODULE_INPUT_Path: ${{ inputs.Path }}
       with:
         Debug: ${{ inputs.Debug }}
         Prerelease: ${{ inputs.Prerelease }}
@@ -49,4 +52,4 @@ runs:
         Version: ${{ inputs.Version }}
         Script: |
           # Build-PSModule
-          ${{ github.action_path }}\scripts\main.ps1
+          ${{ github.action_path }}/scripts/main.ps1
