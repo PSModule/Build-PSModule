@@ -24,13 +24,14 @@ LogGroup 'Loading inputs' {
     Write-Host "Module name:         [$moduleName]"
     Set-GitHubOutput -Name ModuleName -Value $moduleName
 
-    $sourceFolderPath = Join-Path -Path $env:PSMODULE_BUILD_PSMODULE_INPUT_Path -ChildPath 'src'
-    if (-not (Test-Path -Path $sourceFolderPath)) {
-        throw "Source folder path [$sourceFolderPath] does not exist."
-    }
-
-    $moduleOutputFolderPath = Join-Path $env:PSMODULE_BUILD_PSMODULE_INPUT_Path -ChildPath 'outputs/module'
+    $sourceFolderPath = Resolve-Path -Path 'src' | Select-Object -ExpandProperty Path
+    $moduleOutputFolderPath = Join-Path . -ChildPath 'outputs/module'
     Write-Host "Modules output path: [$moduleOutputFolderPath]"
+    [pscustomobject]@{
+        moduleName             = $moduleName
+        sourceFolderPath       = $sourceFolderPath
+        moduleOutputFolderPath = $moduleOutputFolderPath
+    } | Format-List
 }
 
 LogGroup 'Build local scripts' {

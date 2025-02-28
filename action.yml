@@ -9,14 +9,10 @@ inputs:
   Name:
     description: Name of the module to process.
     required: false
-  Path:
-    description: Path to the folder where the modules are located.
-    required: false
-    default: ${{ github.workspace }}
   ArtifactName:
     description: Name of the artifact to upload.
     required: false
-    default: 'module'
+    default: module
   Debug:
     description: Enable debug output.
     required: false
@@ -32,6 +28,10 @@ inputs:
     description: Allow prerelease versions if available.
     required: false
     default: 'false'
+  WorkingDirectory:
+    description: The working directory where the script will run from.
+    required: false
+    default: ${{ github.workspace }}
 
 runs:
   using: composite
@@ -41,12 +41,12 @@ runs:
       id: build
       env:
         PSMODULE_BUILD_PSMODULE_INPUT_Name: ${{ inputs.Name }}
-        PSMODULE_BUILD_PSMODULE_INPUT_Path: ${{ inputs.Path }}
       with:
         Debug: ${{ inputs.Debug }}
         Prerelease: ${{ inputs.Prerelease }}
         Verbose: ${{ inputs.Verbose }}
         Version: ${{ inputs.Version }}
+        WorkingDirectory: ${{ inputs.WorkingDirectory }}
         Script: |
           # Build-PSModule
           ${{ github.action_path }}/scripts/main.ps1
@@ -55,6 +55,6 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.ArtifactName }}
-        path: ${{ inputs.Path }}/outputs/module
+        path: ${{ inputs.WorkingDirectory }}/outputs/module
         if-no-files-found: error
         retention-days: 1
