@@ -25,15 +25,16 @@ This step lets you add custom build logic to process or modify the module conten
 
 ## Usage
 
-| Name                   | Description                                                                                                                                         | Required | Default           |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------- |
-| `Name`                 | Name of the module to process.                                                                                                                      | `false`  |                   |
-| `Path`                 | Path to the folder where the modules are located.                                                                                                   | `false`  | `src`             |
-| `ModulesOutputPath`    | Path to the folder where the built modules are outputted.                                                                                           | `false`  | `outputs/modules` |
-| `Debug`                | Enable debug output.                                                                                                                                | `false`  | `'false'`         |
-| `Verbose`              | Enable verbose output.                                                                                                                              | `false`  | `'false'`         |
-| `Version`              | Specifies the version of the GitHub module to be installed. The value must be an exact version.                                                     | `false`  |                   |
-| `Prerelease`           | Allow prerelease versions if available.                                                                                                             | `false`  | `'false'`         |
+| Name                | Description                                                                                     | Required | Default                   |
+| --------------------| ----------------------------------------------------------------------------------------------- | -------- | ------------------------- |
+| `Name`              | Name of the module to process.                                                                  | `false`  |                           |
+| `Path`              | Path to the folder where the modules are located.                                               | `false`  | `src`                     |
+| `ModulesOutputPath` | Path to the folder where the built modules are outputted.                                       | `false`  | `outputs/modules`         |
+| `Debug`             | Enable debug output.                                                                            | `false`  | `'false'`                 |
+| `Verbose`           | Enable verbose output.                                                                          | `false`  | `'false'`                 |
+| `Version`           | Specifies the version of the GitHub module to be installed. The value must be an exact version. | `false`  |                           |
+| `Prerelease`        | Allow prerelease versions if available.                                                         | `false`  | `'false'`                 |
+| `WorkingDirectory`  | The working directory where the script runs.                                                    | `false`  | `${{ github.workspace }}` |
 
 ## Root module
 
