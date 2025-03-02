@@ -29,7 +29,7 @@
     Resolve-PSModuleDependency -ManifestFilePath $manifestFilePath
 
     Write-Host ' - List installed modules'
-    Get-InstalledPSResource | Format-Table -AutoSize
+    Get-InstalledPSResource | Format-Table -AutoSize | Out-String
 
     Write-Host " - Importing module [$moduleName] v999"
     Import-Module $Path
