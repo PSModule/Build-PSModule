@@ -36,10 +36,10 @@
 
     Write-Host ' - List loaded modules'
     $availableModules = Get-Module -ListAvailable -Refresh -Verbose:$false
-    $availableModules | Select-Object Name, Version, Path | Sort-Object Name | Format-Table -AutoSize
+    $availableModules | Select-Object Name, Version, Path | Sort-Object Name | Format-Table -AutoSize | Out-String
     Write-Host ' - List commands'
     $commands = Get-Command -Module $moduleName -ListImported
-    Write-Host (Get-Command -Module $moduleName -ListImported | Format-Table -AutoSize | Out-String)
+    Get-Command -Module $moduleName -ListImported | Format-Table -AutoSize | Out-String
 
     if ($moduleName -notin $commands.Source) {
         throw 'Module not found'

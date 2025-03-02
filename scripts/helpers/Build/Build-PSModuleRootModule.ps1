@@ -224,7 +224,7 @@ Write-Debug "[`$scriptName] - $relativePath - Done"
 
         $exportsString = $exports | Format-Hashtable
 
-        Write-Host ($exportsString | Out-String)
+        $exportsString | Out-String
 
         $params = @{
             Path  = $rootModuleFile
