@@ -262,6 +262,6 @@ Export-ModuleMember @exports
     }
 
     LogGroup 'Build root module - Validate - File list' {
-        (Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force).FullName | Sort-Object
+        Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force | Resolve-Path -Relative | Sort-Object
     }
 }

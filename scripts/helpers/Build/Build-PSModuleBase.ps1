@@ -43,7 +43,6 @@
     }
 
     LogGroup 'Build base - Result' {
-        # Print relative paths
         Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force | Resolve-Path -Relative | Sort-Object
     }
 }
