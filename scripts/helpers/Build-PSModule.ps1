@@ -34,9 +34,11 @@
 
     LogGroup "Building module [$ModuleName]" {
         $moduleSourceFolder = Get-Item -Path $ModuleSourceFolderPath
-        Write-Host "Module source folder: [$moduleSourceFolder]"
         $moduleOutputFolder = New-Item -Path $ModuleOutputFolderPath -Name $ModuleName -ItemType Directory -Force
-        Write-Host "Module output folder: [$moduleOutputFolder]"
+        [pscustomobject]@{
+            ModuleSourceFolderPath = $moduleSourceFolder
+            ModuleOutputFolderPath = $moduleOutputFolder
+        } | Format-List | Out-String
     }
 
     Build-PSModuleBase -ModuleName $ModuleName -ModuleSourceFolder $moduleSourceFolder -ModuleOutputFolder $moduleOutputFolder
