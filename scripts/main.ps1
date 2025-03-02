@@ -21,17 +21,15 @@ LogGroup 'Loading inputs' {
     } else {
         $env:PSMODULE_BUILD_PSMODULE_INPUT_Name
     }
-    Write-Host "Module name:         [$moduleName]"
     Set-GitHubOutput -Name ModuleName -Value $moduleName
 
     $sourceFolderPath = Resolve-Path -Path 'src' | Select-Object -ExpandProperty Path
     $moduleOutputFolderPath = Join-Path . -ChildPath 'outputs/module'
-    Write-Host "Modules output path: [$moduleOutputFolderPath]"
     [pscustomobject]@{
         moduleName             = $moduleName
         sourceFolderPath       = $sourceFolderPath
         moduleOutputFolderPath = $moduleOutputFolderPath
-    } | Format-List
+    } | Format-List | Out-String
 }
 
 LogGroup 'Build local scripts' {
