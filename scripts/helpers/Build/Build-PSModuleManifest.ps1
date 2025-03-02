@@ -448,7 +448,7 @@
     }
 
     LogGroup 'Build manifest file - Format' {
-        Set-ModuleManifest -Path $outputManifestPath -Verbose
+        Set-ModuleManifest -Path $outputManifestPath
     }
 
     LogGroup 'Build manifest file - Result - After format' {
@@ -460,6 +460,6 @@
     }
 
     LogGroup 'Build manifest file - Validate - Test manifest file' {
-        Test-ModuleManifest -Path $outputManifestPath
+        Test-ModuleManifest -Path $outputManifestPath | Format-List | Out-String
     }
 }
