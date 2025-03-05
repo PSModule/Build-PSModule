@@ -257,7 +257,7 @@ Export-ModuleMember @exports
     }
 
     LogGroup 'Build root module - Validate - Import' {
-        Add-PSModulePath -Path (Split-Path -Path $ModuleOutputFolder -Parent)
+        Install-PSModule -Path $ModuleOutputFolder
         Import-PSModule -Path $ModuleOutputFolder
     }
 
