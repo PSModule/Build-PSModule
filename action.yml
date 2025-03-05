@@ -36,6 +36,9 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Install-PSModuleHelpers
+      uses: PSModule/Install-PSModuleHelpers@v1
+
     - name: Run Build-PSModule
       uses: PSModule/GitHub-Script@v1
       id: build
