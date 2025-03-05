@@ -363,6 +363,7 @@
         $manifestTags = [System.Collections.Generic.List[string]]::new()
         $tags = $PSData.Keys -contains 'Tags' ? ($PSData.Tags).Count -gt 0 ? $PSData.Tags : $repoLabels : $repoLabels
         $tags | ForEach-Object { $manifestTags.Add($_) }
+        'Windows', 'Linux', 'MacOS' | ForEach-Object { $manifestTags.Add($_) }
         # Add tags for compatability mode. https://docs.microsoft.com/en-us/powershell/scripting/developer/module/how-to-write-a-powershell-module-manifest?view=powershell-7.1#compatibility-tags
         if ($manifest.CompatiblePSEditions -contains 'Desktop') {
             if ($manifestTags -notcontains 'PSEdition_Desktop') {
