@@ -31,7 +31,7 @@ inputs:
   WorkingDirectory:
     description: The working directory where the script will run from.
     required: false
-    default: ${{ github.workspace }}
+    default: '.'
 
 runs:
   using: composite
