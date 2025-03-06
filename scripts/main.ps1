@@ -24,7 +24,7 @@ LogGroup 'Loading inputs' {
     Set-GitHubOutput -Name ModuleName -Value $moduleName
 
     $sourceFolderPath = Resolve-Path -Path 'src' | Select-Object -ExpandProperty Path
-    $moduleOutputFolderPath = Join-Path . -ChildPath 'outputs/module'
+    $moduleOutputFolderPath = Join-Path $pwd -ChildPath 'outputs/module'
     [pscustomobject]@{
         moduleName             = $moduleName
         sourceFolderPath       = $sourceFolderPath
@@ -51,5 +51,7 @@ $params = @{
     ModuleOutputFolderPath = $moduleOutputFolderPath
 }
 Build-PSModule @params
+
+Set-GithubOutput -Name ModuleOutputFolderPath -Value $moduleOutputFolderPath
 
 exit 0
