@@ -60,10 +60,10 @@
         $manifest.ModuleVersion = '999.0.0'
         Write-Host "[ModuleVersion] - [$($manifest.ModuleVersion)]"
 
-        $manifest.Author = $manifest.Keys -contains 'Author' ? ($manifest.Author | IsNotNullOrEmpty) ? $manifest.Author : $env:GITHUB_REPOSITORY_OWNER : $env:GITHUB_REPOSITORY_OWNER
+        $manifest.Author = $manifest.Keys -contains 'Author' ? -not [string]::IsNullOrEmpty($manifest.Author) ? $manifest.Author : $env:GITHUB_REPOSITORY_OWNER : $env:GITHUB_REPOSITORY_OWNER
         Write-Host "[Author] - [$($manifest.Author)]"
 
-        $manifest.CompanyName = $manifest.Keys -contains 'CompanyName' ? ($manifest.CompanyName | IsNotNullOrEmpty) ? $manifest.CompanyName : $env:GITHUB_REPOSITORY_OWNER : $env:GITHUB_REPOSITORY_OWNER
+        $manifest.CompanyName = $manifest.Keys -contains 'CompanyName' ? -not [string]::IsNullOrEmpty($manifest.CompanyName) ? $manifest.CompanyName : $env:GITHUB_REPOSITORY_OWNER : $env:GITHUB_REPOSITORY_OWNER
         Write-Host "[CompanyName] - [$($manifest.CompanyName)]"
 
         $year = Get-Date -Format 'yyyy'
@@ -73,7 +73,7 @@
         Write-Host "[Copyright] - [$($manifest.Copyright)]"
 
         $repoDescription = gh repo view --json description | ConvertFrom-Json | Select-Object -ExpandProperty description
-        $manifest.Description = $manifest.Keys -contains 'Description' ? ($manifest.Description | IsNotNullOrEmpty) ? $manifest.Description : $repoDescription : $repoDescription
+        $manifest.Description = $manifest.Keys -contains 'Description' ? -not [string]::IsNullOrEmpty($manifest.Description) ? $manifest.Description : $repoDescription : $repoDescription
         Write-Host "[Description] - [$($manifest.Description)]"
 
         $manifest.PowerShellHostName = $manifest.Keys -contains 'PowerShellHostName' ? -not [string]::IsNullOrEmpty($manifest.PowerShellHostName) ? $manifest.PowerShellHostName : $null : $null
