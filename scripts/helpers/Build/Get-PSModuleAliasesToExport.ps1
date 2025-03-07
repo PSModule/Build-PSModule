@@ -10,6 +10,7 @@
         Get-PSModuleAliasesToExport -SourceFolderPath 'C:\MyModule\src\MyModule'
     #>
     [CmdletBinding()]
+    #Requires -Modules @{ ModuleName = 'Utilities'; ModuleVersion = '0.3.0' }
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
         'PSAvoidUsingWriteHost', '', Scope = 'Function',
         Justification = 'Want to just write to the console, not the pipeline.'
@@ -29,8 +30,7 @@
     $manifest = Get-ModuleManifest -Path $manifestFilePath -Verbose:$false
 
     Write-Host "[$manifestPropertyName]"
-    $aliasesToExport = (($manifest.AliasesToExport).count -eq 0) -or [string]::IsNullOrEmpty($manifest.AliasesToExport) ?
-    '*' : $manifest.AliasesToExport
+    $aliasesToExport = (($manifest.AliasesToExport).count -eq 0) -or ($manifest.AliasesToExport | IsNullOrEmpty) ? '*' : $manifest.AliasesToExport
     $aliasesToExport | ForEach-Object {
         Write-Host "[$manifestPropertyName] - [$_]"
     }
