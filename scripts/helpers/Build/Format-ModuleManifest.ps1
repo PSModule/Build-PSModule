@@ -22,7 +22,7 @@
     $manifestContent = Get-Content -Path $Path
     $manifestContent = $manifestContent | ForEach-Object { $_ -replace '#.*' }
     $manifestContent = $manifestContent | ForEach-Object { $_.TrimEnd() }
-    $manifestContent = $manifestContent | Where-Object { $_ | IsNotNullOrEmpty }
+    $manifestContent = $manifestContent | Where-Object { -not [string]::IsNullOrEmpty($_) }
     [System.IO.File]::WriteAllLines($Path, $manifestContent, $Utf8BomEncoding)
     $manifestContent = Get-Content -Path $Path -Raw
 

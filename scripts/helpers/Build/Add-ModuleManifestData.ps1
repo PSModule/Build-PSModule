@@ -156,7 +156,7 @@
     }
 
     foreach ($key in $changes.GetEnumerator().Name) {
-        $changes[$key] = $changes[$key] | Sort-Object -Unique | Where-Object { $_ | IsNotNullOrEmpty }
+        $changes[$key] = $changes[$key] | Sort-Object -Unique | Where-Object { -not [string]::IsNullOrEmpty($_) }
     }
 
     Set-ModuleManifest -Path $Path @changes
