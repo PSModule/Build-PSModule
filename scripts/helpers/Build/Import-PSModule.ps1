@@ -16,7 +16,6 @@
         'PSAvoidUsingWriteHost', '', Scope = 'Function',
         Justification = 'Want to just write to the console, not the pipeline.'
     )]
-    #Requires -Modules @{ ModuleName = 'Utilities'; ModuleVersion = '0.3.0' }
     param(
         # Path to the folder where the module source code is located.
         [Parameter(Mandatory)]
