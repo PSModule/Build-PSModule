@@ -16,6 +16,7 @@
         Justification = 'Want to just write to the console, not the pipeline.'
     )]
     #Requires -Modules @{ ModuleName = 'GitHub'; ModuleVersion = '0.13.2' }
+    #Requires -Modules @{ ModuleName = 'Utilities'; ModuleVersion = '0.3.0' }
     [CmdletBinding()]
     param(
         # Name of the module.
