@@ -130,7 +130,7 @@ $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
         $exports.Add('Function', (Get-PSModuleFunctionsToExport -SourceFolderPath $ModuleOutputFolder))
         $exports.Add('Variable', (Get-PSModuleVariablesToExport -SourceFolderPath $ModuleOutputFolder))
 
-        Write-Host ($exports | Out-String)
+        [pscustomobject]$exports | Format-List | Out-String
         #endregion - Analyze source files
 
         #region - Module header
@@ -224,7 +224,7 @@ Write-Debug "[`$scriptName] - $relativePath - Done"
 
         $exportsString = $exports | Format-Hashtable
 
-        Write-Host ($exportsString | Out-String)
+        $exportsString | Out-String
 
         $params = @{
             Path  = $rootModuleFile
@@ -257,11 +257,10 @@ Export-ModuleMember @exports
     }
 
     LogGroup 'Build root module - Validate - Import' {
-        Add-PSModulePath -Path (Split-Path -Path $ModuleOutputFolder -Parent)
-        Import-PSModule -Path $ModuleOutputFolder -ModuleName $ModuleName
+        Install-PSModule -Path $ModuleOutputFolder
     }
 
     LogGroup 'Build root module - Validate - File list' {
-        (Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force).FullName | Sort-Object
+        Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force | Resolve-Path -Relative | Sort-Object
     }
 }
