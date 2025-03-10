@@ -23,9 +23,13 @@
         [Parameter(Mandatory)]
         [string] $ModuleName,
 
-        # Folder where the module is outputted.
+        # Path to the folder where the module source code is located.
         [Parameter(Mandatory)]
-        [System.IO.DirectoryInfo] $ModuleSourceFolder
+        [System.IO.DirectoryInfo] $ModuleSourceFolder,
+
+        # Path to the folder where the built modules are outputted.
+        [Parameter(Mandatory)]
+        [System.IO.DirectoryInfo] $ModuleOutputFolder
     )
     LogGroup 'Updating aliases to export in module manifest' {
         Write-Host "Module name: [$ModuleName]"
@@ -87,7 +91,7 @@
         foreach ($alias in $allAliases) {
             Write-Host " - [$alias]"
         }
-        $outputManifestPath = Join-Path -Path $ModuleSourceFolder -ChildPath "$ModuleName.psd1"
+        $outputManifestPath = Join-Path -Path $ModuleOutputFolder -ChildPath "$ModuleName.psd1"
         Write-Host "Output manifest path: [$outputManifestPath]"
         Write-Host 'Setting module manifest with AliasesToExport'
         Set-ModuleManifest -Path $outputManifestPath -AliasesToExport $allAliases -Verbose
