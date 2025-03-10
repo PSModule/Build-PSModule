@@ -115,7 +115,7 @@ foreach ($Type in $ExportableClasses) {
 # Remove type accelerators when the module is removed.
 $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
     foreach ($Type in ($ExportableEnums + $ExportableClasses)) {
-        $TypeAcceleratorsClass::Remove($Type.FullName)
+        $null = $TypeAcceleratorsClass::Remove($Type.FullName)
     }
 }.GetNewClosure()
 #endregion Class exporter
