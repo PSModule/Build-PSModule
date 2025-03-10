@@ -39,7 +39,7 @@
         }
 
         # Get all child items in the module source folder of a powershell file type
-        $files = Get-ChildItem -Path $publicFunctionsPath -Recurse -File -Include '*.ps1', '*.psm1' | Select-Object -ExpandProperty Path
+        $files = Get-ChildItem -Path $publicFunctionsPath -Recurse -File -Include '*.ps1', '*.psm1' | Select-Object -ExpandProperty FullName
 
         # Initialize an array to store all found aliases
         $allAliases = @()
