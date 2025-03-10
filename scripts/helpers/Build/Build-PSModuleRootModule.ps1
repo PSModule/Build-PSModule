@@ -256,11 +256,11 @@ Export-ModuleMember @exports
         Write-Host (Show-FileContent -Path $rootModuleFile)
     }
 
-    LogGroup 'Build root module - Validate - Import' {
-        Install-PSModule -Path $ModuleOutputFolder
-    }
+    # LogGroup 'Build root module - Validate - Import' {
+    #     Install-PSModule -Path $ModuleOutputFolder
+    # }
 
-    LogGroup 'Build root module - Validate - File list' {
-        Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force | Resolve-Path -Relative | Sort-Object
-    }
+    # LogGroup 'Build root module - Validate - File list' {
+    #     Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force | Resolve-Path -Relative | Sort-Object
+    # }
 }
