@@ -85,11 +85,11 @@
 
         Write-Host "Found aliases: [$($allAliases.Count)]"
         foreach ($alias in $allAliases) {
-            Write-Host " - [$($alias.Name)]"
+            Write-Host " - [$alias]"
         }
         $outputManifestPath = Join-Path -Path $ModuleSourceFolder -ChildPath "$ModuleName.psd1"
         Write-Host "Output manifest path: [$outputManifestPath]"
         Write-Host 'Setting module manifest with AliasesToExport'
-        Set-ModuleManifest -Path $outputManifestPath -AliasesToExport $allAliases.Name -Verbose
+        Set-ModuleManifest -Path $outputManifestPath -AliasesToExport $allAliases -Verbose
     }
 }
