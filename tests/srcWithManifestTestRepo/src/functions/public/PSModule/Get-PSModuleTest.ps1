@@ -1,5 +1,5 @@
 ﻿#Requires -Modules Store
-#Requires -Modules @{ ModuleName = 'PSSemVer'; RequiredVersion = '1.0.0' }
+#Requires -Modules @{ ModuleName = 'PSSemVer'; ModuleVersion = '1.0.0' }
 #Requires -Modules @{ ModuleName = 'DynamicParams'; ModuleVersion = '1.1.8' }
 
 function Get-PSModuleTest {

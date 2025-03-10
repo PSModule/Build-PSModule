@@ -16,20 +16,20 @@ LogGroup "Loading helper scripts from [$path]" {
 }
 
 LogGroup 'Loading inputs' {
-    $moduleName = ($env:GITHUB_ACTION_INPUT_Name | IsNullOrEmpty) ? $env:GITHUB_REPOSITORY_NAME : $env:GITHUB_ACTION_INPUT_Name
-    Write-Host "Module name:         [$moduleName]"
-
-    $moduleSourceFolderPath = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath $env:GITHUB_ACTION_INPUT_Path/$moduleName
-    if (-not (Test-Path -Path $moduleSourceFolderPath)) {
-        $moduleSourceFolderPath = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath $env:GITHUB_ACTION_INPUT_Path
+    $moduleName = if ([string]::IsNullOrEmpty($env:PSMODULE_BUILD_PSMODULE_INPUT_Name)) {
+        $env:GITHUB_REPOSITORY_NAME
+    } else {
+        $env:PSMODULE_BUILD_PSMODULE_INPUT_Name
     }
-    Write-Host "Source module path:  [$moduleSourceFolderPath]"
-    if (-not (Test-Path -Path $moduleSourceFolderPath)) {
-        throw "Module path [$moduleSourceFolderPath] does not exist."
-    }
+    Set-GitHubOutput -Name ModuleName -Value $moduleName
 
-    $modulesOutputFolderPath = Join-Path $env:GITHUB_WORKSPACE $env:GITHUB_ACTION_INPUT_ModulesOutputPath
-    Write-Host "Modules output path: [$modulesOutputFolderPath]"
+    $sourceFolderPath = Resolve-Path -Path 'src' | Select-Object -ExpandProperty Path
+    $moduleOutputFolderPath = Join-Path $pwd -ChildPath 'outputs/module'
+    [pscustomobject]@{
+        moduleName             = $moduleName
+        sourceFolderPath       = $sourceFolderPath
+        moduleOutputFolderPath = $moduleOutputFolderPath
+    } | Format-List | Out-String
 }
 
 LogGroup 'Build local scripts' {
@@ -46,9 +46,12 @@ LogGroup 'Build local scripts' {
 }
 
 $params = @{
-    ModuleName              = $moduleName
-    ModuleSourceFolderPath  = $moduleSourceFolderPath
-    ModulesOutputFolderPath = $modulesOutputFolderPath
+    ModuleName             = $moduleName
+    ModuleSourceFolderPath = $sourceFolderPath
+    ModuleOutputFolderPath = $moduleOutputFolderPath
 }
-
 Build-PSModule @params
+
+Set-GithubOutput -Name ModuleOutputFolderPath -Value $moduleOutputFolderPath
+
+exit 0

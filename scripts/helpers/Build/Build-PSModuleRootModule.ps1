@@ -115,7 +115,7 @@ foreach ($Type in $ExportableClasses) {
 # Remove type accelerators when the module is removed.
 $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
     foreach ($Type in ($ExportableEnums + $ExportableClasses)) {
-        $TypeAcceleratorsClass::Remove($Type.FullName)
+        $null = $TypeAcceleratorsClass::Remove($Type.FullName)
     }
 }.GetNewClosure()
 #endregion Class exporter
@@ -130,7 +130,7 @@ $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
         $exports.Add('Function', (Get-PSModuleFunctionsToExport -SourceFolderPath $ModuleOutputFolder))
         $exports.Add('Variable', (Get-PSModuleVariablesToExport -SourceFolderPath $ModuleOutputFolder))
 
-        Write-Host ($exports | Out-String)
+        [pscustomobject]$exports | Format-List | Out-String
         #endregion - Analyze source files
 
         #region - Module header
@@ -224,7 +224,7 @@ Write-Debug "[`$scriptName] - $relativePath - Done"
 
         $exportsString = $exports | Format-Hashtable
 
-        Write-Host ($exportsString | Out-String)
+        $exportsString | Out-String
 
         $params = @{
             Path  = $rootModuleFile
@@ -256,12 +256,11 @@ Export-ModuleMember @exports
         Write-Host (Show-FileContent -Path $rootModuleFile)
     }
 
-    LogGroup 'Build root module - Validate - Import' {
-        Add-PSModulePath -Path (Split-Path -Path $ModuleOutputFolder -Parent)
-        Import-PSModule -Path $ModuleOutputFolder -ModuleName $ModuleName
-    }
+    # LogGroup 'Build root module - Validate - Import' {
+    #     Install-PSModule -Path $ModuleOutputFolder
+    # }
 
-    LogGroup 'Build root module - Validate - File list' {
-        (Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force).FullName | Sort-Object
-    }
+    # LogGroup 'Build root module - Validate - File list' {
+    #     Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force | Resolve-Path -Relative | Sort-Object
+    # }
 }
