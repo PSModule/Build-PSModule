@@ -31,7 +31,7 @@
         Write-Host "Module name: [$ModuleName]"
         Write-Host "Module output folder: [$ModuleSourceFolder]"
 
-        $publicFunctionsPath = Join-Path -Path $ModuleSourceFolder -ChildPath 'public/functions'
+        $publicFunctionsPath = Join-Path -Path $ModuleSourceFolder -ChildPath 'functions/public'
         Write-Host "Public functions path: [$publicFunctionsPath]"
         if (-not (Test-Path -Path $publicFunctionsPath)) {
             Write-Host "Public functions path does not exist: [$publicFunctionsPath]"
