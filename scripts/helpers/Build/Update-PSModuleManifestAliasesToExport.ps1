@@ -75,8 +75,8 @@
                     $aliasAttr = $funcAttributes | Where-Object { $_.TypeName.Name -eq 'Alias' }
 
                     if ($aliasAttr) {
-                        $allAliases = $aliasAttr.PositionalArguments | ForEach-Object { $_.ToString().Trim('"', "'") }
-                        Write-Host "  Found alias [$allAliases] for function [$funcName]"
+                        $aliases = $aliasAttr.PositionalArguments | ForEach-Object { $_.ToString().Trim('"', "'") }
+                        Write-Host "  Found alias [$aliases] for function [$funcName]"
                         $allAliases += $aliases
                     }
                 }
