@@ -162,7 +162,6 @@ $script:PSModuleInfo | Format-List | Out-String -Stream | ForEach-Object { Write
 $scriptName = $script:PSModuleInfo.Name
 Write-Debug "[$scriptName] - Importing module"
 
-# If in Windows PowerShell, set the $IsWindows variable to true.
 if ($PSEdition -eq 'Desktop') {
     $IsWindows = $true
 }
