@@ -134,12 +134,7 @@ $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
         #endregion - Analyze source files
 
         #region - Module header
-        $headerFilePath = Join-Path -Path $ModuleOutputFolder -ChildPath 'header.ps1'
-        if (Test-Path -Path $headerFilePath) {
-            Get-Content -Path $headerFilePath -Raw | Add-Content -Path $rootModuleFile -Force
-            $headerFilePath | Remove-Item -Force
-        } else {
-            Add-Content -Path $rootModuleFile -Force -Value @'
+        Add-Content -Path $rootModuleFile -Force -Value @'
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
     'PSAvoidAssignmentToAutomaticVariable', 'IsWindows',
     Justification = 'IsWindows doesnt exist in PS5.1'
@@ -148,6 +143,14 @@ $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
     'PSUseDeclaredVarsMoreThanAssignments', 'IsWindows',
     Justification = 'IsWindows doesnt exist in PS5.1'
 )]
+'@
+
+        $headerFilePath = Join-Path -Path $ModuleOutputFolder -ChildPath 'header.ps1'
+        if (Test-Path -Path $headerFilePath) {
+            Get-Content -Path $headerFilePath -Raw | Add-Content -Path $rootModuleFile -Force
+            $headerFilePath | Remove-Item -Force
+        } else {
+            Add-Content -Path $rootModuleFile -Force -Value @'
 [CmdletBinding()]
 param()
 '@
