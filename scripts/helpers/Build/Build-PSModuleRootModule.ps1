@@ -153,6 +153,9 @@ $script:PSModuleInfo = Test-ModuleManifest -Path "$PSScriptRoot\$baseName.psd1"
 $script:PSModuleInfo | Format-List | Out-String -Stream | ForEach-Object { Write-Debug $_ }
 $scriptName = $script:PSModuleInfo.Name
 Write-Debug "[$scriptName] - Importing module"
+if ($PSEdition -eq 'Desktop') {
+    $IsWindows = $true
+}
 '@
         #endregion - Module post-header
 
