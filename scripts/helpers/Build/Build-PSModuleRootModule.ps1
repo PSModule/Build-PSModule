@@ -160,7 +160,7 @@ param()
         #region - Module post-header
         Add-Content -Path $rootModuleFile -Force -Value @'
 $baseName = [System.IO.Path]::GetFileNameWithoutExtension($PSCommandPath)
-$script:PSModuleInfo = . "$PSScriptRoot\$baseName.psd1"
+$script:PSModuleInfo = Import-PowerShellDataFile -Path "$PSScriptRoot\$baseName.psd1"
 $script:PSModuleInfo | Format-List | Out-String -Stream | ForEach-Object { Write-Debug $_ }
 $scriptName = $script:PSModuleInfo.Name
 Write-Debug "[$scriptName] - Importing module"
