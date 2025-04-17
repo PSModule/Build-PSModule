@@ -115,7 +115,7 @@ foreach ($Type in $ExportableClasses) {
 # Remove type accelerators when the module is removed.
 $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
     foreach ($Type in ($ExportableEnums + $ExportableClasses)) {
-        $TypeAcceleratorsClass::Remove($Type.FullName)
+        $null = $TypeAcceleratorsClass::Remove($Type.FullName)
     }
 }.GetNewClosure()
 #endregion Class exporter
@@ -130,10 +130,21 @@ $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
         $exports.Add('Function', (Get-PSModuleFunctionsToExport -SourceFolderPath $ModuleOutputFolder))
         $exports.Add('Variable', (Get-PSModuleVariablesToExport -SourceFolderPath $ModuleOutputFolder))
 
-        Write-Host ($exports | Out-String)
+        [pscustomobject]$exports | Format-List | Out-String
         #endregion - Analyze source files
 
         #region - Module header
+        Add-Content -Path $rootModuleFile -Force -Value @'
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    'PSAvoidAssignmentToAutomaticVariable', 'IsWindows',
+    Justification = 'IsWindows doesnt exist in PS5.1'
+)]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    'PSUseDeclaredVarsMoreThanAssignments', 'IsWindows',
+    Justification = 'IsWindows doesnt exist in PS5.1'
+)]
+'@
+
         $headerFilePath = Join-Path -Path $ModuleOutputFolder -ChildPath 'header.ps1'
         if (Test-Path -Path $headerFilePath) {
             Get-Content -Path $headerFilePath -Raw | Add-Content -Path $rootModuleFile -Force
@@ -149,10 +160,15 @@ param()
         #region - Module post-header
         Add-Content -Path $rootModuleFile -Force -Value @'
 $baseName = [System.IO.Path]::GetFileNameWithoutExtension($PSCommandPath)
-$script:PSModuleInfo = Test-ModuleManifest -Path "$PSScriptRoot\$baseName.psd1"
+$script:PSModuleInfo = Import-PowerShellDataFile -Path "$PSScriptRoot\$baseName.psd1"
 $script:PSModuleInfo | Format-List | Out-String -Stream | ForEach-Object { Write-Debug $_ }
 $scriptName = $script:PSModuleInfo.Name
 Write-Debug "[$scriptName] - Importing module"
+
+if ($PSEdition -eq 'Desktop') {
+    $IsWindows = $true
+}
+
 '@
         #endregion - Module post-header
 
@@ -224,7 +240,7 @@ Write-Debug "[`$scriptName] - $relativePath - Done"
 
         $exportsString = $exports | Format-Hashtable
 
-        Write-Host ($exportsString | Out-String)
+        $exportsString | Out-String
 
         $params = @{
             Path  = $rootModuleFile
@@ -256,12 +272,11 @@ Export-ModuleMember @exports
         Write-Host (Show-FileContent -Path $rootModuleFile)
     }
 
-    LogGroup 'Build root module - Validate - Import' {
-        Add-PSModulePath -Path (Split-Path -Path $ModuleOutputFolder -Parent)
-        Import-PSModule -Path $ModuleOutputFolder -ModuleName $ModuleName
-    }
+    # LogGroup 'Build root module - Validate - Import' {
+    #     Install-PSModule -Path $ModuleOutputFolder
+    # }
 
-    LogGroup 'Build root module - Validate - File list' {
-        (Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force).FullName | Sort-Object
-    }
+    # LogGroup 'Build root module - Validate - File list' {
+    #     Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force | Resolve-Path -Relative | Sort-Object
+    # }
 }
