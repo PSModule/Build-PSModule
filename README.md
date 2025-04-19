@@ -39,8 +39,7 @@ This step lets you add custom build logic to process or modify the module conten
 
 ## Expected repository structure
 
-The action expects the module repository to be structured similarly as [Template-PSModule](https://github.com/PSModule/Template-PSModule).
-
+The action expects the module repository to be structured similarly to [Template-PSModule](https://github.com/PSModule/Template-PSModule).
 ## Root module
 
 The `src` folder may contain a 'root module' file. If present, the build function will disregard this file and build a new root module file based on the source code in the module folder.
