@@ -36,6 +36,10 @@ This step lets you add custom build logic to process or modify the module conten
 | `Prerelease`        | Allow prerelease versions if available.                                                         | `false`  | `'false'`         |
 | `WorkingDirectory`  | The working directory where the script runs.                                                    | `false`  | `'.'`             |
 
+## Expected repository structure
+
+The action expects the module repository to be structured similarly as [Template-PSModule](https://github.com/PSModule/Template-PSModule).
+
 ## Root module
 
 The `src` folder may contain a 'root module' file. If present, the build function will disregard this file and build a new root module file based on the source code in the module folder.
@@ -151,7 +155,7 @@ Linking the description to the module manifest file might show more how this wor
 
 This action does not require any special permissions.
 
-## Sources
+## References
 
 **Module manifest:**
 
