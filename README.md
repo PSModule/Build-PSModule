@@ -22,6 +22,7 @@ This step lets you add custom build logic to process or modify the module conten
 1. **Copies the source code** of the module to an output folder.
 1. **Builds the module manifest file** based on information from the GitHub repository and the source code. For more information, please read the [Module Manifest](#module-manifest) section.
 1. **Builds the root module (.psm1) file** by combining source code and adding automation into the root module file. For more information, please read the [Root module](#root-module) section.
+1. **Uploads the module artifact** so that it can be used in the next steps of the workflow.
 
 ## Usage
 
