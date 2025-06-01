@@ -37,7 +37,7 @@ runs:
   using: composite
   steps:
     - name: Install-PSModuleHelpers
-      uses: PSModule/Install-PSModuleHelpers@v1
+      uses: PSModule/Install-PSModuleHelpers@removeInit
 
     - name: Run Build-PSModule
       uses: PSModule/GitHub-Script@v1
