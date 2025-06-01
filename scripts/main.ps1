@@ -5,8 +5,6 @@
 [CmdletBinding()]
 param()
 
-#Requires -Modules Utilities
-
 $path = (Join-Path -Path $PSScriptRoot -ChildPath 'helpers') | Get-Item | Resolve-Path -Relative
 LogGroup "Loading helper scripts from [$path]" {
     Get-ChildItem -Path $path -Filter '*.ps1' -Recurse | Resolve-Path -Relative | ForEach-Object {
