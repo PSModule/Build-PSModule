@@ -11,7 +11,6 @@
     Build-PSModuleBase -SourceFolderPath 'C:\MyModule\src\MyModule' -OutputFolderPath 'C:\MyModule\build\MyModule'
     #>
     [CmdletBinding()]
-    #Requires -Modules @{ ModuleName = 'GitHub'; ModuleVersion = '0.13.2' }
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
         'PSReviewUnusedParameter', '', Scope = 'Function',
         Justification = 'LogGroup - Scoping affects the variables line of sight.'
