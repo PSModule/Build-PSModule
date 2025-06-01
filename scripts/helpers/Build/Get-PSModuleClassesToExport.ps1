@@ -17,7 +17,10 @@
         .NOTES
         Inspired by [about_Classes | Exporting classes with type accelerators](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_classes?view=powershell-7.4#exporting-classes-with-type-accelerators)
     #>
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidLongLines', '', Justification = 'Contains long links.')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSAvoidLongLines', '', Scope = 'Function',
+        Justification = 'Contains long links.'
+    )]
     [CmdletBinding()]
     param (
         # The path to the module root folder.
