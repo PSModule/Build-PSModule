@@ -6,9 +6,7 @@
     "ignore": [
         "**/tests/**",
         "**/.github/workflows/Action-Test.yml",
-        "**/scripts/helpers/Build/Build-PSModuleManifest.ps1",
-        "**/scripts/helpers/Build/Build-PSModuleRootModule.ps1",
-        "**/scripts/helpers/Build/PSScriptAnalyzer.Tests.psd1"
+        "**/scripts/helpers/**"
     ],
     "absolute": true
 }

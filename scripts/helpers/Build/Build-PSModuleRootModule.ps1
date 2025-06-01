@@ -1,7 +1,4 @@
-﻿#Requires -Modules @{ ModuleName = 'GitHub'; ModuleVersion = '0.13.2' }
-#Requires -Modules @{ ModuleName = 'Hashtable'; ModuleVersion = '1.1.1' }
-
-function Build-PSModuleRootModule {
+﻿function Build-PSModuleRootModule {
     <#
         .SYNOPSIS
         Compiles the module root module files.

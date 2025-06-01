@@ -10,10 +10,8 @@
         Get-PSModuleFunctionsToExport -SourceFolderPath 'C:\MyModule\src\MyModule'
     #>
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
-        'PSAvoidUsingWriteHost', '', Scope = 'Function',
-        Justification = 'Want to just write to the console, not the pipeline.'
-    )]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Scope = 'Function', Justification = 'Want to just write to the console, not the pipeline.')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidLongLines', '', Scope = 'Function', Justification = 'Contains long links.')]
     [OutputType([array])]
     param(
         # Path to the folder where the module source code is located.
