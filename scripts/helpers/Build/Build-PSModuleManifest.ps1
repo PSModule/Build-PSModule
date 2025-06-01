@@ -11,8 +11,6 @@
     Build-PSModuleManifest -SourceFolderPath 'C:\MyModule\src\MyModule' -OutputFolderPath 'C:\MyModule\build\MyModule'
     #>
     [CmdletBinding()]
-    #Requires -Modules @{ ModuleName = 'GitHub'; ModuleVersion = '0.13.2' }
-    #Requires -Modules @{ ModuleName = 'Utilities'; ModuleVersion = '0.3.0' }
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
         'PSAvoidLongLines', '', Scope = 'Function',
         Justification = 'Easier to read the multi ternery operators in a single line.'
