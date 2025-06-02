@@ -42,6 +42,7 @@ runs:
     - name: Run Build-PSModule
       shell: pwsh
       id: build
+      working-directory: ${{ inputs.WorkingDirectory }}
       env:
         PSMODULE_BUILD_PSMODULE_INPUT_Name: ${{ inputs.Name }}
       run: |
