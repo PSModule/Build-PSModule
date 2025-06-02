@@ -6,7 +6,7 @@
 param()
 
 $path = (Join-Path -Path $PSScriptRoot -ChildPath 'helpers') | Get-Item | Resolve-Path -Relative
-LogGroup "Loading helper scripts from [$path]" {
+Set-GitHubLogGroup "Loading helper scripts from [$path]" {
     Get-ChildItem -Path $path -Filter '*.ps1' -Recurse | Resolve-Path -Relative | ForEach-Object {
         Write-Host "$_"
         . $_
@@ -15,7 +15,7 @@ LogGroup "Loading helper scripts from [$path]" {
 
 $env:GITHUB_REPOSITORY_NAME = $env:GITHUB_REPOSITORY -replace '.+/'
 
-LogGroup 'Loading inputs' {
+Set-GitHubLogGroup 'Loading inputs' {
     $moduleName = if ([string]::IsNullOrEmpty($env:PSMODULE_BUILD_PSMODULE_INPUT_Name)) {
         $env:GITHUB_REPOSITORY_NAME
     } else {
@@ -30,14 +30,14 @@ LogGroup 'Loading inputs' {
     } | Format-List | Out-String
 }
 
-LogGroup 'Build local scripts' {
+Set-GitHubLogGroup 'Build local scripts' {
     Write-Host 'Execution order:'
     $scripts = Get-ChildItem -Filter '*build.ps1' -Recurse | Sort-Object -Property Name | Resolve-Path -Relative
     $scripts | ForEach-Object {
         Write-Host " - $_"
     }
     $scripts | ForEach-Object {
-        LogGroup "Build local scripts - [$_]" {
+        Set-GitHubLogGroup "Build local scripts - [$_]" {
             . $_
         }
     }

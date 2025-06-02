@@ -30,7 +30,7 @@
         [string] $ModuleOutputFolderPath
     )
 
-    LogGroup "Building module [$ModuleName]" {
+    Set-GitHubLogGroup "Building module [$ModuleName]" {
         $moduleSourceFolder = Get-Item -Path $ModuleSourceFolderPath
         $moduleOutputFolder = New-Item -Path $ModuleOutputFolderPath -Name $ModuleName -ItemType Directory -Force
         [pscustomobject]@{
@@ -44,7 +44,7 @@
     Build-PSModuleRootModule -ModuleName $ModuleName -ModuleOutputFolder $moduleOutputFolder
     Update-PSModuleManifestAliasesToExport -ModuleName $ModuleName -ModuleSourceFolder $moduleSourceFolder -ModuleOutputFolder $moduleOutputFolder
 
-    LogGroup 'Build manifest file - Final Result' {
+    Set-GitHubLogGroup 'Build manifest file - Final Result' {
         $outputManifestPath = Join-Path -Path $ModuleOutputFolder -ChildPath "$ModuleName.psd1"
         Show-FileContent -Path $outputManifestPath
     }

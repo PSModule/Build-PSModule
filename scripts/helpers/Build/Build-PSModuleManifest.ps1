@@ -33,7 +33,7 @@
         [System.IO.DirectoryInfo] $ModuleOutputFolder
     )
 
-    LogGroup 'Build manifest file' {
+    Set-GitHubLogGroup 'Build manifest file' {
         $sourceManifestFilePath = Join-Path -Path $ModuleOutputFolder -ChildPath "$ModuleName.psd1"
         Write-Host "[SourceManifestFilePath] - [$sourceManifestFilePath]"
         if (-not (Test-Path -Path $sourceManifestFilePath)) {
@@ -442,23 +442,23 @@
         New-ModuleManifest -Path $outputManifestPath @manifest
     }
 
-    LogGroup 'Build manifest file - Result - Before format' {
+    Set-GitHubLogGroup 'Build manifest file - Result - Before format' {
         Show-FileContent -Path $outputManifestPath
     }
 
-    LogGroup 'Build manifest file - Format' {
+    Set-GitHubLogGroup 'Build manifest file - Format' {
         Set-ModuleManifest -Path $outputManifestPath
     }
 
-    LogGroup 'Build manifest file - Result - After format' {
+    Set-GitHubLogGroup 'Build manifest file - Result - After format' {
         Show-FileContent -Path $outputManifestPath
     }
 
-    LogGroup 'Build manifest file - Validate - Install module dependencies' {
+    Set-GitHubLogGroup 'Build manifest file - Validate - Install module dependencies' {
         Resolve-PSModuleDependency -ManifestFilePath $outputManifestPath
     }
 
-    LogGroup 'Build manifest file - Validate - Test manifest file' {
+    Set-GitHubLogGroup 'Build manifest file - Validate - Test manifest file' {
         Test-ModuleManifest -Path $outputManifestPath | Format-List | Out-String
     }
 }
