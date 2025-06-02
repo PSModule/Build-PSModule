@@ -40,24 +40,18 @@ runs:
       uses: PSModule/Install-PSModuleHelpers@v1
 
     - name: Run Build-PSModule
-      uses: PSModule/GitHub-Script@v1
+      shell: pwsh
       id: build
       env:
         PSMODULE_BUILD_PSMODULE_INPUT_Name: ${{ inputs.Name }}
-      with:
-        Debug: ${{ inputs.Debug }}
-        Prerelease: ${{ inputs.Prerelease }}
-        Verbose: ${{ inputs.Verbose }}
-        Version: ${{ inputs.Version }}
-        WorkingDirectory: ${{ inputs.WorkingDirectory }}
-        Script: |
-          # Build-PSModule
-          ${{ github.action_path }}/scripts/main.ps1
+      run: |
+        # Build-PSModule
+        ${{ github.action_path }}/scripts/main.ps1
 
     - name: Upload module artifact
       uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.ArtifactName }}
-        path: ${{ fromJson(steps.build.outputs.result).moduleOutputFolderPath }}
+        path: ${{ steps.build.outputs.ModuleOutputFolderPath }}
         if-no-files-found: error
         retention-days: 1

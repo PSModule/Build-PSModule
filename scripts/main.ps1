@@ -13,14 +13,14 @@ LogGroup "Loading helper scripts from [$path]" {
     }
 }
 
+$env:GITHUB_REPOSITORY_NAME = $env:GITHUB_REPOSITORY -replace '.+/'
+
 LogGroup 'Loading inputs' {
     $moduleName = if ([string]::IsNullOrEmpty($env:PSMODULE_BUILD_PSMODULE_INPUT_Name)) {
         $env:GITHUB_REPOSITORY_NAME
     } else {
         $env:PSMODULE_BUILD_PSMODULE_INPUT_Name
     }
-    Set-GitHubOutput -Name ModuleName -Value $moduleName
-
     $sourceFolderPath = Resolve-Path -Path 'src' | Select-Object -ExpandProperty Path
     $moduleOutputFolderPath = Join-Path $pwd -ChildPath 'outputs/module'
     [pscustomobject]@{
@@ -50,6 +50,6 @@ $params = @{
 }
 Build-PSModule @params
 
-Set-GithubOutput -Name ModuleOutputFolderPath -Value $moduleOutputFolderPath
+"ModuleOutputFolderPath=$moduleOutputFolderPath" >> $env:GITHUB_OUTPUT
 
 exit 0
