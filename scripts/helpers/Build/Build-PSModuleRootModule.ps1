@@ -51,7 +51,7 @@
     # Get the path separator for the current OS
     $pathSeparator = [System.IO.Path]::DirectorySeparatorChar
 
-    LogGroup 'Build root module' {
+    Set-GitHubLogGroup 'Build root module' {
         $rootModuleFile = New-Item -Path $ModuleOutputFolder -Name "$ModuleName.psm1" -Force
 
         #region - Analyze source files
@@ -254,26 +254,26 @@ Export-ModuleMember @exports
 
     }
 
-    LogGroup 'Build root module - Result - Before format' {
+    Set-GitHubLogGroup 'Build root module - Result - Before format' {
         Write-Host (Show-FileContent -Path $rootModuleFile)
     }
 
-    LogGroup 'Build root module - Format' {
+    Set-GitHubLogGroup 'Build root module - Format' {
         $AllContent = Get-Content -Path $rootModuleFile -Raw
         $settings = Join-Path -Path $PSScriptRoot 'PSScriptAnalyzer.Tests.psd1'
         Invoke-Formatter -ScriptDefinition $AllContent -Settings $settings |
             Out-File -FilePath $rootModuleFile -Encoding utf8BOM -Force
     }
 
-    LogGroup 'Build root module - Result - After format' {
+    Set-GitHubLogGroup 'Build root module - Result - After format' {
         Write-Host (Show-FileContent -Path $rootModuleFile)
     }
 
-    # LogGroup 'Build root module - Validate - Import' {
+    # Set-GitHubLogGroup 'Build root module - Validate - Import' {
     #     Install-PSModule -Path $ModuleOutputFolder
     # }
 
-    # LogGroup 'Build root module - Validate - File list' {
+    # Set-GitHubLogGroup 'Build root module - Validate - File list' {
     #     Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force | Resolve-Path -Relative | Sort-Object
     # }
 }

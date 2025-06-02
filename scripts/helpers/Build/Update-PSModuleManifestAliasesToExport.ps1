@@ -29,7 +29,7 @@
         [Parameter(Mandatory)]
         [System.IO.DirectoryInfo] $ModuleOutputFolder
     )
-    LogGroup 'Updating aliases to export in module manifest' {
+    Set-GitHubLogGroup 'Updating aliases to export in module manifest' {
         Write-Host "Module name: [$ModuleName]"
         Write-Host "Module output folder: [$ModuleSourceFolder]"
 

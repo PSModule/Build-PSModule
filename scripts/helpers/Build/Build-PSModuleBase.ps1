@@ -33,7 +33,7 @@
         [System.IO.DirectoryInfo] $ModuleOutputFolder
     )
 
-    LogGroup 'Build base' {
+    Set-GitHubLogGroup 'Build base' {
         $relModuleSourceFolder = $ModuleSourceFolder | Resolve-Path -Relative
         $relModuleOutputFolder = $ModuleOutputFolder | Resolve-Path -Relative
         Write-Host "Copying files from [$relModuleSourceFolder] to [$relModuleOutputFolder]"
@@ -41,7 +41,7 @@
         $null = New-Item -Path $ModuleOutputFolder -Name "$ModuleName.psm1" -ItemType File -Force
     }
 
-    LogGroup 'Build base - Result' {
+    Set-GitHubLogGroup 'Build base - Result' {
         Get-ChildItem -Path $ModuleOutputFolder -Recurse -Force | Resolve-Path -Relative | Sort-Object
     }
 }

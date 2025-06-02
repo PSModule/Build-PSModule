@@ -33,7 +33,7 @@
         [System.IO.DirectoryInfo] $ModuleOutputFolder
     )
 
-    LogGroup 'Build manifest file' {
+    Set-GitHubLogGroup 'Build manifest file' {
         $sourceManifestFilePath = Join-Path -Path $ModuleOutputFolder -ChildPath "$ModuleName.psd1"
         Write-Host "[SourceManifestFilePath] - [$sourceManifestFilePath]"
         if (-not (Test-Path -Path $sourceManifestFilePath)) {
@@ -387,7 +387,7 @@
         #>
 
         Write-Host '[LicenseUri]'
-        $licenseUri = "https://github.com/$env:GITHUB_REPOSITORY_OWNER/$env:GITHUB_REPOSITORY_NAME/blob/main/LICENSE"
+        $licenseUri = "https://github.com/$env:GITHUB_REPOSITORY/blob/main/LICENSE"
         $manifest.LicenseUri = $PSData.Keys -contains 'LicenseUri' ? $null -ne $PSData.LicenseUri ? $PSData.LicenseUri : $licenseUri : $licenseUri
         Write-Host "[LicenseUri] - [$($manifest.LicenseUri)]"
         if ([string]::IsNullOrEmpty($manifest.LicenseUri)) {
@@ -403,7 +403,7 @@
         }
 
         Write-Host '[IconUri]'
-        $iconUri = "https://raw.githubusercontent.com/$env:GITHUB_REPOSITORY_OWNER/$env:GITHUB_REPOSITORY_NAME/main/icon/icon.png"
+        $iconUri = "https://raw.githubusercontent.com/$env:GITHUB_REPOSITORY/main/icon/icon.png"
         $manifest.IconUri = $PSData.Keys -contains 'IconUri' ? $null -ne $PSData.IconUri ? $PSData.IconUri : $iconUri : $iconUri
         Write-Host "[IconUri] - [$($manifest.IconUri)]"
         if ([string]::IsNullOrEmpty($manifest.IconUri)) {
@@ -442,23 +442,23 @@
         New-ModuleManifest -Path $outputManifestPath @manifest
     }
 
-    LogGroup 'Build manifest file - Result - Before format' {
+    Set-GitHubLogGroup 'Build manifest file - Result - Before format' {
         Show-FileContent -Path $outputManifestPath
     }
 
-    LogGroup 'Build manifest file - Format' {
+    Set-GitHubLogGroup 'Build manifest file - Format' {
         Set-ModuleManifest -Path $outputManifestPath
     }
 
-    LogGroup 'Build manifest file - Result - After format' {
+    Set-GitHubLogGroup 'Build manifest file - Result - After format' {
         Show-FileContent -Path $outputManifestPath
     }
 
-    LogGroup 'Build manifest file - Validate - Install module dependencies' {
+    Set-GitHubLogGroup 'Build manifest file - Validate - Install module dependencies' {
         Resolve-PSModuleDependency -ManifestFilePath $outputManifestPath
     }
 
-    LogGroup 'Build manifest file - Validate - Test manifest file' {
+    Set-GitHubLogGroup 'Build manifest file - Validate - Test manifest file' {
         Test-ModuleManifest -Path $outputManifestPath | Format-List | Out-String
     }
 }
