@@ -1,9 +1,6 @@
-name: Build-PSModule (by PSModule)
+name: Build-PSModule
 description: Build a PowerShell module to the PowerShell Gallery.
 author: PSModule
-branding:
-  icon: package
-  color: gray-dark
 
 inputs:
   Name:
