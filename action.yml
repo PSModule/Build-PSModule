@@ -32,7 +32,7 @@ runs:
         ${{ github.action_path }}/scripts/main.ps1
 
     - name: Upload module artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ inputs.ArtifactName }}
         path: ${{ steps.build.outputs.ModuleOutputFolderPath }}
