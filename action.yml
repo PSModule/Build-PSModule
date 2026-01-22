@@ -19,7 +19,7 @@ runs:
   using: composite
   steps:
     - name: Install-PSModuleHelpers
-      uses: PSModule/Install-PSModuleHelpers@v1
+      uses: PSModule/Install-PSModuleHelpers@d60d63e4be477d1ca0c67c6085101fb109bce8f1 # v1.0.6
 
     - name: Run Build-PSModule
       shell: pwsh
@@ -32,7 +32,7 @@ runs:
         ${{ github.action_path }}/scripts/main.ps1
 
     - name: Upload module artifact
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
       with:
         name: ${{ inputs.ArtifactName }}
         path: ${{ steps.build.outputs.ModuleOutputFolderPath }}
