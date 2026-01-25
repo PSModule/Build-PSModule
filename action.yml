@@ -29,7 +29,7 @@ runs:
         PSMODULE_BUILD_PSMODULE_INPUT_Name: ${{ inputs.Name }}
       run: |
         # Build-PSModule
-        ${{ github.action_path }}/scripts/main.ps1
+        ${{ github.action_path }}/src/main.ps1
 
     - name: Upload module artifact
       uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
