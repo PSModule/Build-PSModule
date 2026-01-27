@@ -21,8 +21,8 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: write # Required to create releases
+  pull-requests: write # Required to create comments on the PRs
 
 jobs:
   Release:
@@ -34,6 +34,4 @@ jobs:
           persist-credentials: false
 
       - name: Release
-        uses: PSModule/Release-GHRepository@88c70461c8f16cc09682005bcf3b7fca4dd8dc1a # v2.0.1
-        with:
-          IncrementalPrerelease: false
+        uses: PSModule/Release-GHRepository@5a5165d66f485d1aad217ef34a190178b214fdcb # v2.0.2
