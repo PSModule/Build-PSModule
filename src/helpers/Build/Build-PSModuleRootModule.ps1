@@ -134,11 +134,11 @@ $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
         Add-Content -Path $rootModuleFile -Force -Value @'
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
     'PSAvoidAssignmentToAutomaticVariable', 'IsWindows',
-    Justification = 'IsWindows doesnt exist in PS5.1'
+    Justification = 'IsWindows does not exist in PS5.1'
 )]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
     'PSUseDeclaredVarsMoreThanAssignments', 'IsWindows',
-    Justification = 'IsWindows doesnt exist in PS5.1'
+    Justification = 'IsWindows does not exist in PS5.1'
 )]
 '@
 

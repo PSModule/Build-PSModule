@@ -488,7 +488,7 @@
                     "npm"
                 ],
                 [
-                    "environemnt(s)?",
+                    "environment(s)?",
                     "environment$1"
                 ],
                 [
@@ -496,7 +496,7 @@
                     "flaky test$1"
                 ],
                 [
-                    "pacakge(s)?",
+                    "package(s)?",
                     "package$1"
                 ],
                 [
