@@ -25,11 +25,11 @@
     # Get the path separator for the current OS
     $pathSeparator = [System.IO.Path]::DirectorySeparatorChar
 
-    $relativeFolderPath = $Path -Replace $RootPath, ''
-    $relativeFolderPath = $relativeFolderPath -Replace $file.Extension, ''
+    $relativeFolderPath = $Path -replace $RootPath, ''
+    $relativeFolderPath = $relativeFolderPath -replace $file.Extension, ''
     $relativeFolderPath = $relativeFolderPath.TrimStart($pathSeparator)
-    $relativeFolderPath = $relativeFolderPath -Split $pathSeparator | ForEach-Object { "[$_]" }
-    $relativeFolderPath = $relativeFolderPath -Join ' - '
+    $relativeFolderPath = $relativeFolderPath -split $pathSeparator | ForEach-Object { "[$_]" }
+    $relativeFolderPath = $relativeFolderPath -join ' - '
 
     Add-Content -Path $RootModuleFilePath -Force -Value @"
 #region    $relativeFolderPath
@@ -38,11 +38,11 @@ Write-Debug "[`$scriptName] - $relativeFolderPath - Processing folder"
 
     $files = $Path | Get-ChildItem -File -Force -Filter '*.ps1' | Sort-Object -Property FullName
     foreach ($file in $files) {
-        $relativeFilePath = $file.FullName -Replace $RootPath, ''
-        $relativeFilePath = $relativeFilePath -Replace $file.Extension, ''
+        $relativeFilePath = $file.FullName -replace $RootPath, ''
+        $relativeFilePath = $relativeFilePath -replace $file.Extension, ''
         $relativeFilePath = $relativeFilePath.TrimStart($pathSeparator)
-        $relativeFilePath = $relativeFilePath -Split $pathSeparator | ForEach-Object { "[$_]" }
-        $relativeFilePath = $relativeFilePath -Join ' - '
+        $relativeFilePath = $relativeFilePath -split $pathSeparator | ForEach-Object { "[$_]" }
+        $relativeFilePath = $relativeFilePath -join ' - '
 
         Add-Content -Path $RootModuleFilePath -Force -Value @"
 #region    $relativeFilePath
