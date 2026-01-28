@@ -212,11 +212,11 @@ Write-Debug "[$scriptName] - [data] - Done"
         #region - Add content from *.ps1 files on module root
         $files = $ModuleOutputFolder | Get-ChildItem -File -Force -Filter '*.ps1' | Sort-Object -Property FullName
         foreach ($file in $files) {
-            $relativePath = $file.FullName -Replace $ModuleOutputFolder, ''
-            $relativePath = $relativePath -Replace $file.Extension, ''
+            $relativePath = $file.FullName -replace $ModuleOutputFolder, ''
+            $relativePath = $relativePath -replace $file.Extension, ''
             $relativePath = $relativePath.TrimStart($pathSeparator)
-            $relativePath = $relativePath -Split $pathSeparator | ForEach-Object { "[$_]" }
-            $relativePath = $relativePath -Join ' - '
+            $relativePath = $relativePath -split $pathSeparator | ForEach-Object { "[$_]" }
+            $relativePath = $relativePath -join ' - '
 
             Add-Content -Path $rootModuleFile -Force -Value @"
 #region    $relativePath
