@@ -101,7 +101,7 @@
 
         # Get files on module subfolders, excluding the following folders 'init', 'classes', 'public', 'private'
         $skipList = @('init', 'classes', 'functions', 'variables')
-        $ModuleOutputFolder | Get-ChildItem -Directory | Where-Object { $_.Name -NotIn $skipList } |
+        $ModuleOutputFolder | Get-ChildItem -Directory | Where-Object { $_.Name -notin $skipList } |
             Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue | ForEach-Object { $files.Add($_) }
 
         # Get the relative file path and store it in the manifest
@@ -362,7 +362,7 @@
         $tags = $PSData.Keys -contains 'Tags' ? ($PSData.Tags).Count -gt 0 ? $PSData.Tags : $repoLabels : $repoLabels
         $tags | ForEach-Object { $manifestTags.Add($_) }
         'Windows', 'Linux', 'MacOS' | ForEach-Object { $manifestTags.Add($_) }
-        # Add tags for compatability mode. https://docs.microsoft.com/en-us/powershell/scripting/developer/module/how-to-write-a-powershell-module-manifest?view=powershell-7.1#compatibility-tags
+        # Add tags for compatibility mode. https://docs.microsoft.com/en-us/powershell/scripting/developer/module/how-to-write-a-powershell-module-manifest?view=powershell-7.1#compatibility-tags
         if ($manifest.CompatiblePSEditions -contains 'Desktop') {
             if ($manifestTags -notcontains 'PSEdition_Desktop') {
                 $manifestTags.Add('PSEdition_Desktop')
