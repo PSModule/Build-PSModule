@@ -131,17 +131,6 @@ $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
         #endregion - Analyze source files
 
         #region - Module header
-        Add-Content -Path $rootModuleFile -Force -Value @'
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
-    'PSAvoidAssignmentToAutomaticVariable', 'IsWindows',
-    Justification = 'IsWindows does not exist in PS5.1'
-)]
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
-    'PSUseDeclaredVarsMoreThanAssignments', 'IsWindows',
-    Justification = 'IsWindows does not exist in PS5.1'
-)]
-'@
-
         $headerFilePath = Join-Path -Path $ModuleOutputFolder -ChildPath 'header.ps1'
         if (Test-Path -Path $headerFilePath) {
             Get-Content -Path $headerFilePath -Raw | Add-Content -Path $rootModuleFile -Force
@@ -161,10 +150,6 @@ $script:PSModuleInfo = Import-PowerShellDataFile -Path "$PSScriptRoot\$baseName.
 $script:PSModuleInfo | Format-List | Out-String -Stream | ForEach-Object { Write-Debug $_ }
 $scriptName = $script:PSModuleInfo.Name
 Write-Debug "[$scriptName] - Importing module"
-
-if ($PSEdition -eq 'Desktop') {
-    $IsWindows = $true
-}
 
 '@
         #endregion - Module post-header
