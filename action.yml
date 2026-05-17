@@ -6,6 +6,18 @@ inputs:
   Name:
     description: Name of the module to process.
     required: false
+  Version:
+    description: |
+      The Major.Minor.Patch version to stamp into the built module manifest. When empty, the placeholder '999.0.0'
+      is used so local builds still produce a valid manifest.
+    required: false
+    default: ''
+  Prerelease:
+    description: |
+      Optional prerelease tag (for example 'feature001'). When set, the value is written to PrivateData.PSData.Prerelease
+      so the built artifact is a complete prerelease package without any post-build mutation.
+    required: false
+    default: ''
   ArtifactName:
     description: Name of the artifact to upload.
     required: false
@@ -27,6 +39,8 @@ runs:
       working-directory: ${{ inputs.WorkingDirectory }}
       env:
         PSMODULE_BUILD_PSMODULE_INPUT_Name: ${{ inputs.Name }}
+        PSMODULE_BUILD_PSMODULE_INPUT_Version: ${{ inputs.Version }}
+        PSMODULE_BUILD_PSMODULE_INPUT_Prerelease: ${{ inputs.Prerelease }}
       run: |
         # Build-PSModule
         ${{ github.action_path }}/src/main.ps1

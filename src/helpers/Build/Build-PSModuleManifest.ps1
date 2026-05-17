@@ -30,7 +30,15 @@
 
         # Folder where the built modules are outputted. 'outputs/modules/MyModule'
         [Parameter(Mandatory)]
-        [System.IO.DirectoryInfo] $ModuleOutputFolder
+        [System.IO.DirectoryInfo] $ModuleOutputFolder,
+
+        # The Major.Minor.Patch version to stamp into the manifest. Defaults to '999.0.0' for local builds.
+        [Parameter()]
+        [string] $ModuleVersion = '999.0.0',
+
+        # Optional prerelease tag (without the leading hyphen).
+        [Parameter()]
+        [string] $Prerelease = ''
     )
 
     Set-GitHubLogGroup 'Build manifest file' {
@@ -55,8 +63,16 @@
         $manifest.RootModule = $rootModule
         Write-Host "[RootModule] - [$($manifest.RootModule)]"
 
-        $manifest.ModuleVersion = '999.0.0'
+        if ([string]::IsNullOrWhiteSpace($ModuleVersion)) {
+            $ModuleVersion = '999.0.0'
+        }
+        $manifest.ModuleVersion = $ModuleVersion
         Write-Host "[ModuleVersion] - [$($manifest.ModuleVersion)]"
+
+        if (-not [string]::IsNullOrWhiteSpace($Prerelease)) {
+            $manifest.Prerelease = $Prerelease
+            Write-Host "[Prerelease] - [$Prerelease]"
+        }
 
         $manifest.Author = $manifest.Keys -contains 'Author' ? (-not [string]::IsNullOrEmpty($manifest.Author)) ? $manifest.Author : $env:GITHUB_REPOSITORY_OWNER : $env:GITHUB_REPOSITORY_OWNER
         Write-Host "[Author] - [$($manifest.Author)]"
@@ -418,8 +434,8 @@
         }
 
         Write-Host '[PreRelease]'
-        # $manifest.PreRelease = ""
-        # Is managed by the publish action
+        # PreRelease is stamped earlier in this function when a value is provided via the Prerelease parameter.
+        # No mutation happens after the manifest is built; the resulting artifact is the one that ships.
 
         Write-Host '[RequireLicenseAcceptance]'
         $manifest.RequireLicenseAcceptance = $PSData.Keys -contains 'RequireLicenseAcceptance' ? $null -ne $PSData.RequireLicenseAcceptance ? $PSData.RequireLicenseAcceptance : $false : $false

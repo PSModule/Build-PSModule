@@ -27,7 +27,15 @@
 
         # Path to the folder where the built modules are outputted.
         [Parameter(Mandatory)]
-        [string] $ModuleOutputFolderPath
+        [string] $ModuleOutputFolderPath,
+
+        # The Major.Minor.Patch version to stamp into the built manifest. Defaults to '999.0.0' for local builds.
+        [Parameter()]
+        [string] $ModuleVersion = '999.0.0',
+
+        # Optional prerelease tag to stamp into the built manifest.
+        [Parameter()]
+        [string] $Prerelease = ''
     )
 
     Set-GitHubLogGroup "Building module [$ModuleName]" {
@@ -40,7 +48,7 @@
     }
 
     Build-PSModuleBase -ModuleName $ModuleName -ModuleSourceFolder $moduleSourceFolder -ModuleOutputFolder $moduleOutputFolder
-    Build-PSModuleManifest -ModuleName $ModuleName -ModuleOutputFolder $moduleOutputFolder
+    Build-PSModuleManifest -ModuleName $ModuleName -ModuleOutputFolder $moduleOutputFolder -ModuleVersion $ModuleVersion -Prerelease $Prerelease
     Build-PSModuleRootModule -ModuleName $ModuleName -ModuleOutputFolder $moduleOutputFolder
     Update-PSModuleManifestAliasesToExport -ModuleName $ModuleName -ModuleSourceFolder $moduleSourceFolder -ModuleOutputFolder $moduleOutputFolder
 
