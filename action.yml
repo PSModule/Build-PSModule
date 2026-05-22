@@ -6,6 +6,12 @@ inputs:
   Name:
     description: Name of the module to process.
     required: false
+  Version:
+    description: Module version to stamp into the manifest. When empty, the manifest version defaults to `999.0.0`.
+    required: false
+  Prerelease:
+    description: Prerelease tag to stamp into the manifest's `PrivateData.PSData.Prerelease`. When empty, no prerelease tag is written.
+    required: false
   ArtifactName:
     description: Name of the artifact to upload.
     required: false
@@ -27,6 +33,8 @@ runs:
       working-directory: ${{ inputs.WorkingDirectory }}
       env:
         PSMODULE_BUILD_PSMODULE_INPUT_Name: ${{ inputs.Name }}
+        PSMODULE_BUILD_PSMODULE_INPUT_Version: ${{ inputs.Version }}
+        PSMODULE_BUILD_PSMODULE_INPUT_Prerelease: ${{ inputs.Prerelease }}
       run: |
         # Build-PSModule
         ${{ github.action_path }}/src/main.ps1
