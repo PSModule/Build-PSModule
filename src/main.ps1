@@ -16,15 +16,11 @@ Set-GitHubLogGroup "Loading helper scripts from [$path]" {
 $env:GITHUB_REPOSITORY_NAME = $env:GITHUB_REPOSITORY -replace '.+/'
 
 Set-GitHubLogGroup 'Loading inputs' {
-    $moduleName = if ([string]::IsNullOrEmpty($env:PSMODULE_BUILD_PSMODULE_INPUT_Name)) {
-        $env:GITHUB_REPOSITORY_NAME
-    } else {
-        $env:PSMODULE_BUILD_PSMODULE_INPUT_Name
-    }
+    $moduleName = $env:GITHUB_REPOSITORY_NAME
     $moduleVersion = $env:PSMODULE_BUILD_PSMODULE_INPUT_Version
     $modulePrerelease = $env:PSMODULE_BUILD_PSMODULE_INPUT_Prerelease
     $sourceFolderPath = Resolve-Path -Path 'src' | Select-Object -ExpandProperty Path
-    $moduleOutputFolderPath = Join-Path $pwd -ChildPath 'outputs/module'
+    $moduleOutputFolderPath = Join-Path $pwd -ChildPath $env:PSMODULE_BUILD_PSMODULE_INPUT_OutputFolder
     [pscustomobject]@{
         moduleName             = $moduleName
         moduleVersion          = $moduleVersion
@@ -32,6 +28,10 @@ Set-GitHubLogGroup 'Loading inputs' {
         sourceFolderPath       = $sourceFolderPath
         moduleOutputFolderPath = $moduleOutputFolderPath
     } | Format-List | Out-String
+}
+
+if ([string]::IsNullOrWhiteSpace($moduleVersion)) {
+    throw 'Version is required. Please provide a module version.'
 }
 
 Set-GitHubLogGroup 'Build local scripts' {

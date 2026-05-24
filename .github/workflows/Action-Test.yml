@@ -30,7 +30,7 @@ jobs:
       - name: Action-Test
         uses: ./
         with:
-          Name: PSModuleTest
+          Version: 1.0.0
           ArtifactName: PSModuleTestDefault
           WorkingDirectory: tests/srcTestRepo
 
@@ -46,7 +46,7 @@ jobs:
       - name: Action-Test
         uses: ./
         with:
-          Name: PSModuleTest
+          Version: 1.0.0
           ArtifactName: PSModuleTestMinimal
           WorkingDirectory: tests/srcMinimalTestRepo
 
@@ -62,6 +62,6 @@ jobs:
       - name: Action-Test
         uses: ./
         with:
-          Name: PSModuleTest
+          Version: 1.0.0
           ArtifactName: PSModuleTestWithManifest
           WorkingDirectory: tests/srcWithManifestTestRepo

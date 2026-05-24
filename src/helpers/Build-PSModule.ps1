@@ -29,8 +29,8 @@
         [Parameter(Mandatory)]
         [string] $ModuleOutputFolderPath,
 
-        # Module version to stamp into the manifest. When empty, defaults to '999.0.0'.
-        [Parameter()]
+        # Module version to stamp into the manifest.
+        [Parameter(Mandatory)]
         [string] $ModuleVersion,
 
         # Prerelease tag to stamp into the manifest. When empty, no prerelease tag is written.

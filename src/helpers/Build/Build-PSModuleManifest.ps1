@@ -32,8 +32,8 @@
         [Parameter(Mandatory)]
         [System.IO.DirectoryInfo] $ModuleOutputFolder,
 
-        # Module version to stamp into the manifest. When empty, defaults to '999.0.0'.
-        [Parameter()]
+        # Module version to stamp into the manifest.
+        [Parameter(Mandatory)]
         [string] $ModuleVersion,
 
         # Prerelease tag to stamp into the manifest's `PrivateData.PSData.Prerelease`.
@@ -63,7 +63,7 @@
         $manifest.RootModule = $rootModule
         Write-Host "[RootModule] - [$($manifest.RootModule)]"
 
-        $manifest.ModuleVersion = if ([string]::IsNullOrWhiteSpace($ModuleVersion)) { '999.0.0' } else { $ModuleVersion }
+        $manifest.ModuleVersion = $ModuleVersion
         Write-Host "[ModuleVersion] - [$($manifest.ModuleVersion)]"
 
         $manifest.Author = $manifest.Keys -contains 'Author' ? (-not [string]::IsNullOrEmpty($manifest.Author)) ? $manifest.Author : $env:GITHUB_REPOSITORY_OWNER : $env:GITHUB_REPOSITORY_OWNER
