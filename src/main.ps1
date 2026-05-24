@@ -16,7 +16,11 @@ Set-GitHubLogGroup "Loading helper scripts from [$path]" {
 $env:GITHUB_REPOSITORY_NAME = $env:GITHUB_REPOSITORY -replace '.+/'
 
 Set-GitHubLogGroup 'Loading inputs' {
-    $moduleName = $env:GITHUB_REPOSITORY_NAME
+    $moduleName = if ([string]::IsNullOrEmpty($env:PSMODULE_BUILD_PSMODULE_INPUT_Name)) {
+        $env:GITHUB_REPOSITORY_NAME
+    } else {
+        $env:PSMODULE_BUILD_PSMODULE_INPUT_Name
+    }
     $moduleVersion = $env:PSMODULE_BUILD_PSMODULE_INPUT_Version
     $modulePrerelease = $env:PSMODULE_BUILD_PSMODULE_INPUT_Prerelease
     $sourceFolderPath = Resolve-Path -Path 'src' | Select-Object -ExpandProperty Path
