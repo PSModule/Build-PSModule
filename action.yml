@@ -4,7 +4,17 @@ author: PSModule
 
 inputs:
   Name:
-    description: Name of the module to process.
+    description: Name of the module to build. Defaults to the repository name.
+    required: false
+  OutputFolder:
+    description: Path to the folder where the built module is outputted.
+    required: false
+    default: 'outputs/module'
+  Version:
+    description: Module version to stamp into the manifest.
+    required: true
+  Prerelease:
+    description: Prerelease tag to stamp into the manifest's `PrivateData.PSData.Prerelease`. When empty, no prerelease tag is written.
     required: false
   ArtifactName:
     description: Name of the artifact to upload.
@@ -27,6 +37,9 @@ runs:
       working-directory: ${{ inputs.WorkingDirectory }}
       env:
         PSMODULE_BUILD_PSMODULE_INPUT_Name: ${{ inputs.Name }}
+        PSMODULE_BUILD_PSMODULE_INPUT_OutputFolder: ${{ inputs.OutputFolder }}
+        PSMODULE_BUILD_PSMODULE_INPUT_Version: ${{ inputs.Version }}
+        PSMODULE_BUILD_PSMODULE_INPUT_Prerelease: ${{ inputs.Prerelease }}
       run: |
         # Build-PSModule
         ${{ github.action_path }}/src/main.ps1

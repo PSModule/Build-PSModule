@@ -30,7 +30,15 @@
 
         # Folder where the built modules are outputted. 'outputs/modules/MyModule'
         [Parameter(Mandatory)]
-        [System.IO.DirectoryInfo] $ModuleOutputFolder
+        [System.IO.DirectoryInfo] $ModuleOutputFolder,
+
+        # Module version to stamp into the manifest.
+        [Parameter(Mandatory)]
+        [string] $ModuleVersion,
+
+        # Prerelease tag to stamp into the manifest's `PrivateData.PSData.Prerelease`.
+        [Parameter()]
+        [string] $ModulePrerelease
     )
 
     Set-GitHubLogGroup 'Build manifest file' {
@@ -55,7 +63,7 @@
         $manifest.RootModule = $rootModule
         Write-Host "[RootModule] - [$($manifest.RootModule)]"
 
-        $manifest.ModuleVersion = '999.0.0'
+        $manifest.ModuleVersion = $ModuleVersion
         Write-Host "[ModuleVersion] - [$($manifest.ModuleVersion)]"
 
         $manifest.Author = $manifest.Keys -contains 'Author' ? (-not [string]::IsNullOrEmpty($manifest.Author)) ? $manifest.Author : $env:GITHUB_REPOSITORY_OWNER : $env:GITHUB_REPOSITORY_OWNER
@@ -417,9 +425,11 @@
             $manifest.Remove('ReleaseNotes')
         }
 
-        Write-Host '[PreRelease]'
-        # $manifest.PreRelease = ""
-        # Is managed by the publish action
+        Write-Host '[Prerelease]'
+        if (-not [string]::IsNullOrWhiteSpace($ModulePrerelease)) {
+            $manifest.Prerelease = $ModulePrerelease
+            Write-Host "[Prerelease] - [$($manifest.Prerelease)]"
+        }
 
         Write-Host '[RequireLicenseAcceptance]'
         $manifest.RequireLicenseAcceptance = $PSData.Keys -contains 'RequireLicenseAcceptance' ? $null -ne $PSData.RequireLicenseAcceptance ? $PSData.RequireLicenseAcceptance : $false : $false

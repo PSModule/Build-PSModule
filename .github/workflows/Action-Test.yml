@@ -31,8 +31,31 @@ jobs:
         uses: ./
         with:
           Name: PSModuleTest
+          Version: 1.0.0
           ArtifactName: PSModuleTestDefault
           WorkingDirectory: tests/srcTestRepo
+
+      - name: Verify manifest
+        shell: pwsh
+        run: |
+          $PSStyle.OutputRendering = 'Ansi'
+
+          $manifest = Import-PowerShellDataFile 'tests/srcTestRepo/outputs/module/PSModuleTest/PSModuleTest.psd1'
+
+          Write-Host '--- Input ---'
+          Write-Host 'Name: PSModuleTest  Version: 1.0.0'
+          Write-Host ''
+
+          @(
+              [PSCustomObject]@{ Output = 'ModuleVersion'; Expected = '1.0.0'; Actual = $manifest.ModuleVersion; Passed = $manifest.ModuleVersion -eq '1.0.0' }
+          ) | Format-Table -AutoSize | Out-String -Width 200
+
+          $failed = $false
+          if ($manifest.ModuleVersion -ne '1.0.0') {
+              Write-Error "ModuleVersion: expected '1.0.0', got '$($manifest.ModuleVersion)'"
+              $failed = $true
+          }
+          if ($failed) { exit 1 }
 
   ActionTestMinimal:
     name: Action-Test - [Minimal]
@@ -47,8 +70,77 @@ jobs:
         uses: ./
         with:
           Name: PSModuleTest
+          Version: 1.0.0
           ArtifactName: PSModuleTestMinimal
           WorkingDirectory: tests/srcMinimalTestRepo
+
+      - name: Verify manifest
+        shell: pwsh
+        run: |
+          $PSStyle.OutputRendering = 'Ansi'
+
+          $manifest = Import-PowerShellDataFile 'tests/srcMinimalTestRepo/outputs/module/PSModuleTest/PSModuleTest.psd1'
+
+          Write-Host '--- Input ---'
+          Write-Host 'Name: PSModuleTest  Version: 1.0.0'
+          Write-Host ''
+
+          @(
+              [PSCustomObject]@{ Output = 'ModuleVersion'; Expected = '1.0.0'; Actual = $manifest.ModuleVersion; Passed = $manifest.ModuleVersion -eq '1.0.0' }
+          ) | Format-Table -AutoSize | Out-String -Width 200
+
+          $failed = $false
+          if ($manifest.ModuleVersion -ne '1.0.0') {
+              Write-Error "ModuleVersion: expected '1.0.0', got '$($manifest.ModuleVersion)'"
+              $failed = $true
+          }
+          if ($failed) { exit 1 }
+
+  ActionTestPrerelease:
+    name: Action-Test - [Prerelease]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Action-Test
+        uses: ./
+        with:
+          Name: PSModuleTest
+          Version: 2.0.0
+          Prerelease: alpha001
+          ArtifactName: PSModuleTestPrerelease
+          WorkingDirectory: tests/srcTestRepo
+
+      - name: Verify manifest
+        shell: pwsh
+        run: |
+          $PSStyle.OutputRendering = 'Ansi'
+
+          $manifest = Import-PowerShellDataFile 'tests/srcTestRepo/outputs/module/PSModuleTest/PSModuleTest.psd1'
+          $prerelease = $manifest.PrivateData.PSData.Prerelease
+
+          Write-Host '--- Input ---'
+          Write-Host 'Name: PSModuleTest  Version: 2.0.0  Prerelease: alpha001'
+          Write-Host ''
+
+          @(
+              [PSCustomObject]@{ Output = 'ModuleVersion'; Expected = '2.0.0'; Actual = $manifest.ModuleVersion; Passed = $manifest.ModuleVersion -eq '2.0.0' }
+              [PSCustomObject]@{ Output = 'Prerelease'; Expected = 'alpha001'; Actual = $prerelease; Passed = $prerelease -eq 'alpha001' }
+          ) | Format-Table -AutoSize | Out-String -Width 200
+
+          $failed = $false
+          if ($manifest.ModuleVersion -ne '2.0.0') {
+              Write-Error "ModuleVersion: expected '2.0.0', got '$($manifest.ModuleVersion)'"
+              $failed = $true
+          }
+          if ($prerelease -ne 'alpha001') {
+              Write-Error "Prerelease: expected 'alpha001', got '$prerelease'"
+              $failed = $true
+          }
+          if ($failed) { exit 1 }
 
   ActionTestWithManifest:
     name: Action-Test - [DefaultWithManifest]
@@ -63,5 +155,28 @@ jobs:
         uses: ./
         with:
           Name: PSModuleTest
+          Version: 1.0.0
           ArtifactName: PSModuleTestWithManifest
           WorkingDirectory: tests/srcWithManifestTestRepo
+
+      - name: Verify manifest
+        shell: pwsh
+        run: |
+          $PSStyle.OutputRendering = 'Ansi'
+
+          $manifest = Import-PowerShellDataFile 'tests/srcWithManifestTestRepo/outputs/module/PSModuleTest/PSModuleTest.psd1'
+
+          Write-Host '--- Input ---'
+          Write-Host 'Name: PSModuleTest  Version: 1.0.0'
+          Write-Host ''
+
+          @(
+              [PSCustomObject]@{ Output = 'ModuleVersion'; Expected = '1.0.0'; Actual = $manifest.ModuleVersion; Passed = $manifest.ModuleVersion -eq '1.0.0' }
+          ) | Format-Table -AutoSize | Out-String -Width 200
+
+          $failed = $false
+          if ($manifest.ModuleVersion -ne '1.0.0') {
+              Write-Error "ModuleVersion: expected '1.0.0', got '$($manifest.ModuleVersion)'"
+              $failed = $true
+          }
+          if ($failed) { exit 1 }
