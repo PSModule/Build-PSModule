@@ -35,7 +35,14 @@ jobs:
           ArtifactName: PSModuleTestDefault
           WorkingDirectory: tests/srcTestRepo
 
-  ActionTestMinimal:
+      - name: Verify manifest
+        shell: pwsh
+        run: |
+          $manifest = Import-PowerShellDataFile 'tests/srcTestRepo/outputs/module/PSModuleTest/PSModuleTest.psd1'
+          if ($manifest.ModuleVersion -ne '1.0.0') {
+              throw "Expected ModuleVersion '1.0.0' but got '$($manifest.ModuleVersion)'"
+          }
+          Write-Host "ModuleVersion: $($manifest.ModuleVersion)"
     name: Action-Test - [Minimal]
     runs-on: ubuntu-latest
     steps:
@@ -51,6 +58,15 @@ jobs:
           Version: 1.0.0
           ArtifactName: PSModuleTestMinimal
           WorkingDirectory: tests/srcMinimalTestRepo
+
+      - name: Verify manifest
+        shell: pwsh
+        run: |
+          $manifest = Import-PowerShellDataFile 'tests/srcMinimalTestRepo/outputs/module/PSModuleTest/PSModuleTest.psd1'
+          if ($manifest.ModuleVersion -ne '1.0.0') {
+              throw "Expected ModuleVersion '1.0.0' but got '$($manifest.ModuleVersion)'"
+          }
+          Write-Host "ModuleVersion: $($manifest.ModuleVersion)"
 
   ActionTestWithManifest:
     name: Action-Test - [DefaultWithManifest]
@@ -68,3 +84,12 @@ jobs:
           Version: 1.0.0
           ArtifactName: PSModuleTestWithManifest
           WorkingDirectory: tests/srcWithManifestTestRepo
+
+      - name: Verify manifest
+        shell: pwsh
+        run: |
+          $manifest = Import-PowerShellDataFile 'tests/srcWithManifestTestRepo/outputs/module/PSModuleTest/PSModuleTest.psd1'
+          if ($manifest.ModuleVersion -ne '1.0.0') {
+              throw "Expected ModuleVersion '1.0.0' but got '$($manifest.ModuleVersion)'"
+          }
+          Write-Host "ModuleVersion: $($manifest.ModuleVersion)"
