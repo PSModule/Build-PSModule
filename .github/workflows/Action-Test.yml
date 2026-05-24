@@ -70,6 +70,38 @@ jobs:
           }
           Write-Host "ModuleVersion: $($manifest.ModuleVersion)"
 
+  ActionTestPrerelease:
+    name: Action-Test - [Prerelease]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Action-Test
+        uses: ./
+        with:
+          Name: PSModuleTest
+          Version: 2.0.0
+          Prerelease: alpha001
+          ArtifactName: PSModuleTestPrerelease
+          WorkingDirectory: tests/srcTestRepo
+
+      - name: Verify manifest
+        shell: pwsh
+        run: |
+          $manifest = Import-PowerShellDataFile 'tests/srcTestRepo/outputs/module/PSModuleTest/PSModuleTest.psd1'
+          if ($manifest.ModuleVersion -ne '2.0.0') {
+              throw "Expected ModuleVersion '2.0.0' but got '$($manifest.ModuleVersion)'"
+          }
+          $prerelease = $manifest.PrivateData.PSData.Prerelease
+          if ($prerelease -ne 'alpha001') {
+              throw "Expected Prerelease 'alpha001' but got '$prerelease'"
+          }
+          Write-Host "ModuleVersion: $($manifest.ModuleVersion)"
+          Write-Host "Prerelease: $prerelease"
+
   ActionTestWithManifest:
     name: Action-Test - [DefaultWithManifest]
     runs-on: ubuntu-24.04
