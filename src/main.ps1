@@ -38,6 +38,10 @@ if ([string]::IsNullOrWhiteSpace($moduleVersion)) {
     throw 'Version is required. Please provide a module version.'
 }
 
+if ($moduleVersion -notmatch '^\d+\.\d+\.\d+$') {
+    throw "Version '$moduleVersion' is not a valid version. Expected format: 'Major.Minor.Patch' (e.g., '1.2.3')."
+}
+
 Set-GitHubLogGroup 'Build local scripts' {
     Write-Host 'Execution order:'
     $scripts = Get-ChildItem -Filter '*build.ps1' -Recurse | Sort-Object -Property Name | Resolve-Path -Relative
