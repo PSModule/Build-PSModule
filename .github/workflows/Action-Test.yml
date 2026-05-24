@@ -43,6 +43,8 @@ jobs:
               throw "Expected ModuleVersion '1.0.0' but got '$($manifest.ModuleVersion)'"
           }
           Write-Host "ModuleVersion: $($manifest.ModuleVersion)"
+
+  ActionTestMinimal:
     name: Action-Test - [Minimal]
     runs-on: ubuntu-latest
     steps:
